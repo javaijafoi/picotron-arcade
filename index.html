@@ -1218,23 +1218,9 @@
         customDeckEl.style.display = 'flex';
         customDeckEl.innerHTML = '';
 
-        const head = document.createElement('div');
-        head.className = 'custom-deck-head';
-        const hintEl = document.createElement('span');
-        hintEl.style.cssText = 'font-size:11px;color:#C2C3C7;';
-        hintEl.textContent = hintText || GAMES_MAP[activeGameId]?.controls || '';
-        const pBtn = document.createElement('button');
-        pBtn.type = 'button';
-        pBtn.className = 'pico-btn';
-        pBtn.style.cssText = 'background:#FFF1E8;color:#000;min-height:32px;padding:4px 10px;';
-        pBtn.textContent = customPaused ? '▶ RETOMAR' : '⏸ PAUSE';
-        pBtn.addEventListener('click', (e) => { e.stopPropagation(); ensureAudio(); togglePause(); });
-        head.append(hintEl, pBtn);
-        customDeckEl.appendChild(head);
-
+        const row = document.createElement('div');
+        row.className = 'custom-deck-row';
         if (buttons && buttons.length) {
-          const row = document.createElement('div');
-          row.className = 'custom-deck-row';
           buttons.forEach(def => {
             const btn = document.createElement('button');
             btn.type = 'button';
@@ -1265,8 +1251,16 @@
             }
             row.appendChild(btn);
           });
-          customDeckEl.appendChild(row);
         }
+        const pBtn = document.createElement('button');
+        pBtn.id = 'custom-pause-btn';
+        pBtn.type = 'button';
+        pBtn.className = 'pico-btn custom-deck-btn';
+        pBtn.style.cssText = 'flex:0 0 auto;min-width:78px;background:#FFF1E8;color:#000;';
+        pBtn.textContent = customPaused ? '▶ RETOMAR' : '⏸ PAUSE';
+        pBtn.addEventListener('click', (e) => { e.stopPropagation(); ensureAudio(); togglePause(); });
+        row.appendChild(pBtn);
+        customDeckEl.appendChild(row);
         mobileDeck.classList.add('custom-active');
       }
 
@@ -1627,6 +1621,7 @@ window.BUILD_GAMES_02_05 = function(api) {
         ctx.fillStyle = '#000000'; ctx.textAlign = 'center';
         ctx.fillText(rule === 'paulista' ? 'PAULISTA' : 'MINEIRO', 150, 12.5);
         rect(192, 3, 74, 14, '#00E436');
+        ctx.fillStyle = '#000000';
         ctx.fillText(deckMode === 'sujo' ? 'SUJO (40)' : 'LIMPO (28)', 229, 12.5);
         ctx.fillStyle = '#FFF1E8'; ctx.textAlign = 'right';
         ctx.fillText(`VALE ${stake}`, W - 6, 13);
@@ -1678,14 +1673,14 @@ window.BUILD_GAMES_02_05 = function(api) {
         ctx.fillText(coverNext ? '🙈 CARTA COBERTA' : '🙈 Cobrir Carta', 264, 162);
 
         if (signalTimer > 0 && signalText) {
-          rect(44, 96, 232, 16, '#000000');
-          ctx.fillStyle = '#29ADFF'; ctx.font = 'bold 8px ui-monospace, monospace';
-          ctx.fillText(signalText, W / 2, 107);
+          rect(48, 86, 166, 14, '#000000');
+          ctx.fillStyle = '#29ADFF'; ctx.font = 'bold 7.5px ui-monospace, monospace'; ctx.textAlign = 'center';
+          ctx.fillText(signalText, 131, 95.5);
         }
         if (msgTimer > 0 || turn === 'match_over') {
-          rect(40, 52, 240, 18, 'rgba(0,0,0,0.88)');
-          ctx.fillStyle = '#FFEC27'; ctx.font = 'bold 8.5px ui-monospace, monospace'; ctx.textAlign = 'center';
-          ctx.fillText(roundMsg, W / 2, 64);
+          rect(48, 102, 166, 15, 'rgba(0,0,0,0.9)');
+          ctx.fillStyle = '#FFEC27'; ctx.font = 'bold 7.5px ui-monospace, monospace'; ctx.textAlign = 'center';
+          ctx.fillText(roundMsg, 131, 112);
         }
         if (turn === 'match_over') {
           rect(90, 80, 140, 22, '#00E436');
@@ -2696,8 +2691,8 @@ window.BUILD_GAMES_06_10 = function(api) {
         ctx.font = 'bold 7.5px ui-monospace, monospace'; ctx.textAlign = 'left'; ctx.fillStyle = '#FFF1E8';
         ctx.fillText(`VEZ: ${turn === 'you' ? 'VOCÊ' : 'BIRA DO BAR'} · EFEITO: ${SPINS[spinIdx].label}`, 10, 10);
         if (msgTimer > 0 || gameOver) {
-          rect(56, 2, 208, 13, 'rgba(0,0,0,0.85)');
-          ctx.fillStyle = '#FFEC27'; ctx.textAlign = 'center'; ctx.fillText(msg, W / 2, 11);
+          rect(56, H - 15, 208, 13, 'rgba(0,0,0,0.88)');
+          ctx.fillStyle = '#FFEC27'; ctx.textAlign = 'center'; ctx.fillText(msg, W / 2, H - 6);
         }
         if (gameOver) {
           rect(76, 72, 168, 34, 'rgba(0,0,0,0.9)');
@@ -4627,9 +4622,14 @@ window.BUILD_GAMES_06_10 = function(api) {
 
       function render() {
         if (activeGameId !== 'pico_survivor') {
+          ctx.save();
+          ctx.scale(SCALE, SCALE);
+          ctx.imageSmoothingEnabled = false;
+          rect(0, 0, W, H, '#000000');
           const cart = CARTRIDGES[activeGameId];
           if (cart) cart.render();
           if (customPaused) drawCustomPauseOverlay();
+          ctx.restore();
           return;
         }
         ctx.save();
@@ -5103,7 +5103,7 @@ window.BUILD_GAMES_06_10 = function(api) {
         if (activeGameId !== 'pico_survivor') {
           customPaused = !customPaused;
           btnPause.textContent = customPaused ? '▶' : '⏸';
-          const pHeadBtn = customDeckEl.querySelector('.custom-deck-head button');
+          const pHeadBtn = document.getElementById('custom-pause-btn');
           if (pHeadBtn) pHeadBtn.textContent = customPaused ? '▶ RETOMAR' : '⏸ PAUSE';
           sfx.gem(customPaused ? 2 : 5);
           return;
