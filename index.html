@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PICO-OS // Arcade Workstation</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background-color: #1D2B53;
+      background-image:
+        radial-gradient(#29ADFF28 1px, transparent 1px),
+        radial-gradient(#83769C24 1px, transparent 1px);
+      background-size: 16px 16px;
+      background-position: 0 0, 8px 8px;
+      color: #FFF1E8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px;
+    }
+    .workstation {
+      width: 100%;
+      max-width: 920px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .pico-win {
+      border: 3px solid #000000;
+      background: #1D2B53;
+      box-shadow: 5px 5px 0 #000000;
+    }
+    .pico-titlebar {
+      min-height: 34px;
+      padding: 4px 10px;
+      background: #C2C3C7;
+      color: #000000;
+      border-bottom: 3px solid #000000;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+    .pico-btn {
+      border: 0;
+      background: #C2C3C7;
+      color: #000000;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 10px;
+      cursor: pointer;
+      box-shadow: inset 1px 1px 0 #FFF1E8, inset -1px -1px 0 #5F574F, 1px 1px 0 #000000;
+    }
+    .pico-btn:hover { filter: brightness(1.05); }
+    .pico-btn:active {
+      box-shadow: inset 1px 1px 0 #5F574F, inset -1px -1px 0 #FFF1E8;
+      transform: translate(1px, 1px);
+    }
+    .pico-btn.active-tab {
+      background: #FFEC27;
+      color: #000000;
+    }
+    .pico-btn.primary {
+      background: #00E436;
+      color: #000000;
+    }
+    .pico-btn.accent {
+      background: #29ADFF;
+      color: #000000;
+    }
+    .pico-btn.danger {
+      background: #FF004D;
+      color: #FFF1E8;
+    }
+    .pill {
+      display: inline-block;
+      padding: 2px 6px;
+      background: #000000;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    .views-stage {
+      position: relative;
+      min-height: 460px;
+    }
+    .spa-view {
+      outline: none;
+    }
+    .spa-view.inactive {
+      content-visibility: hidden;
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    @supports not (content-visibility: hidden) {
+      .spa-view.inactive {
+        display: none;
+      }
+    }
+    .picotron-game-shell {
+      content-visibility: auto;
+      contain-intrinsic-size: auto none auto 520px;
+    }
+    .shelf-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+      padding: 12px;
+    }
+    .cart-card {
+      border: 3px solid #000000;
+      background: #0f1733;
+      box-shadow: 4px 4px 0 #000000;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .cart-card.slot-empty {
+      background: #141e3d;
+      border-style: dashed;
+      border-color: #83769C;
+      box-shadow: none;
+    }
+    .cart-art {
+      height: 108px;
+      background: #000000;
+      border-bottom: 2px solid #000000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cart-body {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      justify-content: space-between;
+    }
+    .canvas-wrap {
+      background: #000000;
+      display: flex;
+      justify-content: center;
+    }
+    canvas#game {
+      display: block;
+      width: 100%;
+      aspect-ratio: 320 / 176;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .statusbar {
+      padding: 6px 10px;
+      background: #5F574F;
+      border-top: 3px solid #000000;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .hood-panel {
+      padding: 8px 10px;
+      background: #1D2B53;
+      border-top: 3px solid #000000;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+    }
+    .hood-panel.hidden { display: none; }
+    .col-btn {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #000000;
+      cursor: pointer;
+      padding: 0;
+    }
+    .data-grid {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .panel-box {
+      border: 2px solid #000000;
+      background: #0f1733;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ach-item {
+      border: 2px solid #000000;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .ach-item.unlocked { background: #162a2c; border-color: #00E436; }
+    .ach-item.locked { background: #12182b; opacity: 0.65; }
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      border: 3px solid #000000;
+      background: #FFEC27;
+      color: #000000;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 4px 4px 0 #000000;
+      z-index: 50;
+      display: none;
+    }
+    .toast.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="workstation">
+    <!-- Top Picotron OS Bar -->
+    <header class="pico-win">
+      <div class="pico-titlebar">
+        <div class="flex-row">
+          <span class="logo-grid" aria-hidden="true">
+            <span style="background:#FF004D"></span><span style="background:#FFEC27"></span>
+            <span style="background:#00E436"></span><span style="background:#29ADFF"></span>
+          </span>
+          <span>PICO-OS v1.0 // ARCADE WORKSTATION</span>
+          <span id="cache-badge" class="pill" style="background:#008751;color:#FFF1E8;">💾 Cache Local OK</span>
+        </div>
+
+        <nav class="flex-row" aria-label="Navegação do Arcade">
+          <button id="nav-hub" data-view="view-hub" class="nav-btn pico-btn active-tab" type="button">🕹️ Estante</button>
+          <button id="nav-game" data-view="view-game" class="nav-btn pico-btn" type="button">▶ pico_survivor.p64</button>
+          <button id="nav-data" data-view="view-data" class="nav-btn pico-btn" type="button">🏆 Conquistas & Cache</button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Multi-View SPA Stage -->
+    <main class="views-stage">
+      <!-- VIEW 1: CARTRIDGE SHELF (HUB) -->
+      <section id="view-hub" class="spa-view pico-win" tabindex="-1" aria-hidden="false">
+        <div class="pico-titlebar">
+          <span>ESTANTE DE CARTUCHOS (.P64) — PROGRESSO SALVO NO NAVEGADOR</span>
+          <span id="hub-summary" class="pill" style="color:#FFEC27;">RECORDE: 0</span>
+        </div>
+
+        <div id="shelf-grid" class="shelf-grid"></div>
+
+        <div class="statusbar">
+          <span style="color:#FFF1E8;">⚡ Zero cadastro, zero servidor: seu progresso fica salvo automaticamente neste navegador.</span>
+          <span id="last-saved-label" style="color:#FFEC27;font-weight:700;">Último save: --</span>
+        </div>
+      </section>
+
+      <!-- VIEW 2: ACTIVE GAME CARTRIDGE -->
+      <section id="view-game" class="spa-view inactive" tabindex="-1" aria-hidden="true" inert="inert">
+        <div id="pico-shell" class="picotron-game-shell pico-win">
+          <div class="pico-titlebar">
+            <div class="flex-row">
+              <button id="btn-back-hub" type="button" class="pico-btn" style="padding:2px 7px;">← Estante</button>
+              <span>pico_survivor.p64</span>
+              <span id="cart-size" class="pill" style="background:#1D2B53;color:#FFF1E8;">-- KB</span>
+            </div>
+            <div class="flex-row" style="font-variant-numeric:tabular-nums;">
+              <span id="hud-hp" class="pill" style="color:#FF004D;">♥♥♥♥♥</span>
+              <span id="hud-wave" class="pill" style="color:#FFEC27;">W1</span>
+              <span id="hud-score" class="pill" style="color:#00E436;">0</span>
+              <button id="btn-sound" type="button" title="Som (M)" class="pico-btn" style="background:#FFF1E8;padding:3px 7px;">🔊</button>
+              <button id="btn-reset" type="button" title="Nova Partida (R)" class="pico-btn" style="background:#FFF1E8;padding:3px 7px;">↻</button>
+            </div>
+          </div>
+
+          <div class="canvas-wrap">
+            <canvas id="game" width="320" height="176"></canvas>
+          </div>
+
+          <div class="statusbar">
+            <div class="flex-row">
+              <span id="hud-lvl" style="color:#FFEC27;font-weight:700;">LV 1</span>
+              <span style="color:#FFF1E8;">Mouse/WASD: mover · Clique/Espaço: Dash · Save automático</span>
+            </div>
+            <button id="btn-hood" type="button" class="pico-btn" style="background:#FFEC27;">⚡ Abrir Capô</button>
+          </div>
+
+          <div id="hood-panel" class="hood-panel hidden">
+            <div class="flex-row">
+              <span style="color:#C2C3C7;">Herói:</span>
+              <button data-skin="slime" class="skin-btn pico-btn" style="background:#29ADFF;">Slime</button>
+              <button data-skin="robo" class="skin-btn pico-btn">Robo</button>
+              <button data-skin="cat" class="skin-btn pico-btn">Gato</button>
+              <button data-skin="mage" class="skin-btn pico-btn">Mago</button>
+            </div>
+            <div class="flex-row">
+              <span style="color:#C2C3C7;">Cor:</span>
+              <button data-color="#29ADFF" class="col-btn" style="background:#29ADFF;" title="Azul Pico"></button>
+              <button data-color="#FF77A8" class="col-btn" style="background:#FF77A8;" title="Rosa"></button>
+              <button data-color="#00E436" class="col-btn" style="background:#00E436;" title="Verde Neon"></button>
+              <button data-color="#FFEC27" class="col-btn" style="background:#FFEC27;" title="Ouro"></button>
+            </div>
+            <div class="flex-row">
+              <button id="btn-chaos" type="button" class="pico-btn">Partículas: 1x</button>
+              <button id="btn-speed" type="button" class="pico-btn">Vel: 1.0x</button>
+              <button id="btn-boss" type="button" class="pico-btn danger">👑 Boss!</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: ACHIEVEMENTS & LOCAL CACHE MANAGER -->
+      <section id="view-data" class="spa-view inactive pico-win" tabindex="-1" aria-hidden="true" inert="inert">
+        <div class="pico-titlebar">
+          <span>CONQUISTAS & GERENCIADOR DE CACHE LOCAL (LOCALSTORAGE)</span>
+          <span id="storage-bytes" class="pill" style="color:#29ADFF;">0 B</span>
+        </div>
+
+        <div class="data-grid">
+          <div class="panel-box">
+            <div style="font-weight:700;color:#FFEC27;">🏆 CONQUISTAS DO WORKSTATION</div>
+            <div id="ach-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+          </div>
+
+          <div class="panel-box">
+            <div style="font-weight:700;color:#29ADFF;">📊 ESTATÍSTICAS & SAVE LOCAL</div>
+            <div id="stats-box" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;"></div>
+
+            <div id="checkpoint-box" style="border:2px solid #000000;background:#1D2B53;padding:8px;font-size:12px;"></div>
+
+            <div style="font-weight:700;color:#00E436;margin-top:4px;">💾 BACKUP PORTÁTIL (SEM SUPABASE)</div>
+            <p style="margin:0;font-size:11px;color:#C2C3C7;">
+              Tudo fica salvo no cache local deste navegador. Quer levar seu save para outro PC ou celular? Exporte o arquivo .json abaixo.
+            </p>
+            <div class="flex-row">
+              <button id="btn-export" type="button" class="pico-btn accent">⬇ Exportar Save (.json)</button>
+              <button id="btn-import" type="button" class="pico-btn">⬆ Importar Save</button>
+              <input id="file-import" type="file" accept=".json,application/json" style="display:none;" />
+            </div>
+            <div class="flex-row" style="margin-top:4px;">
+              <button id="btn-wipe" type="button" class="pico-btn danger">🗑️ Limpar Cache Local</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = 'pico_os_hub_v1';
+      const W = 320, H = 176;
+      const RAINBOW = ['#FF004D','#FFA300','#FFEC27','#00E436','#29ADFF','#FF77A8'];
+
+      const ACHIEVEMENTS = [
+        { id: 'first_blood', title: 'Primeira Faísca', desc: 'Elimine 10 inimigos no total' },
+        { id: 'wave_3',      title: 'Sobrevivente',    desc: 'Alcance a Onda 3' },
+        { id: 'wave_5',      title: 'Imparável',       desc: 'Alcance a Onda 5' },
+        { id: 'boss_slayer', title: 'Caçador de Coroas', desc: 'Derrote um Boss Coroado' },
+        { id: 'combo_15',    title: 'Ritmo Chiptune',  desc: 'Alcance Combo x15 em gemas' },
+        { id: 'tinkerer',    title: 'Mecânico do Capô', desc: 'Customize o herói em Abrir Capô' },
+        { id: 'score_1000',  title: 'Milionário 16-Bit', desc: 'Faça 1.000 pontos numa partida' }
+      ];
+
+      const GAMES_CATALOG = [
+        {
+          id: 'pico_survivor',
+          filename: 'pico_survivor.p64',
+          title: 'PICO-SURVIVOR',
+          subtitle: 'Arena Survivor pocket com dash, raio em cadeia, lâminas orbitais e editor ao vivo.',
+          playable: true,
+          badgeColor: '#00E436'
+        },
+        {
+          id: 'slot_02',
+          filename: 'slot_02.p64',
+          title: 'CARTUCHO #02 (LIVRE)',
+          subtitle: 'Espaço pronto no Arcade Hub para o próximo joguinho minimalista que criarmos juntos.',
+          playable: false,
+          badgeColor: '#29ADFF'
+        },
+        {
+          id: 'slot_03',
+          filename: 'slot_03.p64',
+          title: 'CARTUCHO #03 (LIVRE)',
+          subtitle: 'Mais um slot da estante esperando a próxima experiência estilo Picotron.',
+          playable: false,
+          badgeColor: '#FF77A8'
+        }
+      ];
+
+      function defaultStore() {
+        return {
+          version: 1,
+          lastSavedAt: null,
+          prefs: { skin: 'slime', heroColor: '#29ADFF', chaos: 1, speedMult: 1, soundOn: true },
+          stats: { bestScore: 0, bestWave: 1, bestLevel: 1, totalKills: 0, totalRuns: 0, achievements: [] },
+          savedRun: null
+        };
+      }
+
+      function loadStore() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return defaultStore();
+          const parsed = JSON.parse(raw);
+          const base = defaultStore();
+          return {
+            version: 1,
+            lastSavedAt: parsed.lastSavedAt || null,
+            prefs: { ...base.prefs, ...(parsed.prefs || {}) },
+            stats: { ...base.stats, ...(parsed.stats || {}), achievements: Array.isArray(parsed.stats?.achievements) ? parsed.stats.achievements : [] },
+            savedRun: parsed.savedRun || null
+          };
+        } catch {
+          return defaultStore();
+        }
+      }
+
+      let store = loadStore();
+
+      function persistStore(silent = false) {
+        try {
+          store.lastSavedAt = new Date().toISOString();
+          const json = JSON.stringify(store);
+          localStorage.setItem(STORAGE_KEY, json);
+          updateCacheIndicators(json.length);
+          if (!silent) renderHubAndData();
+        } catch {
+          cacheBadge.textContent = '⚠ Cache Indisponível';
+        }
+      }
+
+      // --- DOM Refs ---
+      const navBtns = document.querySelectorAll('.nav-btn');
+      const views = document.querySelectorAll('.spa-view');
+      const shelfGrid = document.getElementById('shelf-grid');
+      const hubSummary = document.getElementById('hub-summary');
+      const lastSavedLabel = document.getElementById('last-saved-label');
+      const cacheBadge = document.getElementById('cache-badge');
+      const storageBytesEl = document.getElementById('storage-bytes');
+      const achListEl = document.getElementById('ach-list');
+      const statsBoxEl = document.getElementById('stats-box');
+      const checkpointBoxEl = document.getElementById('checkpoint-box');
+      const toastEl = document.getElementById('toast');
+
+      const shell = document.getElementById('pico-shell');
+      const canvas = document.getElementById('game');
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+
+      const hudHp = document.getElementById('hud-hp');
+      const hudWave = document.getElementById('hud-wave');
+      const hudScore = document.getElementById('hud-score');
+      const hudLvl = document.getElementById('hud-lvl');
+      const cartSizeEl = document.getElementById('cart-size');
+      const btnSound = document.getElementById('btn-sound');
+      const btnReset = document.getElementById('btn-reset');
+      const btnBackHub = document.getElementById('btn-back-hub');
+      const btnHood = document.getElementById('btn-hood');
+      const hoodPanel = document.getElementById('hood-panel');
+      const btnChaos = document.getElementById('btn-chaos');
+      const btnSpeed = document.getElementById('btn-speed');
+      const btnBoss = document.getElementById('btn-boss');
+      const btnExport = document.getElementById('btn-export');
+      const btnImport = document.getElementById('btn-import');
+      const fileImport = document.getElementById('file-import');
+      const btnWipe = document.getElementById('btn-wipe');
+
+      cartSizeEl.textContent = `${(new Blob([document.documentElement.outerHTML]).size / 1024).toFixed(1)} KB`;
+
+      let toastTimer = null;
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
+      }
+
+      function unlockAchievement(id) {
+        if (store.stats.achievements.includes(id)) return;
+        store.stats.achievements.push(id);
+        const ach = ACHIEVEMENTS.find(a => a.id === id);
+        if (ach) showToast(`🏆 Conquista: ${ach.title}!`);
+        persistStore(true);
+      }
+
+      function formatSavedTime(iso) {
+        if (!iso) return 'Nenhum ainda';
+        try {
+          return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        } catch { return 'Agora'; }
+      }
+
+      function updateCacheIndicators(byteLen = null) {
+        const len = byteLen ?? (localStorage.getItem(STORAGE_KEY) || '').length;
+        storageBytesEl.textContent = `${len} B`;
+        lastSavedLabel.textContent = `Último save: ${formatSavedTime(store.lastSavedAt)}`;
+        cacheBadge.textContent = store.savedRun ? '💾 Partida + Stats Salvos' : '💾 Cache Local OK';
+      }
+
+      // --- SPA View Routing (faster-spa-view-transitions) ---
+      let currentView = 'view-hub';
+      function switchToView(viewId) {
+        if (currentView === 'view-game' && viewId !== 'view-game') {
+          saveCheckpoint();
+          stopLoop();
+        }
+        views.forEach(view => {
+          view.classList.add('inactive');
+          view.setAttribute('aria-hidden', 'true');
+          view.setAttribute('inert', 'inert');
+        });
+        const activeView = document.getElementById(viewId);
+        activeView.classList.remove('inactive');
+        activeView.setAttribute('aria-hidden', 'false');
+        activeView.removeAttribute('inert');
+        activeView.focus({ preventScroll: true });
+
+        navBtns.forEach(btn => btn.classList.toggle('active-tab', btn.dataset.view === viewId));
+        currentView = viewId;
+
+        if (viewId === 'view-game') {
+          startLoop();
+        } else {
+          renderHubAndData();
+        }
+      }
+
+      navBtns.forEach(btn => btn.addEventListener('click', () => switchToView(btn.dataset.view)));
+      btnBackHub.addEventListener('click', () => switchToView('view-hub'));
+
+      // --- Render Hub & Cache Inspector ---
+      function renderHubAndData() {
+        hubSummary.textContent = `RECORDE: ${store.stats.bestScore} · ONDA MÁX: ${store.stats.bestWave}`;
+        const r = store.savedRun;
+
+        shelfGrid.innerHTML = GAMES_CATALOG.map((g, idx) => {
+          if (!g.playable) {
+            return `
+              <article class="cart-card slot-empty">
+                <div class="cart-art" style="background:#0c1329;">
+                  <div style="font-size:22px;color:#83769C;margin-bottom:4px;">[ + ]</div>
+                  <div style="font-size:11px;color:#83769C;font-weight:700;">${g.filename}</div>
+                </div>
+                <div class="cart-body">
+                  <div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+                      <strong style="color:#C2C3C7;">#${String(idx + 1).padStart(2, '0')} ${g.title}</strong>
+                      <span class="pill" style="color:${g.badgeColor};">EM BREVE</span>
+                    </div>
+                    <p style="margin:6px 0 0;font-size:11px;color:#83769C;line-height:1.4;">${g.subtitle}</p>
+                  </div>
+                  <button type="button" class="pico-btn" disabled style="opacity:0.45;cursor:not-allowed;">Aguardando Cartucho</button>
+                </div>
+              </article>
+            `;
+          }
+
+          const actionButtons = r
+            ? `
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <button id="hub-resume-btn" type="button" class="pico-btn primary" style="width:100%;">
+                  ▶ CONTINUAR (W${r.wave} · LV ${r.lvl} · ${r.score} PTS)
+                </button>
+                <button id="hub-new-btn" type="button" class="pico-btn" style="width:100%;">
+                  ↺ Nova Partida do Zero
+                </button>
+              </div>
+            `
+            : `<button id="hub-new-btn" type="button" class="pico-btn primary" style="width:100%;">▶ Jogar ${g.filename}</button>`;
+
+          return `
+            <article class="cart-card">
+              <div class="cart-art">
+                <span class="pill" style="position:absolute;top:6px;left:6px;color:#FFEC27;">#${String(idx + 1).padStart(2, '0')} P64</span>
+                <span class="pill" style="position:absolute;top:6px;right:6px;color:${g.badgeColor};">RECORDE ${store.stats.bestScore}</span>
+                <div style="font-size:20px;font-weight:700;letter-spacing:1px;color:#29ADFF;text-shadow:2px 2px 0 #000000;">PICO-SURVIVOR</div>
+                <div style="font-size:11px;color:#00E436;margin-top:4px;">♥ ARENA · SINTETIZADOR · LIVE-EDIT</div>
+              </div>
+              <div class="cart-body">
+                <div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+                    <strong style="color:#FFF1E8;">${g.filename}</strong>
+                    <span class="pill" style="color:#FF77A8;">ONDA MÁX ${store.stats.bestWave}</span>
+                  </div>
+                  <p style="margin:6px 0 0;font-size:11px;color:#C2C3C7;line-height:1.4;">${g.subtitle}</p>
+                </div>
+                ${actionButtons}
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        const resumeBtn = document.getElementById('hub-resume-btn');
+        if (resumeBtn) {
+          resumeBtn.addEventListener('click', () => {
+            ensureAudio();
+            restoreSavedRun();
+            switchToView('view-game');
+          });
+        }
+        const newBtn = document.getElementById('hub-new-btn');
+        if (newBtn) {
+          newBtn.addEventListener('click', () => {
+            ensureAudio();
+            initGame(true);
+            switchToView('view-game');
+          });
+        }
+
+        // Achievements & Stats View
+        achListEl.innerHTML = ACHIEVEMENTS.map(a => {
+          const ok = store.stats.achievements.includes(a.id);
+          return `
+            <div class="ach-item ${ok ? 'unlocked' : 'locked'}">
+              <div>
+                <div style="font-weight:700;color:${ok ? '#00E436' : '#C2C3C7'};">${ok ? '✓' : '🔒'} ${a.title}</div>
+                <div style="font-size:11px;color:#C2C3C7;">${a.desc}</div>
+              </div>
+              <span class="pill" style="color:${ok ? '#FFEC27' : '#5F574F'};">${ok ? 'LIBERADA' : 'BLOQ'}</span>
+            </div>
+          `;
+        }).join('');
+
+        statsBoxEl.innerHTML = `
+          <div class="pill" style="padding:6px;color:#00E436;">Recorde: ${store.stats.bestScore}</div>
+          <div class="pill" style="padding:6px;color:#FFEC27;">Onda Máx: ${store.stats.bestWave}</div>
+          <div class="pill" style="padding:6px;color:#29ADFF;">Nível Máx: ${store.stats.bestLevel}</div>
+          <div class="pill" style="padding:6px;color:#FF77A8;">Abates: ${store.stats.totalKills}</div>
+          <div class="pill" style="padding:6px;color:#FFF1E8;grid-column:span 2;">Partidas iniciadas: ${store.stats.totalRuns}</div>
+        `;
+
+        if (r) {
+          checkpointBoxEl.innerHTML = `
+            <div style="color:#00E436;font-weight:700;margin-bottom:4px;">💾 Partida em andamento salva!</div>
+            <div style="color:#FFF1E8;">Onda ${r.wave} · Nível ${r.lvl} · ${r.score} pts · ${r.hp}/${r.maxHp} ♥</div>
+            <button id="data-resume-btn" type="button" class="pico-btn primary" style="margin-top:6px;">▶ Retomar Partida Agora</button>
+          `;
+          document.getElementById('data-resume-btn').addEventListener('click', () => {
+            ensureAudio();
+            restoreSavedRun();
+            switchToView('view-game');
+          });
+        } else {
+          checkpointBoxEl.innerHTML = `<div style="color:#C2C3C7;">Nenhuma partida pausada no momento. Comece a jogar e seu avanço será salvo a cada 2s!</div>`;
+        }
+        updateCacheIndicators();
+      }
+
+      // --- Web Audio API Chiptune Synthesizer ---
+      let audioCtx = null;
+      let soundOn = store.prefs.soundOn !== false;
+      btnSound.textContent = soundOn ? '🔊' : '🔇';
+
+      function ensureAudio() {
+        if (!soundOn) return null;
+        if (!audioCtx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) audioCtx = new AC();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+      }
+      function tone(freq, dur, type = 'square', vol = 0.07, slide = null) {
+        const ac = ensureAudio();
+        if (!ac) return;
+        const t = ac.currentTime;
+        const osc = ac.createOscillator(), gain = ac.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(20, slide), t + dur);
+        gain.gain.setValueAtTime(vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        osc.connect(gain); gain.connect(ac.destination);
+        osc.start(t); osc.stop(t + dur);
+      }
+      const sfx = {
+        shoot: () => tone(560, 0.055, 'square', 0.035, 210),
+        hit: () => tone(160, 0.05, 'triangle', 0.06, 75),
+        kill: () => tone(320, 0.06, 'square', 0.05, 680),
+        gem: (c) => {
+          const notes = [440, 494, 587, 659, 784, 880, 988, 1175];
+          tone(notes[Math.min(notes.length - 1, c % notes.length)] * (1 + Math.floor(c / 8) * 0.15), 0.06, 'triangle', 0.055);
+        },
+        dash: () => tone(240, 0.12, 'sawtooth', 0.05, 760),
+        hurt: () => tone(120, 0.18, 'sawtooth', 0.09, 45),
+        zap: () => tone(920, 0.08, 'sawtooth', 0.04, 300),
+        boss: () => { tone(110, 0.25, 'sawtooth', 0.08, 220); setTimeout(() => tone(140, 0.3, 'square', 0.08, 70), 140); },
+        lvl: () => [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, 0.11, 'square', 0.06), i * 65))
+      };
+
+      // --- Game State & Live-Edit Prefs ---
+      const cfg = {
+        skin: store.prefs.skin || 'slime',
+        heroColor: store.prefs.heroColor || '#29ADFF',
+        chaos: store.prefs.chaos || 1,
+        speedMult: store.prefs.speedMult || 1
+      };
+
+      function applyPrefsUI() {
+        document.querySelectorAll('.skin-btn').forEach(b => {
+          b.style.background = b.dataset.skin === cfg.skin ? '#29ADFF' : '#C2C3C7';
+        });
+        btnChaos.textContent = `Partículas: ${cfg.chaos}x`;
+        btnChaos.style.background = cfg.chaos === 3 ? '#FFEC27' : '#C2C3C7';
+        btnSpeed.textContent = `Vel: ${cfg.speedMult.toFixed(1)}x`;
+      }
+
+      const UPGRADES = [
+        { id: 'multi', name: 'TIRO TRIPLO', desc: '+1 projetil por disparo', col: '#29ADFF' },
+        { id: 'orbit', name: 'LAMINA ORBITAL', desc: '+1 lamina giratoria', col: '#FFEC27' },
+        { id: 'zap',   name: 'RAIO CADEIA', desc: 'Raio salta nos inimigos', col: '#00E436' },
+        { id: 'dash',  name: 'ONDA DE DASH', desc: 'Explosao ao dar dash', col: '#FF77A8' },
+        { id: 'rate',  name: 'DISPARO TURBO', desc: 'Atira 22% mais rapido', col: '#FFA300' },
+        { id: 'mag',   name: 'IMA + CURA', desc: '+1 Vida e super ima', col: '#FF004D' }
+      ];
+
+      let state = 'title', time = 0, shake = 0, hitStop = 0, score = 0, wave = 1;
+      let combo = 0, comboTimer = 0, spawnTimer = 0, bossTimer = 28, saveTimer = 0;
+      let bannerText = '', bannerTimer = 0, levelChoices = [];
+      const keys = {}, pointer = { x: W / 2, y: H / 2, inside: false };
+      let player, bullets, enemies, gems, particles, floaters, ghosts, bolts, rings, splats;
+
+      const stars = Array.from({ length: 42 }, () => ({
+        x: Math.random() * W, y: Math.random() * H,
+        s: Math.random() < 0.35 ? 2 : 1, spd: 4 + Math.random() * 10,
+        col: Math.random() < 0.5 ? '#1D2B53' : '#83769C'
+      }));
+
+      function saveCheckpoint() {
+        if (!player || (state !== 'play' && state !== 'levelup')) return;
+        store.savedRun = {
+          score, wave, lvl: player.lvl, xp: player.xp, nextXp: player.nextXp,
+          hp: player.hp, maxHp: player.maxHp, projCount: player.projCount,
+          orbits: player.orbits, zapLvl: player.zapLvl, dashBoom: player.dashBoom,
+          fireRate: player.fireRate, magRadius: player.magRadius, combo,
+          savedAt: new Date().toISOString()
+        };
+        if (score > store.stats.bestScore) store.stats.bestScore = score;
+        if (wave > store.stats.bestWave) store.stats.bestWave = wave;
+        if (player.lvl > store.stats.bestLevel) store.stats.bestLevel = player.lvl;
+        persistStore(true);
+      }
+
+      function resetEntities() {
+        bullets = []; enemies = []; gems = []; particles = [];
+        floaters = []; ghosts = []; bolts = []; rings = []; splats = [];
+      }
+
+      function initGame(startImmediately = false) {
+        player = {
+          x: W / 2, y: H / 2, hp: 5, maxHp: 5, invuln: 0,
+          dashCd: 0, dashTime: 0, dashDx: 1, dashDy: 0, faceX: 1, faceY: 0,
+          lvl: 1, xp: 0, nextXp: 8, fireCd: 0, fireRate: 0.42, projCount: 1,
+          orbits: 0, orbitAngle: 0, zapLvl: 0, zapCd: 1.5, dashBoom: 0, magRadius: 34
+        };
+        resetEntities();
+        score = 0; wave = 1; combo = 0; comboTimer = 0;
+        spawnTimer = 0.4; bossTimer = 25; shake = 0; hitStop = 0; saveTimer = 0;
+        bannerText = startImmediately ? 'ONDA 1!' : '';
+        bannerTimer = startImmediately ? 1.8 : 0;
+        state = startImmediately ? 'play' : 'title';
+        if (startImmediately) {
+          store.stats.totalRuns++;
+          store.savedRun = null;
+          saveCheckpoint();
+        } else {
+          for (let i = 0; i < 6; i++) spawnEnemy('slime');
+        }
+        syncHud();
+      }
+
+      function restoreSavedRun() {
+        const r = store.savedRun;
+        if (!r) { initGame(true); return; }
+        player = {
+          x: W / 2, y: H / 2, hp: Math.max(1, r.hp || 5), maxHp: r.maxHp || 5, invuln: 1.2,
+          dashCd: 0, dashTime: 0, dashDx: 1, dashDy: 0, faceX: 1, faceY: 0,
+          lvl: r.lvl || 1, xp: r.xp || 0, nextXp: r.nextXp || 8,
+          fireCd: 0, fireRate: r.fireRate || 0.42, projCount: r.projCount || 1,
+          orbits: r.orbits || 0, orbitAngle: 0, zapLvl: r.zapLvl || 0, zapCd: 1.0,
+          dashBoom: r.dashBoom || 0, magRadius: r.magRadius || 34
+        };
+        resetEntities();
+        score = r.score || 0;
+        wave = r.wave || 1;
+        combo = r.combo || 0;
+        comboTimer = combo > 0 ? 2.0 : 0;
+        spawnTimer = 0.5; bossTimer = 25; shake = 0; hitStop = 0; saveTimer = 0;
+        bannerText = `ONDA ${wave} RETOMADA!`;
+        bannerTimer = 2.0;
+        state = 'play';
+        sfx.lvl();
+        rings.push({ x: player.x, y: player.y, r: 3, maxR: 36, col: '#00E436', life: 0.35 });
+        syncHud();
+      }
+
+      function syncHud() {
+        hudHp.textContent = '♥'.repeat(Math.max(0, player.hp)) + '♡'.repeat(Math.max(0, player.maxHp - player.hp));
+        hudWave.textContent = `W${wave}`;
+        hudScore.textContent = `${score}`;
+        hudLvl.textContent = `LV ${player.lvl}`;
+      }
+
+      function burst(x, y, col, count = 6, spd = 55) {
+        const n = Math.min(48, count * cfg.chaos);
+        for (let i = 0; i < n; i++) {
+          const a = Math.random() * Math.PI * 2, v = spd * (0.35 + Math.random() * 0.9);
+          particles.push({
+            x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+            life: 0.25 + Math.random() * 0.3, size: Math.random() < 0.3 ? 2 : 1,
+            col: Math.random() < 0.25 ? '#FFF1E8' : col
+          });
+        }
+      }
+
+      function addFloater(x, y, txt, col = '#FFF1E8') {
+        if (floaters.length > 26) floaters.shift();
+        floaters.push({ x, y, vy: -22, life: 0.65, txt, col });
+      }
+
+      function spawnEnemy(forceType = null) {
+        if (enemies.length > 65 && forceType !== 'boss') return;
+        const side = Math.floor(Math.random() * 4);
+        let x, y;
+        if (side === 0) { x = Math.random() * W; y = -10; }
+        else if (side === 1) { x = W + 10; y = Math.random() * H; }
+        else if (side === 2) { x = Math.random() * W; y = H + 10; }
+        else { x = -10; y = Math.random() * H; }
+
+        let type = forceType;
+        if (!type) {
+          const r = Math.random();
+          if (wave >= 3 && r < 0.18) type = 'golem';
+          else if (wave >= 2 && r < 0.45) type = 'bat';
+          else if (wave >= 4 && r < 0.62) type = 'ghost';
+          else type = 'slime';
+        }
+        const hpScale = 1 + (wave - 1) * 0.22;
+        const defs = {
+          slime: { r: 5, hp: Math.round(2 * hpScale), spd: 24 + wave * 1.3, col: '#00E436', xp: 1, pts: 10 },
+          bat:   { r: 4, hp: Math.round(1.5 * hpScale), spd: 42 + wave * 1.5, col: '#7E2553', xp: 2, pts: 18 },
+          golem: { r: 7, hp: Math.round(6 * hpScale), spd: 15 + wave * 0.6, col: '#AB5236', xp: 4, pts: 35 },
+          ghost: { r: 5, hp: Math.round(3 * hpScale), spd: 32 + wave * 1.2, col: '#FF77A8', xp: 3, pts: 25 },
+          boss:  { r: 10, hp: 28 + wave * 14, spd: 19 + wave * 0.8, col: '#FF004D', xp: 14, pts: 250 }
+        };
+        const d = defs[type];
+        enemies.push({ type, x, y, vx: 0, vy: 0, r: d.r, hp: d.hp, maxHp: d.hp, spd: d.spd, col: d.col, xp: d.xp, pts: d.pts, flash: 0, phase: Math.random() * 6.28 });
+        if (type === 'boss') {
+          sfx.boss(); shake = 5; bannerText = 'ALERTA: BOSS!'; bannerTimer = 2.0;
+          rings.push({ x, y, r: 2, maxR: 34, col: '#FF004D', life: 0.4 });
+        }
+      }
+
+      function triggerDash() {
+        if (state !== 'play' || player.dashCd > 0) return;
+        const len = Math.hypot(player.faceX, player.faceY) || 1;
+        player.dashDx = player.faceX / len; player.dashDy = player.faceY / len;
+        player.dashTime = 0.14; player.dashCd = 0.95; player.invuln = Math.max(player.invuln, 0.24);
+        sfx.dash(); shake = Math.max(shake, 2);
+        rings.push({ x: player.x, y: player.y, r: 3, maxR: 22 + player.dashBoom * 12, col: '#29ADFF', life: 0.26 });
+        burst(player.x, player.y, '#29ADFF', 8, 70);
+        if (player.dashBoom > 0) {
+          const rad = 32 + player.dashBoom * 10;
+          enemies.forEach(e => {
+            if (Math.hypot(e.x - player.x, e.y - player.y) <= rad) damageEnemy(e, 2 + player.dashBoom * 2, e.x - player.x, e.y - player.y, '#FF77A8');
+          });
+        }
+      }
+
+      function damageEnemy(e, dmg, kx, ky, hitCol = '#FFF1E8') {
+        e.hp -= dmg; e.flash = 0.1;
+        const kl = Math.hypot(kx, ky) || 1, push = e.type === 'boss' ? 18 : 52;
+        e.vx += (kx / kl) * push; e.vy += (ky / kl) * push;
+        burst(e.x, e.y, e.col, 3, 45);
+        addFloater(e.x, e.y - 6, `${dmg}`, hitCol);
+        sfx.hit();
+        if (e.hp <= 0) {
+          score += e.pts + combo * 2; combo++; comboTimer = 2.4;
+          store.stats.totalKills++;
+          if (store.stats.totalKills >= 10) unlockAchievement('first_blood');
+          if (combo >= 15) unlockAchievement('combo_15');
+          if (score >= 1000) unlockAchievement('score_1000');
+          if (e.type === 'boss') unlockAchievement('boss_slayer');
+
+          shake = Math.max(shake, e.type === 'boss' ? 7 : 2.2);
+          if (e.type === 'boss') hitStop = 0.06;
+          sfx.kill();
+          burst(e.x, e.y, e.col, e.type === 'boss' ? 24 : 9, e.type === 'boss' ? 95 : 65);
+          rings.push({ x: e.x, y: e.y, r: 2, maxR: e.type === 'boss' ? 38 : 14, col: e.col, life: 0.25 });
+          if (splats.length > 35) splats.shift();
+          splats.push({ x: e.x, y: e.y, r: e.r, col: e.col, life: 5 });
+          const gemCount = e.type === 'boss' ? 8 : (e.xp >= 3 ? 2 : 1);
+          for (let i = 0; i < gemCount; i++) {
+            gems.push({
+              x: e.x + (Math.random() - 0.5) * 8, y: e.y + (Math.random() - 0.5) * 8,
+              vx: (Math.random() - 0.5) * 35, vy: (Math.random() - 0.5) * 35,
+              val: Math.max(1, Math.ceil(e.xp / gemCount)),
+              col: e.type === 'boss' ? '#FFEC27' : (e.xp >= 3 ? '#29ADFF' : '#00E436')
+            });
+          }
+          syncHud();
+        }
+      }
+
+      function openLevelUp() {
+        state = 'levelup'; sfx.lvl();
+        saveCheckpoint();
+        levelChoices = [...UPGRADES].sort(() => Math.random() - 0.5).slice(0, 3);
+      }
+
+      function applyUpgrade(idx) {
+        const up = levelChoices[idx];
+        if (!up) return;
+        if (up.id === 'multi') player.projCount++;
+        else if (up.id === 'orbit') player.orbits++;
+        else if (up.id === 'zap') player.zapLvl++;
+        else if (up.id === 'dash') player.dashBoom++;
+        else if (up.id === 'rate') player.fireRate *= 0.78;
+        else if (up.id === 'mag') { player.magRadius += 24; player.hp = Math.min(player.maxHp, player.hp + 1); }
+        state = 'play';
+        rings.push({ x: player.x, y: player.y, r: 4, maxR: 42, col: up.col, life: 0.35 });
+        burst(player.x, player.y, up.col, 12, 80);
+        saveCheckpoint();
+        syncHud();
+      }
+
+      function fireAutoWeapons(dt) {
+        player.fireCd -= dt;
+        if (player.fireCd <= 0 && enemies.length > 0) {
+          let nearest = null, bestD = 9999;
+          for (const e of enemies) {
+            const d = Math.hypot(e.x - player.x, e.y - player.y);
+            if (d < bestD) { bestD = d; nearest = e; }
+          }
+          if (nearest) {
+            player.fireCd = player.fireRate;
+            const baseAng = Math.atan2(nearest.y - player.y, nearest.x - player.x);
+            for (let i = 0; i < player.projCount; i++) {
+              const a = baseAng + (i - (player.projCount - 1) / 2) * 0.2;
+              bullets.push({ x: player.x, y: player.y, vx: Math.cos(a) * 165, vy: Math.sin(a) * 165, life: 1.4, dmg: 1 });
+            }
+            sfx.shoot();
+          }
+        }
+        if (player.orbits > 0) {
+          player.orbitAngle += dt * 4.2;
+          for (let i = 0; i < player.orbits; i++) {
+            const a = player.orbitAngle + (i * Math.PI * 2) / player.orbits;
+            const ox = player.x + Math.cos(a) * 20, oy = player.y + Math.sin(a) * 20;
+            for (const e of enemies) {
+              if (e.hp > 0 && Math.hypot(e.x - ox, e.y - oy) < e.r + 4 && e.flash <= 0) damageEnemy(e, 1, e.x - player.x, e.y - player.y, '#FFEC27');
+            }
+          }
+        }
+        if (player.zapLvl > 0) {
+          player.zapCd -= dt;
+          if (player.zapCd <= 0 && enemies.length > 0) {
+            player.zapCd = Math.max(0.75, 2.0 - player.zapLvl * 0.25);
+            const hitSet = new Set(); let cx = player.x, cy = player.y;
+            const pts = [{ x: cx, y: cy }], hops = 2 + player.zapLvl;
+            for (let h = 0; h < hops; h++) {
+              let best = null, bestD = 90;
+              for (const e of enemies) {
+                if (e.hp > 0 && !hitSet.has(e)) {
+                  const d = Math.hypot(e.x - cx, e.y - cy);
+                  if (d < bestD) { bestD = d; best = e; }
+                }
+              }
+              if (!best) break;
+              hitSet.add(best); pts.push({ x: best.x, y: best.y });
+              damageEnemy(best, 1 + Math.floor(player.zapLvl / 2), best.x - cx, best.y - cy, '#00E436');
+              cx = best.x; cy = best.y;
+            }
+            if (pts.length > 1) { bolts.push({ pts, life: 0.16 }); sfx.zap(); }
+          }
+        }
+      }
+
+      function update(rawDt) {
+        const dt = Math.min(0.05, rawDt) * cfg.speedMult;
+        time += dt;
+        for (const s of stars) { s.y += s.spd * dt * 0.5; if (s.y > H) { s.y = 0; s.x = Math.random() * W; } }
+        if (state === 'title') {
+          for (const e of enemies) { e.phase += dt * 4; e.x += Math.cos(e.phase * 0.4) * 14 * dt; e.y += Math.sin(e.phase * 0.3) * 14 * dt; }
+          return;
+        }
+        if (state !== 'play') return;
+        if (hitStop > 0) { hitStop -= rawDt; return; }
+        if (shake > 0) shake = Math.max(0, shake - dt * 22);
+        if (bannerTimer > 0) bannerTimer -= dt;
+        if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) combo = 0; }
+
+        saveTimer += rawDt;
+        if (saveTimer >= 2.0) {
+          saveTimer = 0;
+          saveCheckpoint();
+        }
+
+        let mx = 0, my = 0;
+        if (keys['KeyW'] || keys['ArrowUp']) my -= 1;
+        if (keys['KeyS'] || keys['ArrowDown']) my += 1;
+        if (keys['KeyA'] || keys['ArrowLeft']) mx -= 1;
+        if (keys['KeyD'] || keys['ArrowRight']) mx += 1;
+        if (mx !== 0 || my !== 0) { const l = Math.hypot(mx, my); mx /= l; my /= l; player.faceX = mx; player.faceY = my; }
+        else if (pointer.inside) {
+          const dx = pointer.x - player.x, dy = pointer.y - player.y, dist = Math.hypot(dx, dy);
+          if (dist > 4) { mx = dx / dist; my = dy / dist; player.faceX = mx; player.faceY = my; }
+        }
+
+        if (player.dashCd > 0) player.dashCd -= dt;
+        if (player.invuln > 0) player.invuln -= dt;
+        if (player.dashTime > 0) {
+          player.dashTime -= dt;
+          player.x += player.dashDx * 215 * dt; player.y += player.dashDy * 215 * dt;
+          if (Math.random() < 0.75) ghosts.push({ x: player.x, y: player.y, life: 0.18, col: cfg.heroColor });
+        } else {
+          player.x += mx * 74 * dt; player.y += my * 74 * dt;
+        }
+        player.x = Math.max(8, Math.min(W - 8, player.x));
+        player.y = Math.max(8, Math.min(H - 8, player.y));
+
+        spawnTimer -= dt;
+        if (spawnTimer <= 0) {
+          const newWave = 1 + Math.floor(score / 320);
+          if (newWave > wave) {
+            wave = newWave;
+            bannerText = `ONDA ${wave}!`;
+            bannerTimer = 1.6;
+            if (wave >= 3) unlockAchievement('wave_3');
+            if (wave >= 5) unlockAchievement('wave_5');
+            saveCheckpoint();
+            syncHud();
+          }
+          spawnEnemy(); spawnTimer = Math.max(0.22, 1.05 - wave * 0.08);
+        }
+        bossTimer -= dt;
+        if (bossTimer <= 0) { bossTimer = 32; spawnEnemy('boss'); }
+
+        fireAutoWeapons(dt);
+
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          const b = bullets[i]; b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
+          let hit = false;
+          for (const e of enemies) {
+            if (e.hp > 0 && Math.hypot(e.x - b.x, e.y - b.y) < e.r + 3) { damageEnemy(e, b.dmg, b.vx, b.vy); hit = true; break; }
+          }
+          if (hit || b.life <= 0 || b.x < -10 || b.x > W + 10 || b.y < -10 || b.y > H + 10) bullets.splice(i, 1);
+        }
+
+        for (let i = enemies.length - 1; i >= 0; i--) {
+          const e = enemies[i];
+          if (e.hp <= 0) { enemies.splice(i, 1); continue; }
+          if (e.flash > 0) e.flash -= dt;
+          e.phase += dt * 7;
+          const dx = player.x - e.x, dy = player.y - e.y, dist = Math.hypot(dx, dy) || 1;
+          let spd = e.spd;
+          if (e.type === 'ghost' && Math.sin(e.phase * 0.5) > 0.65) spd *= 1.9;
+          const wobble = e.type === 'bat' ? Math.sin(e.phase * 1.4) * 28 : 0;
+          e.vx *= Math.pow(0.05, dt); e.vy *= Math.pow(0.05, dt);
+          e.x += ((dx / dist) * spd + (-dy / dist) * wobble + e.vx) * dt;
+          e.y += ((dy / dist) * spd + (dx / dist) * wobble + e.vy) * dt;
+          if (dist < e.r + 5 && player.invuln <= 0) {
+            player.hp--; player.invuln = 1.0; shake = 6; hitStop = 0.05; sfx.hurt();
+            burst(player.x, player.y, '#FF004D', 12, 85);
+            rings.push({ x: player.x, y: player.y, r: 3, maxR: 28, col: '#FF004D', life: 0.3 });
+            syncHud();
+            if (player.hp <= 0) {
+              state = 'gameover';
+              if (score > store.stats.bestScore) store.stats.bestScore = score;
+              if (wave > store.stats.bestWave) store.stats.bestWave = wave;
+              if (player.lvl > store.stats.bestLevel) store.stats.bestLevel = player.lvl;
+              store.savedRun = null;
+              persistStore(true);
+              return;
+            }
+          }
+        }
+
+        for (let i = gems.length - 1; i >= 0; i--) {
+          const g = gems[i];
+          g.vx *= Math.pow(0.08, dt); g.vy *= Math.pow(0.08, dt);
+          const dx = player.x - g.x, dy = player.y - g.y, d = Math.hypot(dx, dy) || 1;
+          if (d < player.magRadius) {
+            const pull = 175 * (1 - d / (player.magRadius + 15)) + 75;
+            g.vx += (dx / d) * pull * dt * 8; g.vy += (dy / d) * pull * dt * 8;
+          }
+          g.x += g.vx * dt; g.y += g.vy * dt;
+          if (d < 7) {
+            player.xp += g.val; score += 5; sfx.gem(combo); gems.splice(i, 1);
+            if (player.xp >= player.nextXp) {
+              player.xp -= player.nextXp; player.lvl++; player.nextXp = Math.round(player.nextXp * 1.45 + 3);
+              syncHud(); openLevelUp(); return;
+            }
+            syncHud();
+          }
+        }
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i]; p.x += p.vx * dt; p.y += p.vy * dt;
+          p.vx *= Math.pow(0.25, dt); p.vy *= Math.pow(0.25, dt); p.life -= dt;
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+        for (let i = floaters.length - 1; i >= 0; i--) { floaters[i].y += floaters[i].vy * dt; floaters[i].life -= dt; if (floaters[i].life <= 0) floaters.splice(i, 1); }
+        for (let i = ghosts.length - 1; i >= 0; i--) { ghosts[i].life -= dt; if (ghosts[i].life <= 0) ghosts.splice(i, 1); }
+        for (let i = bolts.length - 1; i >= 0; i--) { bolts[i].life -= dt; if (bolts[i].life <= 0) bolts.splice(i, 1); }
+        for (let i = rings.length - 1; i >= 0; i--) { rings[i].life -= dt; if (rings[i].life <= 0) rings.splice(i, 1); }
+        for (let i = splats.length - 1; i >= 0; i--) { splats[i].life -= dt; if (splats[i].life <= 0) splats.splice(i, 1); }
+      }
+
+      function rect(x, y, w, h, col) {
+        ctx.fillStyle = col;
+        ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+      }
+
+      function drawSquashSprite(x, y, r, col, phase, faceX, faceY, skin = 'slime', isBoss = false) {
+        const sq = Math.sin(phase) * 0.16;
+        const w = Math.max(4, Math.round(r * 2 * (1 + sq)));
+        const h = Math.max(4, Math.round(r * 2 * (1 - sq)));
+        const dx = Math.round(x - w / 2), dy = Math.round(y - h / 2);
+        rect(x - w * 0.45, y + h * 0.4, w * 0.9, 2, '#000000');
+        rect(dx - 1, dy, w + 2, h, '#000000'); rect(dx, dy - 1, w, h + 2, '#000000'); rect(dx, dy, w, h, col);
+        if (skin === 'robo') {
+          rect(x - 1, dy - 3, 2, 2, '#FFEC27');
+          rect(dx + 1, dy + 2, w - 2, 3, '#000000');
+          rect(dx + 2 + Math.round(faceX), dy + 3, 2, 1, '#FFEC27');
+          return;
+        }
+        if (skin === 'cat') { rect(dx, dy - 2, 2, 2, col); rect(dx + w - 2, dy - 2, 2, 2, col); }
+        if (skin === 'mage') {
+          rect(dx - 1, dy - 1, w + 2, 2, '#7E2553'); rect(x - 2, dy - 4, 4, 3, '#7E2553');
+          rect(x + faceX * 4, y - 1, 2, 5, '#AB5236'); rect(x + faceX * 4, y - 2, 2, 2, '#FFEC27');
+        }
+        if (isBoss) {
+          rect(x - 4, dy - 4, 8, 3, '#FFEC27');
+          rect(x - 4, dy - 6, 2, 2, '#FFEC27'); rect(x - 1, dy - 6, 2, 2, '#FFEC27'); rect(x + 2, dy - 6, 2, 2, '#FFEC27');
+        }
+        const ex = Math.round(x + faceX * 1.6), ey = Math.round(y - 1 + faceY * 1.2);
+        rect(ex - 2, ey, 1, 2, '#FFF1E8'); rect(ex + 1, ey, 1, 2, '#FFF1E8');
+        rect(ex - 2, ey + 1, 1, 1, '#000000'); rect(ex + 1, ey + 1, 1, 1, '#000000');
+      }
+
+      function drawRainbowText(text, cx, cy, size = 12, waveAmp = 2.5) {
+        ctx.font = `bold ${size}px monospace`; ctx.textAlign = 'center';
+        const spacing = size * 0.65, startX = cx - ((text.length - 1) * spacing) / 2;
+        for (let i = 0; i < text.length; i++) {
+          const lx = Math.round(startX + i * spacing), ly = Math.round(cy + Math.sin(time * 9 + i * 0.6) * waveAmp);
+          ctx.fillStyle = '#000000'; ctx.fillText(text[i], lx + 1, ly + 1);
+          ctx.fillStyle = RAINBOW[(i + Math.floor(time * 10)) % RAINBOW.length]; ctx.fillText(text[i], lx, ly);
+        }
+      }
+
+      function render() {
+        ctx.save();
+        if (shake > 0.2) ctx.translate(Math.round((Math.random() - 0.5) * shake * 2), Math.round((Math.random() - 0.5) * shake * 2));
+        rect(0, 0, W, H, '#0f1733');
+        for (const s of stars) rect(s.x, s.y, s.s, s.s, s.col);
+        for (const sp of splats) { ctx.globalAlpha = Math.min(0.28, sp.life * 0.08); rect(sp.x - sp.r / 2, sp.y - sp.r / 2, sp.r, sp.r, sp.col); }
+        ctx.globalAlpha = 1;
+
+        for (const r of rings) {
+          const rad = Math.max(2, r.r + (r.maxR - r.r) * (1 - r.life / 0.35));
+          ctx.strokeStyle = r.col; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(Math.round(r.x), Math.round(r.y), Math.round(rad), 0, Math.PI * 2); ctx.stroke();
+        }
+        for (const g of gems) {
+          const bob = Math.sin(time * 8 + g.x) * 1.2;
+          rect(g.x - 2, g.y - 2 + bob, 4, 4, '#000000'); rect(g.x - 1, g.y - 1 + bob, 2, 2, g.col); rect(g.x - 1, g.y - 1 + bob, 1, 1, '#FFF1E8');
+        }
+        for (const gh of ghosts) { ctx.globalAlpha = gh.life * 3; rect(gh.x - 4, gh.y - 4, 8, 8, gh.col); }
+        ctx.globalAlpha = 1;
+
+        for (const e of enemies) {
+          const col = e.flash > 0 ? '#FFF1E8' : e.col, dx = player.x - e.x, dy = player.y - e.y, l = Math.hypot(dx, dy) || 1;
+          drawSquashSprite(e.x, e.y, e.r, col, e.phase, dx / l, dy / l, 'slime', e.type === 'boss');
+          if (e.type === 'boss') { rect(e.x - 12, e.y - 17, 24, 3, '#000000'); rect(e.x - 11, e.y - 16, Math.round(22 * (e.hp / e.maxHp)), 1, '#FF004D'); }
+        }
+        if (state !== 'title') {
+          if (!(player.invuln > 0 && Math.floor(time * 24) % 2 === 0)) {
+            drawSquashSprite(player.x, player.y, 5, cfg.heroColor, time * 10, player.faceX, player.faceY, cfg.skin, false);
+          }
+          if (player.dashCd > 0) { rect(player.x - 5, player.y + 8, 10, 2, '#000000'); rect(player.x - 5, player.y + 8, Math.round(10 * (1 - player.dashCd / 0.95)), 1, '#29ADFF'); }
+          for (let i = 0; i < player.orbits; i++) {
+            const a = player.orbitAngle + (i * Math.PI * 2) / player.orbits, ox = player.x + Math.cos(a) * 20, oy = player.y + Math.sin(a) * 20;
+            rect(ox - 3, oy - 3, 6, 6, '#000000'); rect(ox - 2, oy - 2, 4, 4, '#FFEC27'); rect(ox - 1, oy - 1, 2, 2, '#FFF1E8');
+          }
+        }
+        for (const b of bullets) { rect(b.x - 2, b.y - 2, 4, 4, '#FFF1E8'); rect(b.x - 1, b.y - 1, 2, 2, '#FFEC27'); }
+        for (const bo of bolts) {
+          ctx.strokeStyle = bo.life > 0.08 ? '#FFF1E8' : '#00E436'; ctx.lineWidth = 1.5; ctx.beginPath();
+          bo.pts.forEach((p, idx) => {
+            const jx = idx === 0 ? p.x : p.x + (Math.random() - 0.5) * 4, jy = idx === 0 ? p.y : p.y + (Math.random() - 0.5) * 4;
+            if (idx === 0) ctx.moveTo(jx, jy); else ctx.lineTo(jx, jy);
+          });
+          ctx.stroke();
+        }
+        for (const p of particles) rect(p.x, p.y, p.size, p.size, p.col);
+        ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+        for (const f of floaters) {
+          ctx.fillStyle = '#000000'; ctx.fillText(f.txt, Math.round(f.x) + 1, Math.round(f.y) + 1);
+          ctx.fillStyle = f.col; ctx.fillText(f.txt, Math.round(f.x), Math.round(f.y));
+        }
+        if (state === 'play' && pointer.inside) {
+          rect(pointer.x - 3, pointer.y, 2, 1, '#FFF1E8'); rect(pointer.x + 2, pointer.y, 2, 1, '#FFF1E8');
+          rect(pointer.x, pointer.y - 3, 1, 2, '#FFF1E8'); rect(pointer.x, pointer.y + 2, 1, 2, '#FFF1E8');
+        }
+        if (state !== 'title') {
+          rect(0, 0, W, 3, '#000000'); rect(0, 0, Math.round(W * (player.xp / player.nextXp)), 2, '#00E436');
+          if (combo >= 3) { ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left'; ctx.fillStyle = '#FFEC27'; ctx.fillText(`COMBO x${combo}`, 5, 13); }
+        }
+        if (bannerTimer > 0 && state === 'play') drawRainbowText(bannerText, W / 2, 26, 11, 2);
+
+        if (state === 'title') {
+          rect(20, 26, W - 40, 124, 'rgba(0,0,0,0.82)');
+          ctx.strokeStyle = '#FFF1E8'; ctx.lineWidth = 1; ctx.strokeRect(20.5, 26.5, W - 41, 123);
+          drawRainbowText('PICO-SURVIVOR', W / 2, 54, 15, 2.5);
+          ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#C2C3C7';
+          ctx.fillText(`RECORDE: ${store.stats.bestScore} PTS  |  ONDA MÁX: ${store.stats.bestWave}`, W / 2, 73);
+
+          if (store.savedRun) {
+            const sr = store.savedRun;
+            rect(44, 86, W - 88, 22, '#00E436');
+            ctx.fillStyle = '#000000'; ctx.font = 'bold 8px monospace';
+            ctx.fillText(`▶ CONTINUAR (W${sr.wave} · LV${sr.lvl} · ${sr.score} PTS)`, W / 2, 100);
+            rect(86, 116, W - 172, 18, '#C2C3C7');
+            ctx.fillStyle = '#000000';
+            ctx.fillText('↺ NOVA PARTIDA (N)', W / 2, 128);
+          } else {
+            rect(60, 96, W - 120, 24, '#00E436');
+            ctx.fillStyle = '#000000'; ctx.font = 'bold 9px monospace';
+            ctx.fillText('[ ▶ JOGAR AGORA ]', W / 2, 111);
+          }
+        }
+        if (state === 'levelup') {
+          rect(0, 0, W, H, 'rgba(0,0,0,0.72)');
+          drawRainbowText('LEVEL UP!', W / 2, 28, 13, 2);
+          ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#C2C3C7';
+          ctx.fillText('ESCOLHA UM PODER (CLIQUE OU TECLA 1-3)', W / 2, 42);
+          levelChoices.forEach((up, idx) => {
+            const cw = 90, ch = 84, cx = 16 + idx * 99, cy = 54;
+            rect(cx, cy, cw, ch, '#1D2B53');
+            ctx.strokeStyle = up.col; ctx.lineWidth = 1; ctx.strokeRect(cx + 0.5, cy + 0.5, cw - 1, ch - 1);
+            rect(cx + 2, cy + 2, cw - 4, 14, up.col);
+            ctx.fillStyle = '#000000'; ctx.font = 'bold 8px monospace'; ctx.fillText(`[${idx + 1}]`, cx + cw / 2, cy + 12);
+            ctx.fillStyle = '#FFF1E8'; ctx.fillText(up.name, cx + cw / 2, cy + 36);
+            ctx.fillStyle = '#C2C3C7'; ctx.font = '7px monospace';
+            const words = up.desc.split(' '), mid = Math.ceil(words.length / 2);
+            ctx.fillText(words.slice(0, mid).join(' '), cx + cw / 2, cy + 56);
+            ctx.fillText(words.slice(mid).join(' '), cx + cw / 2, cy + 67);
+          });
+        }
+        if (state === 'gameover') {
+          rect(0, 0, W, H, 'rgba(0,0,0,0.78)');
+          drawRainbowText('GAME OVER', W / 2, 60, 15, 2);
+          ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#FFF1E8';
+          ctx.fillText(`PONTOS: ${score}  |  ONDA: ${wave}  |  RECORDE: ${store.stats.bestScore}`, W / 2, 88);
+          ctx.fillStyle = Math.floor(time * 3) % 2 === 0 ? '#FFEC27' : '#FFF1E8';
+          ctx.fillText('[ CLIQUE OU APERTE R PARA JOGAR DE NOVO ]', W / 2, 118);
+        }
+        ctx.restore();
+      }
+
+      // --- Input Events ---
+      function canvasPos(cx, cy) {
+        const r = canvas.getBoundingClientRect();
+        return { x: ((cx - r.left) / r.width) * W, y: ((cy - r.top) / r.height) * H };
+      }
+      canvas.addEventListener('pointermove', (e) => { const p = canvasPos(e.clientX, e.clientY); pointer.x = p.x; pointer.y = p.y; pointer.inside = true; });
+      canvas.addEventListener('pointerleave', () => { pointer.inside = false; });
+      canvas.addEventListener('pointerdown', (e) => {
+        ensureAudio();
+        const p = canvasPos(e.clientX, e.clientY); pointer.x = p.x; pointer.y = p.y; pointer.inside = true;
+        if (state === 'title') {
+          if (store.savedRun) {
+            if (p.y >= 114 && p.y <= 136 && p.x >= 80 && p.x <= W - 80) initGame(true);
+            else restoreSavedRun();
+          } else {
+            initGame(true);
+            sfx.lvl();
+          }
+          return;
+        }
+        if (state === 'gameover') { initGame(true); sfx.lvl(); return; }
+        if (state === 'levelup') {
+          for (let idx = 0; idx < 3; idx++) {
+            const cx = 16 + idx * 99, cy = 54;
+            if (p.x >= cx && p.x <= cx + 90 && p.y >= cy && p.y <= cy + 84) { applyUpgrade(idx); break; }
+          }
+          return;
+        }
+        if (state === 'play') triggerDash();
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (currentView !== 'view-game') return;
+        keys[e.code] = true;
+        if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
+        if (e.code === 'Space') {
+          ensureAudio();
+          if (state === 'title') { if (store.savedRun) restoreSavedRun(); else initGame(true); }
+          else if (state === 'gameover') initGame(true);
+          else if (state === 'play') triggerDash();
+        }
+        if (e.code === 'KeyN' && state === 'title') { ensureAudio(); initGame(true); }
+        if (e.code === 'KeyR') initGame(true);
+        if (e.code === 'KeyM') toggleSound();
+        if (state === 'levelup') {
+          if (e.code === 'Digit1') applyUpgrade(0);
+          if (e.code === 'Digit2') applyUpgrade(1);
+          if (e.code === 'Digit3') applyUpgrade(2);
+        }
+      });
+      window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+      function toggleSound() {
+        soundOn = !soundOn;
+        store.prefs.soundOn = soundOn;
+        btnSound.textContent = soundOn ? '🔊' : '🔇';
+        if (soundOn) ensureAudio();
+        persistStore(true);
+      }
+      btnSound.addEventListener('click', toggleSound);
+      btnReset.addEventListener('click', () => { ensureAudio(); initGame(true); });
+      btnHood.addEventListener('click', () => {
+        hoodPanel.classList.toggle('hidden');
+        btnHood.textContent = hoodPanel.classList.contains('hidden') ? '⚡ Abrir Capô' : '⚡ Fechar Capô';
+      });
+      document.querySelectorAll('.skin-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          cfg.skin = btn.dataset.skin;
+          store.prefs.skin = cfg.skin;
+          applyPrefsUI();
+          unlockAchievement('tinkerer');
+          persistStore(true);
+          if (player) burst(player.x, player.y, cfg.heroColor, 8, 50);
+          sfx.gem(4);
+        });
+      });
+      document.querySelectorAll('.col-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          cfg.heroColor = btn.dataset.color;
+          store.prefs.heroColor = cfg.heroColor;
+          unlockAchievement('tinkerer');
+          persistStore(true);
+          if (player) burst(player.x, player.y, cfg.heroColor, 8, 50);
+          sfx.gem(6);
+        });
+      });
+      btnChaos.addEventListener('click', () => {
+        cfg.chaos = cfg.chaos === 1 ? 3 : 1;
+        store.prefs.chaos = cfg.chaos;
+        applyPrefsUI();
+        persistStore(true);
+      });
+      btnSpeed.addEventListener('click', () => {
+        const speeds = [0.7, 1.0, 1.5];
+        cfg.speedMult = speeds[(speeds.indexOf(cfg.speedMult) + 1) % speeds.length];
+        store.prefs.speedMult = cfg.speedMult;
+        applyPrefsUI();
+        persistStore(true);
+      });
+      btnBoss.addEventListener('click', () => {
+        ensureAudio();
+        if (state !== 'play') initGame(true);
+        spawnEnemy('boss');
+      });
+
+      // --- Export / Import / Wipe Cache ---
+      btnExport.addEventListener('click', () => {
+        saveCheckpoint();
+        const blob = new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pico-os-save-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('💾 Save exportado!');
+      });
+
+      btnImport.addEventListener('click', () => fileImport.click());
+      fileImport.addEventListener('change', (e) => {
+        const f = e.target.files?.[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const data = JSON.parse(String(reader.result));
+            if (!data || typeof data !== 'object' || !data.stats) throw new Error('invalid');
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            store = loadStore();
+            cfg.skin = store.prefs.skin; cfg.heroColor = store.prefs.heroColor;
+            cfg.chaos = store.prefs.chaos; cfg.speedMult = store.prefs.speedMult;
+            applyPrefsUI();
+            renderHubAndData();
+            showToast('⬆ Save importado com sucesso!');
+          } catch {
+            showToast('⚠ Arquivo de save inválido');
+          }
+          fileImport.value = '';
+        };
+        reader.readAsText(f);
+      });
+
+      let wipeArmed = false, wipeTimer = null;
+      btnWipe.addEventListener('click', () => {
+        if (!wipeArmed) {
+          wipeArmed = true;
+          btnWipe.textContent = '⚠ Clique novamente para confirmar!';
+          wipeTimer = setTimeout(() => {
+            wipeArmed = false;
+            btnWipe.textContent = '🗑️ Limpar Cache Local';
+          }, 3000);
+          return;
+        }
+        clearTimeout(wipeTimer);
+        wipeArmed = false;
+        btnWipe.textContent = '🗑️ Limpar Cache Local';
+        localStorage.removeItem(STORAGE_KEY);
+        store = defaultStore();
+        cfg.skin = 'slime'; cfg.heroColor = '#29ADFF'; cfg.chaos = 1; cfg.speedMult = 1;
+        applyPrefsUI();
+        initGame(false);
+        renderHubAndData();
+        showToast('🗑️ Cache local limpo!');
+      });
+
+      // --- Efficient Background Processing ---
+      let rafId = null, lastTs = 0, running = false;
+      function loop(ts) {
+        if (!running) return;
+        if (!lastTs) lastTs = ts;
+        const dt = (ts - lastTs) / 1000; lastTs = ts;
+        update(dt); render();
+        rafId = requestAnimationFrame(loop);
+      }
+      function startLoop() {
+        if (currentView !== 'view-game' || document.hidden) return;
+        if (running && rafId) return;
+        running = true; lastTs = 0; rafId = requestAnimationFrame(loop);
+      }
+      function stopLoop() {
+        running = false;
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      }
+
+      shell.addEventListener('contentvisibilityautostatechange', (event) => {
+        if (event.skipped) { saveCheckpoint(); stopLoop(); }
+        else startLoop();
+      });
+      if (!('contentVisibility' in document.documentElement.style)) {
+        new IntersectionObserver((entries) => {
+          entries.forEach(entry => entry.isIntersecting ? startLoop() : stopLoop());
+        }, { rootMargin: '150px' }).observe(shell);
+      }
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { saveCheckpoint(); stopLoop(); }
+        else startLoop();
+      });
+      window.addEventListener('pagehide', saveCheckpoint);
+
+      applyPrefsUI();
+      initGame(false);
+      renderHubAndData();
+    })();
+  </script>
+</body>
+</html>
