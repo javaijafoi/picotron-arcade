@@ -1,22 +1,24 @@
-# PICO-OS // Arcade Workstation
+# PICO-OS v3.0 // 10 Jogos Clássicos (.p64)
 
-Estação de trabalho arcade retrô inspirada no **Picotron** — single-file (`index.html`), 100% estática, sem backend, com persistência automática em `localStorage` (`pico_os_hub_v1`).
+Estação de trabalho arcade retrô inspirada no **Picotron** (`320x176` escalado `3x` para `960x528`), 100% single-file (`index.html`), estática e leve, sem IA pesada e com salvamento automático local em `localStorage` (`pico_os_hub_v1`).
 
-## O que tem nesta versão (v2.0 — Top 10 Maluco + Mobile Fullscreen)
+## Os 10 Cartuchos Únicos (#01 ao #10)
 
-- **Estante de Cartuchos (.p64)** em ordem do **#01 ao #10** + **Modo Caos Total (Todos os 10 juntos)**
-- **Modo Tela Cheia Universal (`⛶ Tela Cheia`)** compatível com celular (Android/iOS) e PC + **Botões Touch dedicados** (`⚡ DASH!`, `⏸ PAUSE`, `🦠 [F] Vírus`)
-- **Badges de Plataforma:** identifica o que é ideal nos dois (`📱+💻 Mobile & PC`) e o que fica melhor no PC com adaptação para toque (`💻 Ideal no PC · Toque Adaptado`)
-- **Laboratório Ao Vivo (`🧪 Top 10`)** + **Abrir Capô** + **Backup `.json` local**
+| # | Cartucho | Gênero / Mecânica | Celular / PC |
+|---|---|---|---|
+| **#01** | **PICO-SURVIVOR** (`pico_survivor.p64`) | Arena roguelike top-down + **gaveta dobrável com os 10 Modos Malucos** | 📱+💻 Tela Cheia & PC |
+| **#02** | **PICO-TRUCO** (`pico_truco.p64`) | Chave ao vivo **Paulista (Vira) ↔ Mineiro (Fixo)** e **Baralho Sujo (40) ↔ Limpo (28)**, carta coberta, sinal e tapão na mesa | 📱+💻 Tela Cheia & PC |
+| **#03** | **PICO-PINBALL: Tilt 3000** (`pico_pinball.p64`) | Fliperama widebody com bumpers magnéticos, alvos **P-I-C-O** (Multiball de 4 bolas) e Nudge com risco de TILT | 📱+💻 Tela Cheia & PC |
+| **#04** | **PICO-ENDURO: Pé na Tábua 16** (`pico_enduro.p64`) | Corrida pseudo-3D com ciclo Dia → Pôr-do-Sol → Noite (faróis) → Neblina e vácuo em caminhões para Turbo Nitro | 📱+💻 Tela Cheia & PC |
+| **#05** | **PICO-OBRA: Mestre de Barris** (`pico_obra.p64`) | Plataforma vertical com 4 andares de vigas, escadas, barris rolantes e marreta giratória | 💻 Melhor no PC · Toque Adaptado |
+| **#06** | **PICO-LANDER: Pouso na Marra** (`pico_lander.p64`) | Vetorial fósforo verde com gravidade, vento lateral e zoom automático ao aproximar das bases 1x, 3x e 5x | 💻 Melhor no PC · Toque Adaptado |
+| **#07** | **PICO-SINUCA: Bola 8 de Boteco** (`pico_sinuca.p64`) | Mesa vista de cima 90°, estilingue para mira, Giz Azul flamejante, efeito spin e câmera lenta na Bola 8 | 📱+💻 Tela Cheia & PC |
+| **#08** | **PICO-DETONA: Usina Puyo-Tris** (`pico_detona.p64`) | Puzzle 1v1 híbrido (linhas de Tetris + 4 cores Puyo + blocos-bomba que jogam concreto no poço da CPU) | 💻 Melhor no PC · Toque Adaptado |
+| **#09** | **PICO-LABIRINTO: Pac-Glitch Neon** (`pico_labirinto.p64`) | Labirinto CRT com curva pré-registrada, 4 Bugs de personalidade distinta e Fruta Glitch que inverte paredes | 📱+💻 Tela Cheia & PC |
+| **#10** | **PICO-TRAVESSIA: Sapa Louca na Marginal** (`pico_travessia.p64`) | Travessia vertical com bueiros a vapor (+3 faixas), aviso de trem e enchente subindo | 📱+💻 Tela Cheia & PC |
 
-### Os 10 Modos do Top 10 (#01 ao #10)
-1. **#01 Liquidificador Cósmico** — Bolas quicantes + Raquetada de Dash + Eco que duplica projéteis (`📱+💻`)
-2. **#02 Arena-Janela Viva** — Moldura do PICO-OS encolhe; dê Dash na borda para prensar bichos e dropar cura (`💻 / Toque Adaptado`)
-3. **#03 Pause Arma-Secreta** — Arraste a caixa de Pause para mirar bomba *ZA WARUDO* + botão fujão após 3x spam (`💻 / Toque Adaptado`)
-4. **#04 Mímico Contador** — Chefe-baú que rouba upgrades e devolve com juros ao levar Dash (`📱+💻`)
-5. **#05 Casca de Ovo (1 HP)** — 1 pontinho de vida, +400% velocidade de tiro, balas gigantes e reset 80% do Dash ao tirar fina (`📱+💻`)
-6. **#06 Dash de Pinball** — Dash vira bumper que arremessa inimigos em efeito boliche (`📱+💻`)
-7. **#07 Vírus Relâmpago** — Pop-up de 3s–4s para Tela Azul da Vitória ou spam destrutível (`💻 / Toque Adaptado`)
-8. **#08 Caça-Níquel 777** — Abates e Dados Dourados giram o 7-7-7 com chuva de moedas e tiros arco-íris (`📱+💻`)
-9. **#09 Pacifista do Apocalipse** — Sem tiros normais; Dash suga a horda em buraco negro e explode em Supernova (`📱+💻`)
-10. **#10 Dominó de Pólvora** — Faíscas saltam entre inimigos mortos em reação em cadeia explosiva (`📱+💻`)
+## Recursos da Workstation
+
+- **Gaveta Dobrável no #01 (`🧪 Ver 10 Modos Malucos`)**: começa recolhida para manter a estante limpa; ao expandir, permite jogar qualquer um dos 10 mutadores clássicos do Pico-Survivor (ou ligar os 10 ao mesmo tempo).
+- **Tela Cheia & Controles Adaptados por Cartucho**: cada jogo configura seu painel de botões touch/mouse dedicado (flippers no Pinball, Truco/Coberta/Sinal no Truco, acelerador/freio/turbo no Enduro, giz/spin na Sinuca, etc.) e pausa universal (`P`, `Esc` ou botão `⏸`).
+- **Conquistas, Recordes por Cartucho & Cache Local**: aba `🏆 Conquistas & Save` exibe recorde individual dos 10 jogos, conquistas desbloqueadas e exportação/importação `.json`.
