@@ -482,6 +482,299 @@
       background: #1a1026;
       box-shadow: inset 0 0 0 2px #FF004D, 4px 4px 0 #000000;
     }
+
+    /* =========================================================================
+       CLEAN FULLSCREEN MOBILE & DESKTOP ARCHITECTURE
+       - Only the game in center + lateral wings controls
+       - Hide all titlebars, statusbars, decks & desktop chrome
+       - Dual D-Pad on both sides + Touchpad lateral mode
+       - Double confirmation modal with auto-pause
+       ========================================================================= */
+    #pico-shell.fullscreen-mode {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      width: 100vw;
+      height: 100dvh;
+      max-width: none;
+      margin: 0;
+      border: 0;
+      box-shadow: none;
+      background: #000000;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    #pico-shell.fullscreen-mode > .pico-titlebar,
+    #pico-shell.fullscreen-mode > .statusbar,
+    #pico-shell.fullscreen-mode #mobile-deck {
+      display: none !important;
+    }
+
+    /* Floating Minimal Top Bar in Fullscreen */
+    .fs-top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 38px;
+      z-index: 100000;
+      background: rgba(10, 16, 38, 0.94);
+      border-bottom: 2px solid #000000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 10px;
+      padding-top: max(4px, env(safe-area-inset-top));
+      backdrop-filter: blur(6px);
+      user-select: none;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+    .fs-top-bar .pico-btn {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 8px;
+      min-height: 28px;
+    }
+
+    /* Centered Canvas in Fullscreen: preserves aspect-ratio and centers game */
+    #pico-shell.fullscreen-mode .canvas-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000000;
+      padding: 0;
+      margin: 0;
+      position: relative;
+    }
+    #pico-shell.fullscreen-mode canvas#game {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: calc(100% - 40px);
+      object-fit: contain;
+      aspect-ratio: 960 / 528;
+      margin: auto;
+    }
+
+    /* Controls Overlay & Lateral Wings */
+    .fs-controls {
+      position: absolute;
+      inset: 38px 0 0 0;
+      pointer-events: none;
+      z-index: 10000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+    }
+    .fs-wing {
+      width: 140px;
+      height: calc(100% - 20px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+      user-select: none;
+      touch-action: none;
+    }
+
+    /* 4-Way Directional D-Pad Cross */
+    .fs-dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 42px);
+      grid-template-rows: repeat(3, 42px);
+      gap: 3px;
+      user-select: none;
+      touch-action: none;
+    }
+    .fs-dpad-btn {
+      background: #1D2B53;
+      color: #FFF1E8;
+      border: 2px solid #29ADFF;
+      box-shadow: 2px 2px 0 #000000;
+      font-size: 15px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      touch-action: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.05s ease, background 0.05s ease;
+    }
+    .fs-dpad-btn:active, .fs-dpad-btn.pressed {
+      background: #29ADFF;
+      color: #000000;
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0 #000000;
+    }
+    .fs-dpad-up { grid-column: 2; grid-row: 1; }
+    .fs-dpad-left { grid-column: 1; grid-row: 2; }
+    .fs-dpad-center {
+      grid-column: 2; grid-row: 2;
+      background: #0a1026;
+      border: 1px solid #1D2B53;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      margin: auto;
+    }
+    .fs-dpad-right { grid-column: 3; grid-row: 2; }
+    .fs-dpad-down { grid-column: 2; grid-row: 3; }
+
+    /* Action Buttons in Wings */
+    .fs-action-btn {
+      min-width: 96px;
+      min-height: 42px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 6px;
+      border: 2px solid #000000;
+      box-shadow: 2px 2px 0 #000000;
+      user-select: none;
+      touch-action: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .fs-action-btn:active, .fs-action-btn.pressed {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0 #000000;
+    }
+
+    /* Lateral Touchpad Box */
+    .fs-touchpad {
+      width: 130px;
+      height: 130px;
+      max-width: 100%;
+      background: radial-gradient(circle, #192a56 0%, #0c1433 70%, #050a1c 100%);
+      border: 2px solid #29ADFF;
+      border-radius: 12px;
+      box-shadow: inset 0 0 10px rgba(41, 173, 255, 0.3), 0 4px 8px rgba(0,0,0,0.6);
+      position: relative;
+      touch-action: none;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: grab;
+    }
+    .fs-touchpad:active { cursor: grabbing; }
+    .fs-touchpad-label {
+      font-size: 9px;
+      font-weight: 800;
+      color: #29ADFF;
+      pointer-events: none;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .fs-touchpad-hint {
+      font-size: 8px;
+      color: #C2C3C7;
+      pointer-events: none;
+      margin-top: 2px;
+    }
+    .fs-touchpad-puck {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #FFEC27;
+      border: 2px solid #000000;
+      box-shadow: 0 0 8px rgba(255, 236, 39, 0.7);
+      pointer-events: none;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.04s ease-out;
+    }
+    .fs-touchpad.active .fs-touchpad-puck {
+      background: #00E436;
+      box-shadow: 0 0 12px #00E436;
+    }
+
+    /* Fullscreen Exit Confirmation Modal */
+    .fs-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(6px);
+      z-index: 200000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .fs-modal-backdrop.open {
+      display: flex;
+    }
+    .fs-modal-card {
+      background: #0c1433;
+      border: 3px solid #FF004D;
+      box-shadow: 0 0 0 3px #000000, 6px 6px 0 #000000;
+      max-width: 380px;
+      width: 100%;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+      color: #FFF1E8;
+    }
+
+    /* Portrait adjustments for mobile phones (vertical orientation) */
+    @media (max-aspect-ratio: 1/1) {
+      #pico-shell.fullscreen-mode .canvas-wrap {
+        height: auto;
+        max-height: calc(100dvh - 250px);
+        margin-top: 38px;
+      }
+      .fs-controls {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 240px;
+        padding: 6px 10px;
+        background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(5,8,20,0.85) 15%, rgba(5,8,20,0.98) 100%);
+      }
+      .fs-wing {
+        width: 48%;
+        height: 100%;
+        gap: 6px;
+      }
+      .fs-dpad {
+        grid-template-columns: repeat(3, 38px);
+        grid-template-rows: repeat(3, 38px);
+        gap: 2px;
+      }
+      .fs-dpad-btn {
+        font-size: 14px;
+      }
+      .fs-touchpad {
+        width: 114px;
+        height: 114px;
+      }
+      .fs-action-btn {
+        min-width: 82px;
+        min-height: 38px;
+        font-size: 10px;
+        padding: 4px 6px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -521,7 +814,7 @@
           <div id="shelf-grid" class="shelf-grid"></div>
 
           <div class="statusbar">
-            <span style="color:#FFF1E8;">📱 Celular: use <strong>⛶ Tela Cheia</strong>! Cartuchos #02 ao #10 são jogos independentes; os 10 modos do Survivor ficam na gaveta do #01.</span>
+            <span style="color:#FFF1E8;">📱 Celular: use <strong>⛶ Tela Cheia</strong>! O jogo fica limpo no meio com D-Pad duplo ou Touchpad lateral à sua escolha.</span>
             <span id="last-saved-label" style="color:#FFEC27;font-weight:700;">Último save: --</span>
           </div>
         </div>
@@ -552,7 +845,47 @@
             <canvas id="game" width="960" height="528"></canvas>
           </div>
 
-          <!-- Mobile / Fullscreen Dedicated Arcade Deck -->
+          <!-- Fullscreen Floating Minimal HUD (Only shown in Fullscreen) -->
+          <div id="fs-top-bar" class="fs-top-bar" style="display:none;">
+            <button id="btn-fs-exit" type="button" class="pico-btn danger" title="Sair da Tela Cheia (Pausa e pede confirmação)">✕ Sair</button>
+            <div id="fs-hud-info" style="font-size:11px;font-weight:700;color:#FFEC27;display:flex;align-items:center;gap:6px;">
+              <span id="fs-game-title">PICO-SURVIVOR</span>
+              <span id="fs-kids-badge" class="pill" style="background:#00E436;color:#000;font-size:9px;">🎈 KIDS ON</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button id="btn-fs-mode-toggle" type="button" class="pico-btn warn" title="Alternar entre Modo Controle (D-Pad duplo) e Modo Toque (Touchpad lateral)">🎮 Controle</button>
+              <button id="btn-fs-pause" type="button" class="pico-btn" style="background:#FFF1E8;color:#000;" title="Pausar jogo">⏸</button>
+            </div>
+          </div>
+
+          <!-- Fullscreen Lateral Wings Controls (Left & Right Thumb Areas) -->
+          <div id="fs-controls" class="fs-controls" style="display:none;">
+            <div id="fs-wing-left" class="fs-wing"></div>
+            <div id="fs-wing-right" class="fs-wing"></div>
+          </div>
+
+          <!-- Fullscreen Double Confirmation Exit Modal (Pauses game automatically) -->
+          <div id="fs-exit-modal" class="fs-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="fs-modal-title">
+            <div class="fs-modal-card">
+              <div style="font-size:16px;font-weight:900;color:#FFEC27;letter-spacing:0.5px;" id="fs-modal-title">
+                ⏸ JOGO PAUSADO // SAIR DA TELA CHEIA?
+              </div>
+              <div style="font-size:12px;color:#FFF1E8;line-height:1.4;">
+                Deseja realmente sair do modo Tela Cheia?<br>
+                <span style="font-size:10px;color:#C2C3C7;">O jogo está pausado para você não perder seu progresso.</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+                <button id="btn-fs-modal-stay" type="button" class="pico-btn primary" style="padding:10px 14px;font-size:12px;font-weight:800;">
+                  ▶ Continuar Jogando (Manter Tela Cheia)
+                </button>
+                <button id="btn-fs-modal-exit" type="button" class="pico-btn danger" style="padding:8px 12px;font-size:11px;">
+                  ✕ Sim, Sair da Tela Cheia
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Standard Desktop / Windowed Mobile Deck (Hidden in Fullscreen) -->
           <div id="mobile-deck" class="mobile-deck">
             <div id="survivor-deck" style="display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
               <div class="flex-row">
@@ -665,6 +998,89 @@
       const RAINBOW = ['#FF004D','#FFA300','#FFEC27','#00E436','#29ADFF','#FF77A8'];
       const isTouchCapable = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(pointer: coarse)').matches;
 
+      const GAMES_CATALOG = [
+        {
+          id: 'pico_survivor', num: '#01', cart: 'pico_survivor.p64', title: 'PICO-SURVIVOR',
+          genre: 'Arena Top-Down · Roguelike', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
+          colors: ['#000000', '#00E436', '#FF004D', '#29ADFF'], kb: '64 KB',
+          desc: 'Sobreviva a ondas de slimes, morcegos e chefões. Inclui gaveta dobrável com os 10 Modos Malucos!',
+          controls: 'Mouse/WASD ou arraste · Espaço/Clique: Dash · Q/F/P',
+          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#000"/><circle cx="60" cy="24" r="9" fill="#29ADFF"/><rect x="56" y="21" width="2" height="3" fill="#FFF"/><rect x="62" y="21" width="2" height="3" fill="#FFF"/><circle cx="24" cy="14" r="5" fill="#00E436"/><circle cx="96" cy="16" r="6" fill="#FF004D"/><circle cx="88" cy="36" r="4" fill="#7E2553"/><polygon points="34,36 38,32 42,36 38,40" fill="#FFEC27"/></svg>'
+        },
+        {
+          id: 'pico_truco', num: '#02', cart: 'pico_truco.p64', title: 'PICO-TRUCO',
+          genre: 'Cartas de Boteco · 1v1', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
+          colors: ['#AB5236', '#FF004D', '#FFF1E8', '#FFEC27'], kb: '38 KB',
+          desc: 'Chave ao vivo Paulista (Vira) ↔ Mineiro (Fixo) e Sujo (40) ↔ Limpo (28). Carta coberta, sinal e tapão na mesa!',
+          controls: 'Toque/clique nas cartas · Truco, Coberta e Sinal no painel abaixo',
+          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#AB5236"/><rect x="20" y="6" width="80" height="36" fill="#FF004D" stroke="#000" stroke-width="2"/><rect x="34" y="10" width="20" height="28" fill="#FFF1E8" stroke="#000"/><text x="44" y="27" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">4♣</text><rect x="66" y="10" width="20" height="28" fill="#FFF1E8" stroke="#000"/><text x="76" y="27" font-size="11" font-weight="bold" text-anchor="middle" fill="#FF004D">7♥</text><rect x="6" y="16" width="10" height="16" fill="#FFEC27" stroke="#000"/></svg>'
+        },
+        {
+          id: 'pico_pinball', num: '#03', cart: 'pico_pinball.p64', title: 'PICO-PINBALL: Tilt 3000',
+          genre: 'Fliperama Widebody · Física 2D', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
+          colors: ['#7E2553', '#FFEC27', '#29ADFF', '#FFF1E8'], kb: '41 KB',
+          desc: 'Bumpers magnéticos, alvos P-I-C-O que disparam Multiball de 4 bolas e chacoalhada Nudge com risco de TILT!',
+          controls: 'Z / ◀ / toque lado Esq: Flipper Esq · / ou ▶: Dir · Espaço: Mola/Nudge',
+          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#1D2B53"/><rect x="18" y="4" width="84" height="40" fill="#7E2553" stroke="#FFF1E8"/><circle cx="48" cy="18" r="6" fill="#FFEC27" stroke="#000"/><circle cx="72" cy="18" r="6" fill="#29ADFF" stroke="#000"/><line x1="36" y1="38" x2="54" y2="42" stroke="#FFEC27" stroke-width="4"/><line x1="84" y1="38" x2="66" y2="42" stroke="#FFEC27" stroke-width="4"/><circle cx="60" cy="29" r="3" fill="#FFF1E8"/></svg>'
+        },
+        {
+          id: 'pico_enduro', num: '#04', cart: 'pico_enduro.p64', title: 'PICO-ENDURO: Pé na Tábua',
+          genre: 'Corrida Pseudo-3D · Clima Dinâmico', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
+          colors: ['#1D2B53', '#FFA300', '#29ADFF', '#FFF1E8'], kb: '44 KB',
+          desc: 'Ciclo Dia → Pôr-do-Sol → Noite (faróis) → Neblina! Pegue vácuo nos caminhões para carregar Turbo Nitro.',
+          controls: '◀/▶ ou arraste: virar · ▲/W: acelerar · ▼/S: freio · Espaço: Turbo',
+          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="22" fill="#FF004D"/><circle cx="60" cy="19" r="8" fill="#FFEC27"/><rect y="22" width="120" height="26" fill="#008751"/><polygon points="48,22 72,22 106,48 14,48" fill="#5F574F"/><rect x="52" y="34" width="16" height="9" fill="#29ADFF" stroke="#000"/></svg>'
+        },
+        {
+          id: 'pico_obra', num: '#05', cart: 'pico_obra.p64', title: 'PICO-OBRA: Mestre de Barris',
+          genre: 'Plataforma 2D · Fliperama Clássico', badge: '💻 Melhor no PC · Toque Adaptado', badgeCls: 'pc',
+          colors: ['#29ADFF', '#FF004D', '#FFEC27', '#AB5236'], kb: '39 KB',
+          desc: 'Escale 4 andares de vigas e escadas, salte barris em chamas e pegue a marreta giratória pra salvar o Pinguim!',
+          controls: '◀/▶: andar · ▲/▼: subir/descer escadas · Espaço: Pular barril · M: Marreta',
+          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#000"/><line x1="8" y1="42" x2="112" y2="42" stroke="#FF004D" stroke-width="4"/><line x1="12" y1="28" x2="108" y2="28" stroke="#FF004D" stroke-width="4"/><line x1="16" y1="14" x2="80" y2="14" stroke="#FF004D" stroke-width="4"/><circle cx="28" cy="24" r="4" fill="#29ADFF"/><circle cx="68" cy="25" r="3" fill="#AB5236"/><circle cx="34" cy="10" r="5" fill="#5F574F"/></svg>'
+        },
+        {
+          id: 'pico_lander', num: '#06', cart: 'pico_lander.p64', title: 'PICO-LANDER: Módulo Lunar',
+          genre: 'Simulador Físico · Inércia & Combustível', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
+          colors: ['#000000', '#FFF1E8', '#00E436', '#FFEC27'], kb: '37 KB',
+          desc: 'Gravidade lunar, inércia pura e vetor de pouso suave nas plataformas 1x, 3x e 5x com vento dinâmico!',
+          controls: '▲ ou Espaço: Propulsor principal · ◀/▶: Girar nave · Pouso suave (v < 24)',
+          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#000"/><polyline points="0,44 24,38 48,46 76,32 94,44 120,40" stroke="#5F574F" stroke-width="2" fill="none"/><polygon points="56,18 64,18 68,26 52,26" fill="#FFF1E8" stroke="#000"/><rect x="58" y="26" width="4" height="4" fill="#FFA300"/><circle cx="86" cy="10" r="1.5" fill="#FFF"/><circle cx="30" cy="12" r="1" fill="#FFF"/></svg>'
+        },
+        {
+          id: 'pico_sinuca', num: '#07', cart: 'pico_sinuca.p64', title: 'PICO-SINUCA: Bilhar de Boteco',
+          genre: 'Física de Colisão · Caçapa & Efeito', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
+          colors: ['#008751', '#AB5236', '#FFF1E8', '#000000'], kb: '43 KB',
+          desc: 'Feltro verde de boteco, 6 caçapas com amortecimento real, giz de efeito e tacada estilingue puxa-e-solta.',
+          controls: 'Arraste para trás na Bola Branca (estilingue) e solte · Botão Giz alterna efeito',
+          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#AB5236"/><rect x="12" y="8" width="96" height="32" fill="#008751" stroke="#000"/><circle cx="34" cy="24" r="4" fill="#FFF1E8"/><circle cx="78" cy="24" r="3.5" fill="#FF004D"/><circle cx="84" cy="20" r="3.5" fill="#FFEC27"/><circle cx="84" cy="28" r="3.5" fill="#29ADFF"/></svg>'
+        },
+        {
+          id: 'pico_pilhas', num: '#08', cart: 'pico_pilhas.p64', title: 'PICO-PILHAS: Puyo-Tetra',
+          genre: 'Puzzle de Encaixe · Fusão de 4 Cores', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
+          colors: ['#FF004D', '#00E436', '#29ADFF', '#FFEC27'], kb: '40 KB',
+          desc: 'Encaixe pares de blocos coloridos estilo Puyo-Puyo: junte 4 ou mais da mesma cor para estourar correntes!',
+          controls: '◀/▶: mover · ▲ ou Z: girar bloco · ▼/Espaço: queda rápida',
+          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#1D2B53"/><rect x="42" y="4" width="36" height="40" fill="#000" stroke="#FFF1E8"/><rect x="46" y="28" width="8" height="8" fill="#FF004D"/><rect x="54" y="28" width="8" height="8" fill="#FF004D"/><rect x="46" y="20" width="8" height="8" fill="#FF004D"/><rect x="62" y="36" width="8" height="8" fill="#00E436"/><circle cx="50" cy="12" r="3.5" fill="#29ADFF"/><circle cx="58" cy="12" r="3.5" fill="#FFEC27"/></svg>'
+        },
+        {
+          id: 'pico_labirinto', num: '#09', cart: 'pico_labirinto.p64', title: 'PICO-LABIRINTO: Come-Come Cyber',
+          genre: 'Perseguição em Grade · 4 Fantasmas', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
+          colors: ['#000000', '#29ADFF', '#FFEC27', '#FF004D'], kb: '42 KB',
+          desc: 'Devore os 120 bits de dados, pegue as pílulas de Glitch para perseguir os 4 vírus e fuja pelos túneis laterais!',
+          controls: 'Setas ou WASD para virar nos cruzamentos (vira automaticamente no próximo canto)',
+          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#000"/><rect x="20" y="8" width="80" height="32" fill="none" stroke="#29ADFF" stroke-width="2"/><circle cx="48" cy="24" r="5" fill="#FFEC27"/><path d="M48,24 L54,20 A5,5 0 0,0 54,28 Z" fill="#000"/><circle cx="74" cy="24" r="4.5" fill="#FF004D"/><circle cx="86" cy="24" r="4.5" fill="#00E436"/><circle cx="62" cy="24" r="1.5" fill="#FFF1E8"/></svg>'
+        },
+        {
+          id: 'pico_travessia', num: '#10', cart: 'pico_travessia.p64', title: 'PICO-TRAVESSIA: O Sapo da Pista',
+          genre: 'Passagem Rápida · Frogger 8-Bit', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
+          colors: ['#00E436', '#5F574F', '#29ADFF', '#FF004D'], kb: '39 KB',
+          desc: 'Atravesse a rodovia movimentada de 5 faixas e pegue carona em troncos e tartarugas flutuantes no rio caudaloso!',
+          controls: '▲: pular pra frente · ▼: recuar · ◀/▶: saltar para os lados',
+          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="14" fill="#29ADFF"/><rect y="14" width="120" height="6" fill="#008751"/><rect y="20" width="120" height="22" fill="#5F574F"/><rect y="42" width="120" height="6" fill="#008751"/><rect x="24" y="24" width="14" height="6" fill="#FF004D"/><rect x="68" y="32" width="16" height="7" fill="#FFEC27"/><rect x="42" y="4" width="22" height="6" fill="#AB5236"/><circle cx="58" cy="45" r="3" fill="#00E436"/></svg>'
+        }
+      ];
+      const GAMES_MAP = Object.fromEntries(GAMES_CATALOG.map(g => [g.id, g]));
       const TOP10_MODES = [
         {
           key: 'm1', num: '01', icon: '☄️', name: 'Liquidificador Cósmico',
@@ -728,90 +1144,6 @@
         }
       ];
 
-      const GAMES_CATALOG = [
-        {
-          id: 'pico_survivor', num: '#01', cart: 'pico_survivor.p64', title: 'PICO-SURVIVOR',
-          genre: 'Arena Top-Down · Roguelike', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
-          colors: ['#000000', '#00E436', '#FF004D', '#29ADFF'], kb: '64 KB',
-          desc: 'Sobreviva a ondas de slimes, morcegos e chefões. Inclui gaveta dobrável com os 10 Modos Malucos!',
-          controls: 'Mouse/WASD ou arraste · Espaço/Clique: Dash · Q/F/P',
-          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#000"/><circle cx="60" cy="24" r="9" fill="#29ADFF"/><rect x="56" y="21" width="2" height="3" fill="#FFF"/><rect x="62" y="21" width="2" height="3" fill="#FFF"/><circle cx="24" cy="14" r="5" fill="#00E436"/><circle cx="96" cy="16" r="6" fill="#FF004D"/><circle cx="88" cy="36" r="4" fill="#7E2553"/><polygon points="34,36 38,32 42,36 38,40" fill="#FFEC27"/></svg>'
-        },
-        {
-          id: 'pico_truco', num: '#02', cart: 'pico_truco.p64', title: 'PICO-TRUCO',
-          genre: 'Cartas de Boteco · 1v1', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
-          colors: ['#AB5236', '#FF004D', '#FFF1E8', '#FFEC27'], kb: '38 KB',
-          desc: 'Chave ao vivo Paulista (Vira) ↔ Mineiro (Fixo) e Sujo (40) ↔ Limpo (28). Carta coberta, sinal e tapão na mesa!',
-          controls: 'Toque/clique nas cartas · Truco, Coberta e Sinal no painel abaixo',
-          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#AB5236"/><rect x="20" y="6" width="80" height="36" fill="#FF004D" stroke="#000" stroke-width="2"/><rect x="34" y="10" width="20" height="28" fill="#FFF1E8" stroke="#000"/><text x="44" y="27" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">4♣</text><rect x="66" y="10" width="20" height="28" fill="#FFF1E8" stroke="#000"/><text x="76" y="27" font-size="11" font-weight="bold" text-anchor="middle" fill="#FF004D">7♥</text><rect x="6" y="16" width="10" height="16" fill="#FFEC27" stroke="#000"/></svg>'
-        },
-        {
-          id: 'pico_pinball', num: '#03', cart: 'pico_pinball.p64', title: 'PICO-PINBALL: Tilt 3000',
-          genre: 'Fliperama Widebody · Física 2D', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
-          colors: ['#7E2553', '#FFEC27', '#29ADFF', '#FFF1E8'], kb: '41 KB',
-          desc: 'Bumpers magnéticos, alvos P-I-C-O que disparam Multiball de 4 bolas e chacoalhada Nudge com risco de TILT!',
-          controls: 'Z / ◀ / toque lado Esq: Flipper Esq · / ou ▶: Dir · Espaço: Mola/Nudge',
-          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#1D2B53"/><rect x="18" y="4" width="84" height="40" fill="#7E2553" stroke="#FFF1E8"/><circle cx="48" cy="18" r="6" fill="#FFEC27" stroke="#000"/><circle cx="72" cy="18" r="6" fill="#29ADFF" stroke="#000"/><line x1="36" y1="38" x2="54" y2="42" stroke="#FFEC27" stroke-width="4"/><line x1="84" y1="38" x2="66" y2="42" stroke="#FFEC27" stroke-width="4"/><circle cx="60" cy="29" r="3" fill="#FFF1E8"/></svg>'
-        },
-        {
-          id: 'pico_enduro', num: '#04', cart: 'pico_enduro.p64', title: 'PICO-ENDURO: Pé na Tábua',
-          genre: 'Corrida Pseudo-3D · Clima Dinâmico', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
-          colors: ['#1D2B53', '#FFA300', '#29ADFF', '#FFF1E8'], kb: '44 KB',
-          desc: 'Ciclo Dia → Pôr-do-Sol → Noite (faróis) → Neblina! Pegue vácuo nos caminhões para carregar Turbo Nitro.',
-          controls: '◀/▶ ou arraste: virar · ▲/W: acelerar · ▼/S: freio · Espaço: Turbo',
-          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="22" fill="#FF004D"/><circle cx="60" cy="19" r="8" fill="#FFEC27"/><rect y="22" width="120" height="26" fill="#008751"/><polygon points="48,22 72,22 106,48 14,48" fill="#5F574F"/><rect x="52" y="34" width="16" height="9" fill="#29ADFF" stroke="#000"/></svg>'
-        },
-        {
-          id: 'pico_obra', num: '#05', cart: 'pico_obra.p64', title: 'PICO-OBRA: Mestre de Barris',
-          genre: 'Plataforma 2D · Fliperama Clássico', badge: '💻 Melhor no PC · Toque Adaptado', badgeCls: 'pc',
-          colors: ['#29ADFF', '#FF004D', '#FFEC27', '#AB5236'], kb: '39 KB',
-          desc: 'Escale 4 andares de vigas e escadas, salte barris em chamas e pegue a marreta giratória pra salvar o Pinguim!',
-          controls: '◀/▶ mover · ▲/▼ escadas · Espaço: Pular',
-          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#29ADFF"/><rect x="10" y="14" width="100" height="4" fill="#FF004D"/><rect x="10" y="28" width="100" height="4" fill="#FF004D"/><rect x="10" y="42" width="100" height="4" fill="#FF004D"/><rect x="82" y="14" width="8" height="14" fill="#FFEC27"/><rect x="34" y="28" width="8" height="14" fill="#FFEC27"/><circle cx="52" cy="24" r="4" fill="#AB5236"/></svg>'
-        },
-        {
-          id: 'pico_lander', num: '#06', cart: 'pico_lander.p64', title: 'PICO-LANDER: Pouso na Marra',
-          genre: 'Vetorial Fósforo Verde · Física', badge: '💻 Melhor no PC · Toque Adaptado', badgeCls: 'pc',
-          colors: ['#000000', '#00E436', '#FFEC27', '#FF004D'], kb: '35 KB',
-          desc: 'Gravidade lunar, vento lateral e zoom automático perto do solo! Pouse reto com pouco combustível nas bases 1x, 3x ou 5x.',
-          controls: '◀/▶ girar · ▲/W/Espaço: Propulsor',
-          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#000"/><polyline points="0,42 25,30 42,38 56,38 78,24 96,35 120,40" fill="none" stroke="#00E436" stroke-width="2"/><line x1="42" y1="38" x2="56" y2="38" stroke="#FFEC27" stroke-width="3"/><polygon points="60,10 53,22 67,22" fill="none" stroke="#00E436" stroke-width="2"/></svg>'
-        },
-        {
-          id: 'pico_sinuca', num: '#07', cart: 'pico_sinuca.p64', title: 'PICO-SINUCA: Bola 8 de Boteco',
-          genre: 'Bilhar Arcade 90° · Estilingue', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
-          colors: ['#008751', '#AB5236', '#FFF1E8', '#29ADFF'], kb: '46 KB',
-          desc: 'Mesa vista de cima 90°, mira de estilingue, Giz Azul pra tacada flamejante, efeito spin e câmera lenta na Bola 8!',
-          controls: 'Arraste pra trás na mesa pra mirar e solte · Use Giz/Efeito no painel',
-          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#AB5236"/><rect x="8" y="6" width="104" height="36" fill="#008751" stroke="#000"/><circle cx="34" cy="24" r="5" fill="#FFF1E8"/><circle cx="72" cy="24" r="5" fill="#000"/><text x="72" y="27" font-size="7" font-weight="bold" text-anchor="middle" fill="#FFF">8</text><circle cx="82" cy="18" r="5" fill="#FF004D"/><circle cx="82" cy="30" r="5" fill="#FFEC27"/></svg>'
-        },
-        {
-          id: 'pico_detona', num: '#08', cart: 'pico_detona.p64', title: 'PICO-DETONA: Usina Puyo-Tris',
-          genre: 'Puzzle 1v1 · Linha + Cor + Bomba', badge: '💻 Melhor no PC · Toque Adaptado', badgeCls: 'pc',
-          colors: ['#5F574F', '#FF004D', '#00E436', '#FFEC27'], kb: '48 KB',
-          desc: 'Feche linhas de Tetris OU conecte 4 cores estilo Puyo! Bombas explodem e jogam concreto na usina da CPU.',
-          controls: '◀/▶ mover · ▲/X girar · ▼ descer · Espaço: Cair direto',
-          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#5F574F"/><rect x="14" y="6" width="38" height="36" fill="#000" stroke="#FFF"/><rect x="68" y="6" width="38" height="36" fill="#000" stroke="#FFF"/><rect x="18" y="30" width="10" height="10" fill="#FF004D"/><rect x="28" y="30" width="10" height="10" fill="#00E436"/><rect x="74" y="30" width="10" height="10" fill="#FFEC27"/></svg>'
-        },
-        {
-          id: 'pico_labirinto', num: '#09', cart: 'pico_labirinto.p64', title: 'PICO-LABIRINTO: Pac-Glitch Neon',
-          genre: 'Labirinto CRT · Fruta Glitch', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
-          colors: ['#000000', '#29ADFF', '#FF77A8', '#FFEC27'], kb: '42 KB',
-          desc: '4 Bugs com personalidade clássica! Coma a Fruta Glitch roxa para inverter paredes e escapar em cima da hora.',
-          controls: 'Setas/WASD ou deslize o dedo (curva pré-registrada)',
-          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="48" fill="#000"/><rect x="8" y="6" width="104" height="36" fill="none" stroke="#29ADFF" stroke-width="2"/><path d="M36 24 L44 19 A7 7 0 1 0 44 29 Z" fill="#FFEC27"/><circle cx="58" cy="24" r="2" fill="#FFF"/><circle cx="68" cy="24" r="2" fill="#FFF"/><rect x="80" y="18" width="10" height="11" fill="#FF77A8"/></svg>'
-        },
-        {
-          id: 'pico_travessia', num: '#10', cart: 'pico_travessia.p64', title: 'PICO-TRAVESSIA: Sapa Louca',
-          genre: 'Fliperama Vertical · Enchente', badge: '📱+💻 Tela Cheia & PC', badgeCls: 'ok',
-          colors: ['#29ADFF', '#00E436', '#5F574F', '#FFA300'], kb: '37 KB',
-          desc: 'Salte entre carros na Marginal, aproveite bueiros com vapor (+3 faixas!) e fuja da enchente subindo atrás!',
-          controls: 'Setas/WASD ou toque/deslize pra pular faixas',
-          artSvg: '<svg viewBox="0 0 120 48" width="120" height="48"><rect width="120" height="12" fill="#29ADFF"/><rect y="12" width="120" height="24" fill="#5F574F"/><rect y="36" width="120" height="12" fill="#008751"/><rect x="20" y="16" width="22" height="8" fill="#FF004D"/><rect x="74" y="25" width="28" height="8" fill="#FFEC27"/><circle cx="60" cy="41" r="4" fill="#00E436"/></svg>'
-        }
-      ];
-      const GAMES_MAP = Object.fromEntries(GAMES_CATALOG.map(g => [g.id, g]));
-
       const ACHIEVEMENTS = [
         { id: 'first_blood', title: 'Primeira Faísca', desc: 'Elimine 10 inimigos no total' },
         { id: 'wave_3',      title: 'Sobrevivente',    desc: 'Alcance a Onda 3' },
@@ -823,8 +1155,9 @@
         { id: 'mimic_robbed', title: 'Leão da Receita', desc: 'Pegue restituição com juros do Mímico (#04)' },
         { id: 'virus_slayer', title: 'Antivírus Humano', desc: 'Vença um Vírus Relâmpago (#07)' },
         { id: 'top10_master', title: 'Rei do Caos 16-Bit', desc: 'Ative TODOS os 10 modos ao mesmo tempo' },
-        { id: 'truco_master', title: 'Seis ou Doze, Ladrão!', desc: 'Alcance 1.200 pts no Pico-Truco (#02)' },
-        { id: 'arcade_explorer', title: 'Colecionador (.P64)', desc: 'Jogue pelo menos 5 cartuchos diferentes' },
+        { id: 'first_truco', title: 'Rei do Truco', desc: 'Vença uma mão de Truco com tapão na mesa!' },
+        { id: 'pinball_fever', title: 'Mago do Flipper', desc: 'Dispare o Multiball no Pico-Pinball 3000!' },
+        { id: 'enduro_trophy', title: 'Pé na Tábua', desc: 'Complete um dia inteiro de corrida no Enduro!' },
         { id: 'all_10_games', title: 'Rei da Estante', desc: 'Experimente todos os 10 jogos clássicos!' }
       ];
 
@@ -839,7 +1172,7 @@
         return {
           version: 2,
           lastSavedAt: null,
-          prefs: { skin: 'slime', heroColor: '#29ADFF', chaos: 1, speedMult: 1, soundOn: true, kidsMode: true },
+          prefs: { skin: 'slime', heroColor: '#29ADFF', chaos: 1, speedMult: 1, soundOn: true, kidsMode: true, mobileInputMode: 'buttons' },
           stats: { bestScore: 0, bestWave: 1, bestLevel: 1, totalKills: 0, totalRuns: 0, achievements: [], gameScores: {}, playedGames: [] },
           savedRun: null
         };
@@ -854,7 +1187,7 @@
           return {
             version: 2,
             lastSavedAt: parsed.lastSavedAt || null,
-            prefs: { ...base.prefs, ...(parsed.prefs || {}), kidsMode: parsed.prefs?.kidsMode !== undefined ? !!parsed.prefs.kidsMode : true },
+            prefs: { ...base.prefs, ...(parsed.prefs || {}), kidsMode: parsed.prefs?.kidsMode !== undefined ? !!parsed.prefs.kidsMode : true, mobileInputMode: (parsed.prefs?.mobileInputMode === 'touchpad' ? 'touchpad' : 'buttons') },
             stats: {
               ...base.stats,
               ...(parsed.stats || {}),
@@ -925,6 +1258,18 @@
       const scoresByGameEl = document.getElementById('scores-by-game');
       const btnKidsHeader = document.getElementById('btn-kids-header');
       const btnKidsGame = document.getElementById('btn-kids-game');
+      const fsTopBarEl = document.getElementById('fs-top-bar');
+      const fsControlsEl = document.getElementById('fs-controls');
+      const fsWingLeftEl = document.getElementById('fs-wing-left');
+      const fsWingRightEl = document.getElementById('fs-wing-right');
+      const fsExitModalEl = document.getElementById('fs-exit-modal');
+      const btnFsExitEl = document.getElementById('btn-fs-exit');
+      const btnFsModeToggleEl = document.getElementById('btn-fs-mode-toggle');
+      const btnFsPauseEl = document.getElementById('btn-fs-pause');
+      const btnFsModalStayEl = document.getElementById('btn-fs-modal-stay');
+      const btnFsModalExitEl = document.getElementById('btn-fs-modal-exit');
+      const fsGameTitleEl = document.getElementById('fs-game-title');
+      const fsKidsBadgeEl = document.getElementById('fs-kids-badge');
       const btnAllTop10 = document.getElementById('btn-all-top10');
       const btnClearTop10 = document.getElementById('btn-clear-top10');
       const mobileDeck = document.getElementById('mobile-deck');
@@ -972,13 +1317,62 @@
         cacheBadge.textContent = store.savedRun ? '💾 Partida + Stats Salvos' : '💾 Cache Local OK';
       }
 
-      // --- Fullscreen Handling (Works on Mobile Safari, Android & Desktop) ---
+      // --- Fullscreen Handling (Clean Mobile View + Dual D-Pad / Touchpad + Double Confirmation) ---
       let isFullscreen = false;
+      let pendingExitModal = false;
+      let lastRegisteredMobileButtons = null;
+
       function syncFullscreenUI() {
         shell.classList.toggle('fullscreen-mode', isFullscreen);
         btnFullscreen.textContent = isFullscreen ? '✕ Sair Tela Cheia' : '⛶ Tela Cheia';
+
+        if (fsTopBarEl) fsTopBarEl.style.display = isFullscreen ? 'flex' : 'none';
+        if (fsControlsEl) fsControlsEl.style.display = isFullscreen ? 'flex' : 'none';
+
+        if (isFullscreen) {
+          renderFullscreenControls();
+        } else {
+          if (fsExitModalEl) fsExitModalEl.classList.remove('open');
+          pendingExitModal = false;
+        }
       }
-      async function setFullscreen(wantFull) {
+
+      function requestExitFullscreen() {
+        if (!isFullscreen) return;
+        ensureAudio();
+        // 1. Immediately pause the game to protect player lives and score
+        if (activeGameId === 'pico_survivor') {
+          if (state === 'play') togglePause();
+        } else if (!customPaused) {
+          togglePause();
+        }
+        // 2. Open high-contrast double confirmation modal
+        pendingExitModal = true;
+        if (fsExitModalEl) fsExitModalEl.classList.add('open');
+      }
+
+      function cancelExitFullscreen() {
+        if (fsExitModalEl) fsExitModalEl.classList.remove('open');
+        pendingExitModal = false;
+        // Resume game if it was paused by the exit prompt
+        if (activeGameId === 'pico_survivor') {
+          if (state === 'paused' && !runawayBtn.active) togglePause();
+        } else if (customPaused) {
+          togglePause();
+        }
+      }
+
+      function confirmExitFullscreen() {
+        if (fsExitModalEl) fsExitModalEl.classList.remove('open');
+        pendingExitModal = false;
+        setFullscreen(false, true); // forceExit = true bypasses confirmation
+      }
+
+      async function setFullscreen(wantFull, forceExit = false) {
+        if (!wantFull && isFullscreen && !forceExit) {
+          requestExitFullscreen();
+          return;
+        }
         isFullscreen = wantFull;
         syncFullscreenUI();
         if (wantFull) {
@@ -994,20 +1388,389 @@
           } catch {}
         }
       }
-      btnFullscreen.addEventListener('click', () => setFullscreen(!isFullscreen));
+
+      btnFullscreen.addEventListener('click', () => {
+        if (isFullscreen) requestExitFullscreen();
+        else setFullscreen(true);
+      });
+
       document.addEventListener('fullscreenchange', () => {
         if (!document.fullscreenElement && !document.webkitFullscreenElement && isFullscreen) {
-          // Keep CSS fullscreen only if native exited unexpectedly via button; if user hit Esc on desktop, exit cleanly
+          // Native fullscreen exited via device back button or hardware gesture
+          if (activeGameId === 'pico_survivor') {
+            if (state === 'play') togglePause();
+          } else if (!customPaused) {
+            togglePause();
+          }
           isFullscreen = false;
           syncFullscreenUI();
         }
       });
 
+      function toggleMobileInputMode() {
+        ensureAudio();
+        const next = (store.prefs.mobileInputMode === 'touchpad') ? 'buttons' : 'touchpad';
+        store.prefs.mobileInputMode = next;
+        persistStore(false);
+        renderFullscreenControls();
+        showToast(next === 'touchpad' ? '👆 Modo Toque Ativado (Touchpads Laterais)' : '🎮 Modo Controle Ativado (D-Pads Duplos)');
+      }
+
+      function createDpad(side) {
+        const container = document.createElement('div');
+        container.className = 'fs-dpad';
+        container.setAttribute('aria-label', `D-Pad Direcional ${side === 'left' ? 'Esquerdo' : 'Direito'}`);
+
+        const directions = [
+          { dir: 'up', code: 'ArrowUp', label: '▲', cls: 'fs-dpad-up' },
+          { dir: 'left', code: 'ArrowLeft', label: '◀', cls: 'fs-dpad-left' },
+          { dir: 'center', code: null, label: '', cls: 'fs-dpad-center' },
+          { dir: 'right', code: 'ArrowRight', label: '▶', cls: 'fs-dpad-right' },
+          { dir: 'down', code: 'ArrowDown', label: '▼', cls: 'fs-dpad-down' }
+        ];
+
+        directions.forEach(d => {
+          if (d.dir === 'center') {
+            const c = document.createElement('div');
+            c.className = d.cls;
+            container.appendChild(c);
+            return;
+          }
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `fs-dpad-btn ${d.cls}`;
+          btn.textContent = d.label;
+          btn.dataset.code = d.code;
+
+          let isDown = false;
+          const startPress = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            ensureAudio();
+            if (!isDown) {
+              isDown = true;
+              btn.classList.add('pressed');
+              keys[d.code] = true;
+              if (activeGameId !== 'pico_survivor' && !customPaused) {
+                CARTRIDGES[activeGameId]?.onKeyDown?.(d.code);
+              }
+            }
+          };
+          const endPress = (e) => {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            if (isDown) {
+              isDown = false;
+              btn.classList.remove('pressed');
+              keys[d.code] = false;
+            }
+          };
+
+          btn.addEventListener('pointerdown', startPress);
+          btn.addEventListener('pointerup', endPress);
+          btn.addEventListener('pointercancel', endPress);
+          btn.addEventListener('pointerleave', endPress);
+          container.appendChild(btn);
+        });
+
+        return container;
+      }
+
+      function createActionButton(label, cls, code, onClick) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `pico-btn fs-action-btn ${cls || ''}`;
+        btn.textContent = label;
+
+        let isDown = false;
+        const startPress = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          ensureAudio();
+          if (onClick) {
+            onClick();
+            return;
+          }
+          if (code && !isDown) {
+            isDown = true;
+            btn.classList.add('pressed');
+            keys[code] = true;
+            if (code === 'Space') {
+              if (activeGameId === 'pico_survivor' && state === 'play') triggerDash();
+              else if (activeGameId !== 'pico_survivor' && !customPaused) CARTRIDGES[activeGameId]?.onKeyDown?.('Space');
+            } else if (code === 'KeyF') {
+              if (activeGameId === 'pico_survivor' && state === 'play' && virusEvent) resolveVirus(true);
+            }
+          }
+        };
+        const endPress = (e) => {
+          if (e) { e.preventDefault(); e.stopPropagation(); }
+          if (isDown) {
+            isDown = false;
+            btn.classList.remove('pressed');
+            if (code) keys[code] = false;
+          }
+        };
+
+        btn.addEventListener('pointerdown', startPress);
+        btn.addEventListener('pointerup', endPress);
+        btn.addEventListener('pointercancel', endPress);
+        btn.addEventListener('pointerleave', endPress);
+        return btn;
+      }
+
+      function attachTouchpad(touchpadEl, puckEl, side) {
+        let activePointerId = null;
+        let startX = 0, startY = 0, startTime = 0;
+        const maxR = 32;
+
+        function handleStart(e) {
+          e.preventDefault();
+          ensureAudio();
+          if (activePointerId !== null) return;
+          activePointerId = e.pointerId;
+          try { touchpadEl.setPointerCapture(e.pointerId); } catch {}
+          touchpadEl.classList.add('active');
+          const rect = touchpadEl.getBoundingClientRect();
+          startX = rect.left + rect.width / 2;
+          startY = rect.top + rect.height / 2;
+          startTime = Date.now();
+          handleMove(e);
+        }
+
+        function handleMove(e) {
+          if (e.pointerId !== activePointerId) return;
+          e.preventDefault();
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          const dist = Math.hypot(dx, dy);
+          const clamped = Math.min(maxR, dist);
+          const angle = Math.atan2(dy, dx);
+          const puckX = Math.cos(angle) * clamped;
+          const puckY = Math.sin(angle) * clamped;
+          puckEl.style.transform = `translate(calc(-50% + ${puckX.toFixed(1)}px), calc(-50% + ${puckY.toFixed(1)}px))`;
+
+          const DEADZONE = 10;
+          if (dist > DEADZONE) {
+            const nx = dx / dist;
+            const ny = dy / dist;
+            keys['ArrowLeft'] = dx < -DEADZONE;
+            keys['ArrowRight'] = dx > DEADZONE;
+            keys['ArrowUp'] = dy < -DEADZONE;
+            keys['ArrowDown'] = dy > DEADZONE;
+
+            if (activeGameId === 'pico_survivor' && typeof player !== 'undefined' && player) {
+              player.faceX = nx;
+              player.faceY = ny;
+            }
+          } else {
+            keys['ArrowLeft'] = false;
+            keys['ArrowRight'] = false;
+            keys['ArrowUp'] = false;
+            keys['ArrowDown'] = false;
+          }
+        }
+
+        function handleEnd(e) {
+          if (e.pointerId !== activePointerId) return;
+          e.preventDefault();
+          try { touchpadEl.releasePointerCapture(e.pointerId); } catch {}
+          activePointerId = null;
+          touchpadEl.classList.remove('active');
+          puckEl.style.transform = 'translate(-50%, -50%)';
+
+          const dist = Math.hypot(e.clientX - startX, e.clientY - startY);
+          const elapsed = Date.now() - startTime;
+
+          keys['ArrowLeft'] = false;
+          keys['ArrowRight'] = false;
+          keys['ArrowUp'] = false;
+          keys['ArrowDown'] = false;
+
+          // Quick tap detection (< 12px move within 350ms) triggers action
+          if (dist < 12 && elapsed < 350) {
+            if (activeGameId === 'pico_survivor') {
+              if (state === 'play') triggerDash();
+            } else if (activeGameId === 'pico_pinball') {
+              if (side === 'left') {
+                keys['ArrowLeft'] = true;
+                CARTRIDGES.pico_pinball?.onKeyDown?.('ArrowLeft');
+                setTimeout(() => { keys['ArrowLeft'] = false; }, 140);
+              } else {
+                keys['ArrowRight'] = true;
+                CARTRIDGES.pico_pinball?.onKeyDown?.('ArrowRight');
+                setTimeout(() => { keys['ArrowRight'] = false; }, 140);
+              }
+            } else {
+              keys['Space'] = true;
+              if (!customPaused) CARTRIDGES[activeGameId]?.onKeyDown?.('Space');
+              setTimeout(() => { keys['Space'] = false; }, 120);
+            }
+          }
+        }
+
+        touchpadEl.addEventListener('pointerdown', handleStart);
+        touchpadEl.addEventListener('pointermove', handleMove);
+        touchpadEl.addEventListener('pointerup', handleEnd);
+        touchpadEl.addEventListener('pointercancel', handleEnd);
+      }
+
+      function createTouchpad(side) {
+        const pad = document.createElement('div');
+        pad.className = 'fs-touchpad';
+        pad.id = `fs-touchpad-${side}`;
+        pad.innerHTML = `
+          <div class="fs-touchpad-puck" id="fs-puck-${side}"></div>
+          <div class="fs-touchpad-label">${side === 'left' ? '👆 TOUCHPAD ESQ' : '👆 TOUCHPAD DIR'}</div>
+          <div class="fs-touchpad-hint">Arraste · Toque = Ação</div>
+        `;
+        const puck = pad.querySelector('.fs-touchpad-puck');
+        attachTouchpad(pad, puck, side);
+        return pad;
+      }
+
+      function renderFullscreenControls() {
+        if (!isFullscreen) return;
+        const isTouchpad = (store.prefs.mobileInputMode === 'touchpad');
+
+        if (fsGameTitleEl) {
+          const meta = (typeof GAMES_MAP !== 'undefined' && GAMES_MAP[activeGameId]) || null;
+          fsGameTitleEl.textContent = meta ? `${meta.num} ${meta.title.split(':')[0]}` : activeGameId;
+        }
+        if (fsKidsBadgeEl) {
+          const kids = isKidsMode();
+          fsKidsBadgeEl.textContent = kids ? '🎈 KIDS ON' : '🔥 RAIZ';
+          fsKidsBadgeEl.style.background = kids ? '#00E436' : '#FF004D';
+          fsKidsBadgeEl.style.color = kids ? '#000000' : '#FFF1E8';
+        }
+        if (btnFsModeToggleEl) {
+          btnFsModeToggleEl.textContent = isTouchpad ? '👆 Modo Toque' : '🎮 Modo Controle';
+          btnFsModeToggleEl.title = isTouchpad ? 'Mudar para Modo Controle (D-Pads com botões)' : 'Mudar para Modo Toque (Touchpads laterais)';
+          btnFsModeToggleEl.className = 'pico-btn ' + (isTouchpad ? 'primary' : 'warn');
+        }
+        if (btnFsPauseEl) {
+          const isP = (activeGameId === 'pico_survivor' ? (state === 'paused') : customPaused);
+          btnFsPauseEl.textContent = isP ? '▶' : '⏸';
+        }
+
+        if (!fsWingLeftEl || !fsWingRightEl) return;
+        fsWingLeftEl.innerHTML = '';
+        fsWingRightEl.innerHTML = '';
+
+        if (isTouchpad) {
+          // --- MODO TOQUE: Touchpads laterais em ambos os lados ---
+          fsWingLeftEl.appendChild(createTouchpad('left'));
+          fsWingRightEl.appendChild(createTouchpad('right'));
+
+          if (activeGameId === 'pico_survivor') {
+            fsWingLeftEl.appendChild(createActionButton('⚡ DASH', 'danger', 'Space'));
+            fsWingRightEl.appendChild(createActionButton('⚡ DASH', 'danger', 'Space'));
+            if (typeof virusEvent !== 'undefined' && virusEvent) {
+              fsWingRightEl.appendChild(createActionButton('🦠 VÍRUS!', 'warn', 'KeyF'));
+            }
+          } else if (activeGameId === 'pico_truco') {
+            fsWingLeftEl.appendChild(createActionButton('🃏 C1', 'primary', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('Digit1')));
+            fsWingLeftEl.appendChild(createActionButton('🃏 C2', 'primary', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('Digit2')));
+            fsWingLeftEl.appendChild(createActionButton('🃏 C3', 'primary', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('Digit3')));
+            fsWingRightEl.appendChild(createActionButton('⚡ TRUCO', 'danger', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('KeyT')));
+            fsWingRightEl.appendChild(createActionButton('🙈 COBERTA', 'warn', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('KeyC')));
+            fsWingRightEl.appendChild(createActionButton('😉 SINAL', '', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('KeyS')));
+          } else if (activeGameId === 'pico_pinball') {
+            fsWingLeftEl.appendChild(createActionButton('◀ FLIP ESQ', 'accent', 'ArrowLeft'));
+            fsWingLeftEl.appendChild(createActionButton('📳 NUDGE', 'warn', 'Space'));
+            fsWingRightEl.appendChild(createActionButton('FLIP DIR ▶', 'accent', 'ArrowRight'));
+            fsWingRightEl.appendChild(createActionButton('🚀 MOLA', 'primary', 'ArrowDown'));
+          } else if (activeGameId === 'pico_enduro') {
+            fsWingLeftEl.appendChild(createActionButton('🔥 TURBO', 'danger', 'Space'));
+            fsWingRightEl.appendChild(createActionButton('🔥 TURBO', 'danger', 'Space'));
+          } else if (activeGameId === 'pico_obra') {
+            fsWingLeftEl.appendChild(createActionButton('🦘 PULAR', 'primary', 'Space'));
+            fsWingRightEl.appendChild(createActionButton('🦘 PULAR', 'primary', 'Space'));
+          } else if (activeGameId === 'pico_lander') {
+            fsWingLeftEl.appendChild(createActionButton('🚀 PROPULSÃO', 'primary', 'ArrowUp'));
+            fsWingRightEl.appendChild(createActionButton('🚀 PROPULSÃO', 'primary', 'ArrowUp'));
+          } else if (activeGameId === 'pico_sinuca') {
+            fsWingLeftEl.appendChild(createActionButton('🎯 GIZ/EFEITO', 'accent', null, () => CARTRIDGES.pico_sinuca?.onKeyDown?.('KeyE')));
+            fsWingRightEl.appendChild(createActionButton('↻ NOVA MESA', 'warn', null, () => CARTRIDGES.pico_sinuca?.init()));
+          } else if (activeGameId === 'pico_pilhas') {
+            fsWingLeftEl.appendChild(createActionButton('↻ GIRAR', 'warn', 'ArrowUp'));
+            fsWingRightEl.appendChild(createActionButton('⬇ CAIR', 'danger', 'Space'));
+          } else if (activeGameId === 'pico_travessia') {
+            fsWingLeftEl.appendChild(createActionButton('▲ PULAR!', 'primary', 'ArrowUp'));
+            fsWingRightEl.appendChild(createActionButton('▲ PULAR!', 'primary', 'ArrowUp'));
+          } else {
+            fsWingLeftEl.appendChild(createActionButton('⚡ AÇÃO', 'primary', 'Space'));
+            fsWingRightEl.appendChild(createActionButton('⚡ AÇÃO', 'primary', 'Space'));
+          }
+        } else {
+          // --- MODO CONTROLE: D-Pad completo dos dois lados + Botões de ação ---
+          if (activeGameId === 'pico_truco') {
+            fsWingLeftEl.appendChild(createActionButton('🃏 CARTA 1', 'primary', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('Digit1')));
+            fsWingLeftEl.appendChild(createActionButton('🃏 CARTA 2', 'primary', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('Digit2')));
+            fsWingLeftEl.appendChild(createActionButton('🃏 CARTA 3', 'primary', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('Digit3')));
+            fsWingRightEl.appendChild(createActionButton('⚡ TRUCO!', 'danger', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('KeyT')));
+            fsWingRightEl.appendChild(createActionButton('🙈 COBERTA', 'warn', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('KeyC')));
+            fsWingRightEl.appendChild(createActionButton('😉 SINAL', '', null, () => CARTRIDGES.pico_truco?.onKeyDown?.('KeyS')));
+          } else if (activeGameId === 'pico_pinball') {
+            fsWingLeftEl.appendChild(createDpad('left'));
+            fsWingLeftEl.appendChild(createActionButton('◀ FLIP ESQ', 'accent', 'ArrowLeft'));
+            fsWingLeftEl.appendChild(createActionButton('📳 NUDGE', 'warn', 'Space'));
+
+            fsWingRightEl.appendChild(createDpad('right'));
+            fsWingRightEl.appendChild(createActionButton('FLIP DIR ▶', 'accent', 'ArrowRight'));
+            fsWingRightEl.appendChild(createActionButton('🚀 MOLA', 'primary', 'ArrowDown'));
+          } else if (activeGameId === 'pico_pilhas') {
+            fsWingLeftEl.appendChild(createDpad('left'));
+            fsWingLeftEl.appendChild(createActionButton('↻ GIRAR', 'warn', 'ArrowUp'));
+
+            fsWingRightEl.appendChild(createDpad('right'));
+            fsWingRightEl.appendChild(createActionButton('⬇ CAIR', 'danger', 'Space'));
+          } else {
+            // Directional games (#01, #04, #05, #06, #07, #09, #10):
+            // D-Pad completo em AMBOS os lados (esquerda e direita)
+            fsWingLeftEl.appendChild(createDpad('left'));
+            fsWingRightEl.appendChild(createDpad('right'));
+
+            if (activeGameId === 'pico_survivor') {
+              fsWingLeftEl.appendChild(createActionButton('⚡ DASH', 'danger', 'Space'));
+              fsWingRightEl.appendChild(createActionButton('⚡ DASH', 'danger', 'Space'));
+              if (typeof virusEvent !== 'undefined' && virusEvent) {
+                fsWingRightEl.appendChild(createActionButton('🦠 VÍRUS!', 'warn', 'KeyF'));
+              }
+            } else if (activeGameId === 'pico_enduro') {
+              fsWingLeftEl.appendChild(createActionButton('🔥 TURBO', 'danger', 'Space'));
+              fsWingRightEl.appendChild(createActionButton('🔥 TURBO', 'danger', 'Space'));
+            } else if (activeGameId === 'pico_obra') {
+              fsWingLeftEl.appendChild(createActionButton('🦘 PULAR', 'primary', 'Space'));
+              fsWingRightEl.appendChild(createActionButton('🦘 PULAR', 'primary', 'Space'));
+            } else if (activeGameId === 'pico_lander') {
+              fsWingLeftEl.appendChild(createActionButton('🚀 PROPULSÃO', 'primary', 'ArrowUp'));
+              fsWingRightEl.appendChild(createActionButton('🚀 PROPULSÃO', 'primary', 'ArrowUp'));
+            } else if (activeGameId === 'pico_sinuca') {
+              fsWingLeftEl.appendChild(createActionButton('🎯 GIZ/EFEITO', 'accent', null, () => CARTRIDGES.pico_sinuca?.onKeyDown?.('KeyE')));
+              fsWingRightEl.appendChild(createActionButton('↻ NOVA MESA', 'warn', null, () => CARTRIDGES.pico_sinuca?.init()));
+            } else if (activeGameId === 'pico_travessia') {
+              fsWingLeftEl.appendChild(createActionButton('▲ PULAR!', 'primary', 'ArrowUp'));
+              fsWingRightEl.appendChild(createActionButton('▲ PULAR!', 'primary', 'ArrowUp'));
+            } else {
+              fsWingLeftEl.appendChild(createActionButton('⚡ AÇÃO', 'primary', 'Space'));
+              fsWingRightEl.appendChild(createActionButton('⚡ AÇÃO', 'primary', 'Space'));
+            }
+          }
+        }
+      }
+
+      // Event listeners for Fullscreen HUD & Modal
+      btnFsExitEl?.addEventListener('click', requestExitFullscreen);
+      btnFsModeToggleEl?.addEventListener('click', toggleMobileInputMode);
+      btnFsPauseEl?.addEventListener('click', () => { ensureAudio(); togglePause(); });
+      btnFsModalStayEl?.addEventListener('click', cancelExitFullscreen);
+      btnFsModalExitEl?.addEventListener('click', confirmExitFullscreen);
+      window.addEventListener('resize', () => { if (isFullscreen) renderFullscreenControls(); });
       // --- SPA View Routing ---
       let currentView = 'view-hub';
       function switchToView(viewId) {
         if (currentView === 'view-game' && viewId !== 'view-game') {
-          if (isFullscreen) setFullscreen(false);
+          if (isFullscreen) setFullscreen(false, true);
           if (activeGameId === 'pico_survivor') saveCheckpoint();
           stopLoop();
         }
@@ -1232,61 +1995,40 @@
           btnKidsGame.setAttribute('aria-pressed', on ? 'true' : 'false');
           btnKidsGame.textContent = on ? '🎈 KIDS: ON' : '🔥 KIDS: OFF';
         }
+        if (isFullscreen) renderFullscreenControls();
       }
 
       function toggleKidsMode() {
         ensureAudio();
         if (!store.prefs) store.prefs = {};
         store.prefs.kidsMode = !isKidsMode();
-        persistStore(true);
+        persistStore(false);
         syncKidsUI();
-        if (currentView === 'view-game') {
-          if (activeGameId === 'pico_survivor' && state === 'play' && player) {
-            const on = isKidsMode();
-            const is1HP = !!activeTop10.m5;
-            const targetMax = is1HP ? (on ? 5 : 1) : (on ? 10 : 5);
-            player.maxHp = targetMax;
-            player.hp = on ? Math.max(player.hp, Math.min(targetMax, player.hp + 5)) : Math.min(targetMax, player.hp);
-            if (on) {
-              player.projCount = Math.max(player.projCount, 2);
-              player.orbits = Math.max(player.orbits, 2);
-              player.magRadius = Math.max(player.magRadius, 80);
-            }
-            syncHud();
-          } else if (activeGameId === 'pico_survivor') {
-            initGame(false);
-          } else if (CARTRIDGES[activeGameId]) {
-            CARTRIDGES[activeGameId].init();
-          }
-        }
         renderHubAndData();
-        sfx.gem(isKidsMode() ? 6 : 2);
-        showToast(isKidsMode() ? '🎈 MODO KIDS (FÁCIL) LIGADO — Salvo no cache!' : '🔥 MODO RAIZ (NORMAL) LIGADO — Salvo no cache!');
+        showToast(isKidsMode() ? '🎈 Modo Kids Ativado em todos os 10 Jogos!' : '🔥 Modo Kids Desligado (Modo Raiz)!');
       }
-
       btnKidsHeader?.addEventListener('click', toggleKidsMode);
       btnKidsGame?.addEventListener('click', toggleKidsMode);
-      syncKidsUI();
 
-      function syncCustomHud(hpTxt, waveTxt, scoreVal, badgeTxt) {
-        hudHp.textContent = hpTxt ?? '---';
-        hudWave.textContent = waveTxt ?? '---';
-        hudScore.textContent = typeof scoreVal === 'number' ? Math.floor(scoreVal).toLocaleString('pt-BR') : String(scoreVal ?? 0);
-        hudLvl.textContent = GAMES_MAP[activeGameId]?.num || '#--';
-        if (badgeTxt !== undefined) hudActiveBadges.textContent = badgeTxt;
+      function markGamePlayed(gameId) {
+        if (!store.stats.playedGames) store.stats.playedGames = [];
+        if (!store.stats.playedGames.includes(gameId)) {
+          store.stats.playedGames.push(gameId);
+          if (store.stats.playedGames.length >= 10) unlockAchievement('all_10_games');
+          persistStore(false);
+        }
       }
 
-      function recordGameScore(gameId, scoreVal) {
-        const s = Math.max(0, Math.floor(scoreVal || 0));
+      function recordGameScore(gameId, score) {
         if (!store.stats.gameScores) store.stats.gameScores = {};
         const prev = store.stats.gameScores[gameId] || 0;
-        const improved = s > prev;
-        if (improved) store.stats.gameScores[gameId] = s;
-        if (gameId === 'pico_truco' && s >= 1200) unlockAchievement('truco_master');
-        const now = performance.now();
-        if (improved && now - lastScoreSavedAt > 900) {
-          lastScoreSavedAt = now;
-          persistStore();
+        if (score > prev) {
+          store.stats.gameScores[gameId] = score;
+          const now = Date.now();
+          if (now - lastScoreSavedAt > 1500) {
+            persistStore(false);
+            lastScoreSavedAt = now;
+          }
         }
       }
 
@@ -1299,7 +2041,12 @@
       }
 
       function setMobileControls(buttons, hintText) {
+        lastRegisteredMobileButtons = buttons;
         if (hintText && statusHintText) statusHintText.textContent = hintText;
+        if (isFullscreen) {
+          renderFullscreenControls();
+          return;
+        }
         if (activeGameId === 'pico_survivor') {
           survivorDeckEl.style.display = 'flex';
           customDeckEl.style.display = 'none';
@@ -3551,53 +4298,48 @@ window.BUILD_GAMES_06_10 = function(api) {
       };
 
       const CUSTOM_PAUSE_BOX = {
-        resume: { x: 84, y: 74, w: 152, h: 18 },
-        restart: { x: 84, y: 96, w: 152, h: 16 },
-        hub: { x: 84, y: 116, w: 152, h: 16 }
+        restart: { x: W / 2 - 80, y: H / 2 + 10, w: 160, h: 22 },
+        hub: { x: W / 2 - 80, y: H / 2 + 38, w: 160, h: 22 }
       };
 
       function drawCustomPauseOverlay() {
-        rect(0, 0, W, H, 'rgba(0,0,0,0.74)');
-        rect(68, 32, 184, 108, '#1D2B53');
-        ctx.strokeStyle = '#FFEC27';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(69, 33, 182, 106);
-        ctx.lineWidth = 1;
-        drawRainbowText('JOGO PAUSADO', W / 2, 49, 10, performance.now() / 1000);
-        ctx.font = 'bold 6px ui-monospace, monospace';
+        rect(0, 0, W, H, 'rgba(0,0,0,0.7)');
+        drawRainbowText('JOGO PAUSADO', W / 2 - 60, H / 2 - 40, 16);
+        ctx.fillStyle = '#FFF1E8';
+        ctx.font = '10px ui-monospace, monospace';
         ctx.textAlign = 'center';
-        ctx.fillStyle = '#C2C3C7';
-        ctx.fillText(GAMES_MAP[activeGameId]?.title || 'CARTUCHO PICO-OS', W / 2, 62);
+        ctx.fillText('Pressione P / Esc ou toque para continuar', W / 2, H / 2 - 14);
 
-        const drawBtn = (b, bg, fg, label) => {
-          rect(b.x, b.y, b.w, b.h, bg);
-          ctx.strokeStyle = '#000';
-          ctx.strokeRect(b.x + 0.5, b.y + 0.5, b.w - 1, b.h - 1);
-          ctx.fillStyle = fg;
-          ctx.font = 'bold 7px ui-monospace, monospace';
-          ctx.textAlign = 'center';
-          ctx.fillText(label, b.x + b.w / 2, b.y + b.h / 2 + 2.5);
-        };
-        drawBtn(CUSTOM_PAUSE_BOX.resume, '#00E436', '#000', '▶ RETOMAR (P)');
-        drawBtn(CUSTOM_PAUSE_BOX.restart, '#FFEC27', '#000', '↻ REINICIAR (R)');
-        drawBtn(CUSTOM_PAUSE_BOX.hub, '#FFF1E8', '#000', '🕹️ VOLTAR ESTANTE');
+        rect(CUSTOM_PAUSE_BOX.restart.x, CUSTOM_PAUSE_BOX.restart.y, CUSTOM_PAUSE_BOX.restart.w, CUSTOM_PAUSE_BOX.restart.h, '#FFEC27');
+        rect(CUSTOM_PAUSE_BOX.restart.x + 2, CUSTOM_PAUSE_BOX.restart.y + 2, CUSTOM_PAUSE_BOX.restart.w - 4, CUSTOM_PAUSE_BOX.restart.h - 4, '#1D2B53');
+        ctx.fillStyle = '#FFEC27';
+        ctx.font = 'bold 11px ui-monospace, monospace';
+        ctx.fillText('↻ REINICIAR (R)', W / 2, CUSTOM_PAUSE_BOX.restart.y + 15);
+
+        rect(CUSTOM_PAUSE_BOX.hub.x, CUSTOM_PAUSE_BOX.hub.y, CUSTOM_PAUSE_BOX.hub.w, CUSTOM_PAUSE_BOX.hub.h, '#FF004D');
+        rect(CUSTOM_PAUSE_BOX.hub.x + 2, CUSTOM_PAUSE_BOX.hub.y + 2, CUSTOM_PAUSE_BOX.hub.w - 4, CUSTOM_PAUSE_BOX.hub.h - 4, '#000000');
+        ctx.fillStyle = '#FFF1E8';
+        ctx.font = 'bold 11px ui-monospace, monospace';
+        ctx.fillText('← SAIR P/ ESTANTE', W / 2, CUSTOM_PAUSE_BOX.hub.y + 15);
       }
 
-      function markGamePlayed(gameId) {
-        if (!Array.isArray(store.stats.playedGames)) store.stats.playedGames = [];
-        if (!store.stats.playedGames.includes(gameId)) {
-          store.stats.playedGames.push(gameId);
-          if (store.stats.playedGames.length >= 5) unlockAchievement('arcade_explorer');
-          if (store.stats.playedGames.length >= 10) unlockAchievement('all_10_games');
-          persistStore();
+      function syncCustomHud(stats) {
+        hudHp.textContent = stats.hp !== undefined ? String(stats.hp) : '--';
+        hudWave.textContent = stats.stage !== undefined ? String(stats.stage) : '--';
+        hudScore.textContent = stats.score !== undefined ? String(stats.score) : '0';
+        hudLvl.textContent = stats.extra !== undefined ? String(stats.extra) : '--';
+        hudActiveBadges.textContent = stats.sub || 'Arcade';
+        if (isFullscreen) {
+          const fsKids = document.getElementById('fs-kids-badge');
+          if (fsKids) fsKids.textContent = isKidsMode() ? '🎈 KIDS ON' : '🔥 RAIZ';
         }
       }
 
       function updateShellForCartridge(gameId) {
-        const g = GAMES_MAP[gameId] || GAMES_MAP.pico_survivor;
         const isSurv = gameId === 'pico_survivor';
-        activeModeLabel.textContent = g.cart;
-        cartSizeEl.textContent = g.kb;
+        const g = GAMES_MAP[gameId] || { title: gameId, kb: '40 KB', controls: '' };
+        if (activeModeLabel) activeModeLabel.textContent = g.cart || (gameId + '.p64');
+        if (typeof cartSizeEl !== 'undefined' && cartSizeEl) cartSizeEl.textContent = g.kb;
         btnToggleTop10.style.display = isSurv ? '' : 'none';
         btnHood.style.display = isSurv ? '' : 'none';
         if (!isSurv) {
@@ -3609,6 +4351,7 @@ window.BUILD_GAMES_06_10 = function(api) {
           setMobileControls(null);
           syncHud();
         }
+        if (isFullscreen) renderFullscreenControls();
       }
 
       function launchCartridge(gameId, opts = {}) {
@@ -3618,6 +4361,7 @@ window.BUILD_GAMES_06_10 = function(api) {
         customPaused = false;
         btnPause.textContent = '⏸';
         btnTouchPause.textContent = '⏸ PAUSE';
+        if (btnFsPauseEl) btnFsPauseEl.textContent = '⏸';
         Object.keys(keys).forEach(k => delete keys[k]);
         markGamePlayed(gameId);
         updateShellForCartridge(gameId);
@@ -3649,18 +4393,21 @@ window.BUILD_GAMES_06_10 = function(api) {
           if (opts.fullscreen) setFullscreen(true);
         }
         switchToView('view-game');
+        if (isFullscreen) renderFullscreenControls();
       }
 
       function restartActiveGame() {
         ensureAudio();
         customPaused = false;
         btnPause.textContent = '⏸';
+        if (btnFsPauseEl) btnFsPauseEl.textContent = '⏸';
         if (activeGameId === 'pico_survivor') {
           initGame(true);
         } else if (CARTRIDGES[activeGameId]) {
           CARTRIDGES[activeGameId].init();
           cartridgeReady[activeGameId] = true;
         }
+        if (isFullscreen) renderFullscreenControls();
       }
 
       function renderTop10Lab() {
@@ -5168,7 +5915,7 @@ window.BUILD_GAMES_06_10 = function(api) {
           if (customPaused) {
             const hit = (b) => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
             if (hit(CUSTOM_PAUSE_BOX.restart)) { restartActiveGame(); return; }
-            if (hit(CUSTOM_PAUSE_BOX.hub)) { customPaused = false; btnPause.textContent = '⏸'; switchToView('view-hub'); return; }
+            if (hit(CUSTOM_PAUSE_BOX.hub)) { customPaused = false; btnPause.textContent = '⏸'; if (isFullscreen) setFullscreen(false, true); switchToView('view-hub'); return; }
             togglePause();
             return;
           }
@@ -5283,7 +6030,7 @@ window.BUILD_GAMES_06_10 = function(api) {
         keys[e.code] = true;
         if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
         if (activeGameId !== 'pico_survivor') {
-          if (isFullscreen && e.code === 'Escape') { setFullscreen(false); return; }
+          if (isFullscreen && e.code === 'Escape') { e.preventDefault(); requestExitFullscreen(); return; }
           if (e.code === 'KeyM') { toggleSound(); return; }
           if (e.code === 'KeyP' || e.code === 'Escape') { togglePause(); return; }
           if (e.code === 'KeyR') { restartActiveGame(); return; }
@@ -5298,7 +6045,7 @@ window.BUILD_GAMES_06_10 = function(api) {
           else if (state === 'play') triggerDash();
         }
         if (e.code === 'KeyP' || e.code === 'Escape') {
-          if (isFullscreen && e.code === 'Escape') { setFullscreen(false); return; }
+          if (isFullscreen && e.code === 'Escape') { e.preventDefault(); requestExitFullscreen(); return; }
           if ((state === 'play' || state === 'paused') && !runawayBtn.active) { e.preventDefault(); togglePause(); }
         }
         if (e.code === 'KeyF' && state === 'play' && virusEvent) { e.preventDefault(); resolveVirus(true); }
@@ -5313,9 +6060,11 @@ window.BUILD_GAMES_06_10 = function(api) {
       window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
       function togglePause() {
+        if (btnFsPauseEl) btnFsPauseEl.textContent = (customPaused || state === 'play') ? '⏸' : '▶';
         if (activeGameId !== 'pico_survivor') {
           customPaused = !customPaused;
           btnPause.textContent = customPaused ? '▶' : '⏸';
+          if (btnFsPauseEl) btnFsPauseEl.textContent = customPaused ? '▶' : '⏸';
           const pHeadBtn = document.getElementById('custom-pause-btn');
           if (pHeadBtn) pHeadBtn.textContent = customPaused ? '▶ RETOMAR' : '⏸ PAUSE';
           sfx.gem(customPaused ? 2 : 5);
