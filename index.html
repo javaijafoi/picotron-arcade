@@ -448,6 +448,40 @@
       gap: 6px;
       font-size: 11px;
     }
+    .pico-btn.kids-toggle {
+      border: 2px solid #000000;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      transition: transform 0.12s ease;
+    }
+    .pico-btn.kids-toggle.on {
+      background: linear-gradient(90deg, #00E436 0%, #FFEC27 100%);
+      color: #000000;
+      box-shadow: 0 0 0 2px #FFF1E8, 2px 2px 0 #000000;
+    }
+    .pico-btn.kids-toggle.off {
+      background: #1D2B53;
+      color: #FFEC27;
+      box-shadow: 0 0 0 2px #FF004D, 2px 2px 0 #000000;
+    }
+    .kids-banner {
+      border: 3px solid #000000;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 2px;
+    }
+    .kids-banner.on {
+      background: linear-gradient(90deg, #093d18 0%, #104e23 55%, #3f3600 100%);
+      box-shadow: inset 0 0 0 2px #00E436, 4px 4px 0 #000000;
+    }
+    .kids-banner.off {
+      background: #1a1026;
+      box-shadow: inset 0 0 0 2px #FF004D, 4px 4px 0 #000000;
+    }
   </style>
 </head>
 <body>
@@ -468,6 +502,7 @@
           <button id="nav-hub" data-view="view-hub" class="nav-btn pico-btn active-tab" type="button">🕹️ Estante (#01-#10)</button>
           <button id="nav-game" data-view="view-game" class="nav-btn pico-btn" type="button">▶ Jogar</button>
           <button id="nav-data" data-view="view-data" class="nav-btn pico-btn" type="button">🏆 Conquistas & Save</button>
+          <button id="btn-kids-header" type="button" class="pico-btn kids-toggle on" aria-pressed="true" title="Alternar Modo Kids / Fácil em todos os 10 jogos (Salva no cache)">🎈 MODO KIDS (FÁCIL): ON</button>
         </nav>
       </div>
     </header>
@@ -505,6 +540,7 @@
               <span id="hud-hp" class="pill" style="color:#FF004D;">♥♥♥♥♥</span>
               <span id="hud-wave" class="pill" style="color:#FFEC27;">W1</span>
               <span id="hud-score" class="pill" style="color:#00E436;">0</span>
+              <button id="btn-kids-game" type="button" title="Alternar Modo Kids / Fácil (Salva no cache)" class="pico-btn kids-toggle on" style="padding:4px 8px;" aria-pressed="true">🎈 KIDS: ON</button>
               <button id="btn-fullscreen" type="button" title="Tela Cheia (Celular e PC)" class="pico-btn accent" style="padding:4px 8px;">⛶ Tela Cheia</button>
               <button id="btn-pause" type="button" title="Pausar (P / Esc)" class="pico-btn" style="background:#FFF1E8;padding:4px 8px;">⏸</button>
               <button id="btn-sound" type="button" title="Som (M)" class="pico-btn" style="background:#FFF1E8;padding:4px 8px;">🔊</button>
@@ -803,7 +839,7 @@
         return {
           version: 2,
           lastSavedAt: null,
-          prefs: { skin: 'slime', heroColor: '#29ADFF', chaos: 1, speedMult: 1, soundOn: true },
+          prefs: { skin: 'slime', heroColor: '#29ADFF', chaos: 1, speedMult: 1, soundOn: true, kidsMode: true },
           stats: { bestScore: 0, bestWave: 1, bestLevel: 1, totalKills: 0, totalRuns: 0, achievements: [], gameScores: {}, playedGames: [] },
           savedRun: null
         };
@@ -818,7 +854,7 @@
           return {
             version: 2,
             lastSavedAt: parsed.lastSavedAt || null,
-            prefs: { ...base.prefs, ...(parsed.prefs || {}) },
+            prefs: { ...base.prefs, ...(parsed.prefs || {}), kidsMode: parsed.prefs?.kidsMode !== undefined ? !!parsed.prefs.kidsMode : true },
             stats: {
               ...base.stats,
               ...(parsed.stats || {}),
@@ -887,6 +923,8 @@
       const customDeckEl = document.getElementById('custom-deck');
       const statusHintText = document.getElementById('status-hint-text');
       const scoresByGameEl = document.getElementById('scores-by-game');
+      const btnKidsHeader = document.getElementById('btn-kids-header');
+      const btnKidsGame = document.getElementById('btn-kids-game');
       const btnAllTop10 = document.getElementById('btn-all-top10');
       const btnClearTop10 = document.getElementById('btn-clear-top10');
       const mobileDeck = document.getElementById('mobile-deck');
@@ -1064,6 +1102,7 @@
         btnChaos.textContent = `Partículas: ${cfg.chaos}x`;
         btnChaos.style.background = cfg.chaos === 3 ? '#FFEC27' : '#C2C3C7';
         btnSpeed.textContent = `Vel: ${cfg.speedMult.toFixed(1)}x`;
+        syncKidsUI();
       }
 
       const UPGRADES = [
@@ -1175,6 +1214,60 @@
       let lastScoreSavedAt = 0;
       const cartridgeReady = {};
 
+      function isKidsMode() {
+        return !!(store && store.prefs && store.prefs.kidsMode !== false);
+      }
+
+      function syncKidsUI() {
+        const on = isKidsMode();
+        if (btnKidsHeader) {
+          btnKidsHeader.classList.toggle('on', on);
+          btnKidsHeader.classList.toggle('off', !on);
+          btnKidsHeader.setAttribute('aria-pressed', on ? 'true' : 'false');
+          btnKidsHeader.textContent = on ? '🎈 MODO KIDS (FÁCIL): ON' : '🔥 MODO KIDS: OFF (RAIZ)';
+        }
+        if (btnKidsGame) {
+          btnKidsGame.classList.toggle('on', on);
+          btnKidsGame.classList.toggle('off', !on);
+          btnKidsGame.setAttribute('aria-pressed', on ? 'true' : 'false');
+          btnKidsGame.textContent = on ? '🎈 KIDS: ON' : '🔥 KIDS: OFF';
+        }
+      }
+
+      function toggleKidsMode() {
+        ensureAudio();
+        if (!store.prefs) store.prefs = {};
+        store.prefs.kidsMode = !isKidsMode();
+        persistStore(true);
+        syncKidsUI();
+        if (currentView === 'view-game') {
+          if (activeGameId === 'pico_survivor' && state === 'play' && player) {
+            const on = isKidsMode();
+            const is1HP = !!activeTop10.m5;
+            const targetMax = is1HP ? (on ? 5 : 1) : (on ? 10 : 5);
+            player.maxHp = targetMax;
+            player.hp = on ? Math.max(player.hp, Math.min(targetMax, player.hp + 5)) : Math.min(targetMax, player.hp);
+            if (on) {
+              player.projCount = Math.max(player.projCount, 2);
+              player.orbits = Math.max(player.orbits, 2);
+              player.magRadius = Math.max(player.magRadius, 80);
+            }
+            syncHud();
+          } else if (activeGameId === 'pico_survivor') {
+            initGame(false);
+          } else if (CARTRIDGES[activeGameId]) {
+            CARTRIDGES[activeGameId].init();
+          }
+        }
+        renderHubAndData();
+        sfx.gem(isKidsMode() ? 6 : 2);
+        showToast(isKidsMode() ? '🎈 MODO KIDS (FÁCIL) LIGADO — Salvo no cache!' : '🔥 MODO RAIZ (NORMAL) LIGADO — Salvo no cache!');
+      }
+
+      btnKidsHeader?.addEventListener('click', toggleKidsMode);
+      btnKidsGame?.addEventListener('click', toggleKidsMode);
+      syncKidsUI();
+
       function syncCustomHud(hpTxt, waveTxt, scoreVal, badgeTxt) {
         hudHp.textContent = hpTxt ?? '---';
         hudWave.textContent = waveTxt ?? '---';
@@ -1267,13 +1360,15 @@
       const CUSTOM_API = {
         W, H, RAINBOW, rect, drawRainbowText, ctx, keys, sfx, tone,
         syncCustomHud, recordGameScore, getHighScore, isPausedState, setMobileControls,
+        isKidsMode,
         getActiveId: () => activeGameId
       };
 
       // Embedded Cartridges #02 - #10
       // Cartridges #02 to #05 for PICO-OS Arcade Workstation
 window.BUILD_GAMES_02_05 = function(api) {
-  const { W, H, RAINBOW, rect, drawRainbowText, ctx, keys, sfx, tone, syncCustomHud, recordGameScore, getHighScore, isPausedState, setMobileControls } = api;
+  const { W, H, RAINBOW, rect, drawRainbowText, ctx, keys, sfx, tone, syncCustomHud, recordGameScore, getHighScore, isPausedState, setMobileControls, isKidsMode } = api;
+  const kids = () => typeof isKidsMode === 'function' && isKidsMode();
 
   // =========================================================================
   // #02 — PICO-TRUCO (Paulista/Mineiro + Baralho Limpo/Sujo, Tapão na Mesa)
@@ -1434,9 +1529,9 @@ window.BUILD_GAMES_02_05 = function(api) {
       // Lightweight "Napkin Bluff" math for Bot decision!
       const avg = botAverageStrength();
       const maxC = handBot.length ? Math.max(...handBot.map(c => cardStrength(c))) : (playedBot ? cardStrength(playedBot) : 0);
-      const bluff = Math.random() < 0.22;
-      const shouldAccept = maxC >= 8 || avg >= 6.5 || vazaWins[0] === 'bot' || (nxt <= 4 && bluff);
-      const shouldRaise = maxC >= 92 && nextStakeValue() && Math.random() < 0.45;
+      const bluff = !kids() && Math.random() < 0.22;
+      const shouldAccept = kids() ? (maxC >= 90 && avg >= 7) : (maxC >= 8 || avg >= 6.5 || vazaWins[0] === 'bot' || (nxt <= 4 && bluff));
+      const shouldRaise = !kids() && maxC >= 92 && nextStakeValue() && Math.random() < 0.45;
       if (!shouldAccept) {
         roundMsg = 'Tião Blefe CORREU! Você ganhou +' + stake + '!';
         msgTimer = 1.8; sfx.slot();
@@ -1485,20 +1580,22 @@ window.BUILD_GAMES_02_05 = function(api) {
       // Bot maybe shouts TRUCO with napkin math!
       const nxt = nextStakeValue();
       const maxC = Math.max(...handBot.map(c => cardStrength(c)));
-      if (nxt && lastBetter !== 'bot' && vazaWins.length <= 1 && Math.random() < (maxC >= 91 ? 0.36 : 0.14)) {
+      if (!kids() && nxt && lastBetter !== 'bot' && vazaWins.length <= 1 && Math.random() < (maxC >= 91 ? 0.36 : 0.14)) {
         roundMsg = `TIÃO: "${nxt === 3 ? 'TRUCO LADRÃO!' : 'VALE ' + nxt + '!'}"`;
         joltTable(5); turn = 'ask_truco_bot'; refreshMobileBar();
         return;
       }
-      // Pick card: if player played, try cheapest winner, else dump weakest (except strong start)
+      // Pick card: in Kids mode plays weakest card; otherwise cheapest winner or lead
       let pickIdx = 0;
       handBot.sort((a, b) => cardStrength(a) - cardStrength(b));
-      if (playedYou) {
-        const youStr = cardStrength(playedYou, playedYouHidden);
-        const beatIdx = handBot.findIndex(c => cardStrength(c) > youStr);
-        pickIdx = beatIdx >= 0 ? beatIdx : 0;
-      } else {
-        pickIdx = handBot.length > 1 && Math.random() < 0.55 ? handBot.length - 1 : 0;
+      if (!kids()) {
+        if (playedYou) {
+          const youStr = cardStrength(playedYou, playedYouHidden);
+          const beatIdx = handBot.findIndex(c => cardStrength(c) > youStr);
+          pickIdx = beatIdx >= 0 ? beatIdx : 0;
+        } else {
+          pickIdx = handBot.length > 1 && Math.random() < 0.55 ? handBot.length - 1 : 0;
+        }
       }
       playedBot = handBot.splice(pickIdx, 1)[0];
       playedBotHidden = false;
@@ -1545,7 +1642,7 @@ window.BUILD_GAMES_02_05 = function(api) {
     }
 
     function awardHandPoints(winner, pts) {
-      if (winner === 'you') { scoreYou = Math.min(12, scoreYou + pts); sfx.lvl(); }
+      if (winner === 'you') { scoreYou = Math.min(12, scoreYou + pts + (kids() ? 1 : 0)); sfx.lvl(); }
       else { scoreBot = Math.min(12, scoreBot + pts); sfx.hurt(); }
       roundsPlayed++;
       recordGameScore('pico_truco', scoreYou * 100 - scoreBot * 20);
@@ -1659,8 +1756,25 @@ window.BUILD_GAMES_02_05 = function(api) {
 
         // Player Cards + TRUCO Button on right
         const isIron = scoreYou === 11 && scoreBot === 11;
+        const cardY = kids() ? 116 : 120;
         for (let i = 0; i < handYou.length; i++) {
-          drawCard(76 + i * 44, 120, handYou[i], isIron, turn === 'you');
+          const cx = 76 + i * 44;
+          drawCard(cx, cardY, handYou[i], isIron, turn === 'you');
+          if (kids() && !isIron) {
+            const str = cardStrength(handYou[i]);
+            const lbl = str >= 8 ? '★FORTE' : str >= 6 ? '👍BOA' : '🐣FRACA';
+            const bg = str >= 8 ? '#00E436' : str >= 6 ? '#FFEC27' : '#29ADFF';
+            rect(cx - 2, 165, 38, 10, '#000000');
+            rect(cx - 1, 166, 36, 8, bg);
+            ctx.font = 'bold 6.5px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#000000';
+            ctx.fillText(lbl, cx + 17, 172.5);
+          }
+        }
+        if (kids()) {
+          rect(6, 152, 62, 16, '#00E436');
+          ctx.strokeStyle = '#000000'; ctx.lineWidth = 1; ctx.strokeRect(6.5, 152.5, 61, 15);
+          ctx.font = 'bold 7px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#000000';
+          ctx.fillText('🎈KIDS +1PT', 37, 163);
         }
         const nxt = nextStakeValue();
         rect(220, 122, 88, 24, '#FF004D');
@@ -1705,7 +1819,7 @@ window.BUILD_GAMES_02_05 = function(api) {
         if (turn === 'you') {
           for (let i = 0; i < handYou.length; i++) {
             const cx = 76 + i * 44;
-            if (p.x >= cx && p.x <= cx + 36 && p.y >= 118 && p.y <= 172) { playYouCard(i); return; }
+            if (p.x >= cx && p.x <= cx + 36 && p.y >= 114 && p.y <= 175) { playYouCard(i); return; }
           }
         }
       }
@@ -1733,11 +1847,16 @@ window.BUILD_GAMES_02_05 = function(api) {
 
     function nudge() {
       if (gameOver || tiltLocked) return;
-      tiltCount++;
-      tiltTimer = 3.5;
+      if (!kids()) {
+        tiltCount++;
+        tiltTimer = 3.5;
+      } else {
+        tiltCount = 0;
+        tiltLocked = false;
+      }
       nudgeShake = 5;
       sfx.hit();
-      if (tiltCount >= 3) {
+      if (!kids() && tiltCount >= 3) {
         tiltLocked = true; sfx.hurt();
         return;
       }
@@ -1749,15 +1868,15 @@ window.BUILD_GAMES_02_05 = function(api) {
 
     return {
       init() {
-        score = 0; ballsLeft = 3; mult = 1; picoLit = [false, false, false, false];
+        score = 0; ballsLeft = kids() ? 5 : 3; mult = 1; picoLit = [false, false, false, false];
         balls = []; leftFlip = 0; rightFlip = 0; tiltCount = 0; tiltLocked = false; gameOver = false;
         spawnBall();
-        syncCustomHud('⚾⚾⚾', 'PINBALL', 0, '1x MULT');
+        syncCustomHud('⚾'.repeat(ballsLeft), 'PINBALL', 0, kids() ? 'KIDS' : '1x MULT');
         setMobileControls([
           { label: '◀ FLIP ESQ', cls: 'accent', onHoldStart: () => { leftFlip = 1; sfx.shoot(); }, onHoldEnd: () => { leftFlip = 0; } },
           { label: '📳 NUDGE', cls: 'warn', onClick: nudge },
           { label: 'FLIP DIR ▶', cls: 'accent', onHoldStart: () => { rightFlip = 1; sfx.shoot(); }, onHoldEnd: () => { rightFlip = 0; } }
-        ], 'A/◀ e D/▶ = Flippers · Espaço = Nudge (cuidado com TILT!)');
+        ], 'A/◀ e D/▶ = Flippers · Espaço = Nudge (Zero Tilt no Modo Kids!)');
       },
       update(dt) {
         if (isPausedState() || gameOver) return;
@@ -1772,7 +1891,7 @@ window.BUILD_GAMES_02_05 = function(api) {
 
         for (let i = balls.length - 1; i >= 0; i--) {
           const b = balls[i];
-          b.vy += 185 * dt;
+          b.vy += (kids() ? 122 : 185) * dt;
           b.x += b.vx * dt; b.y += b.vy * dt;
           // Speed cap
           const spd = Math.hypot(b.vx, b.vy);
@@ -1816,6 +1935,13 @@ window.BUILD_GAMES_02_05 = function(api) {
               if (rfActive) { b.vy = -215; b.vx = (b.x - 138) * 3.8 - 40; sfx.raquetada(); score += 25 * mult; }
               else if (b.y > flipZoneY - 3) { b.vy = -Math.abs(b.vy) * 0.55; b.vx -= 35; }
             }
+          }
+
+          // Salva-Bola Central Kids
+          if (kids() && b.vy > 0 && b.y >= 153 && b.y <= 167 && b.x >= 96 && b.x <= 134) {
+            b.y = 152; b.vy = -175; b.vx += (Math.random() - 0.5) * 90;
+            score += 50 * mult; sfx.ding(2);
+            recordGameScore('pico_pinball', score);
           }
 
           // Bumpers collision
@@ -1869,7 +1995,11 @@ window.BUILD_GAMES_02_05 = function(api) {
           ctx.fillStyle = bmp.hit > 0 ? '#FFF1E8' : bmp.col; ctx.beginPath(); ctx.arc(bmp.x, bmp.y, bmp.r, 0, Math.PI * 2); ctx.fill();
         }
 
-        // Flippers
+        // Flippers + Salva-Bola Central Kids
+        if (kids()) {
+          rect(98, 157, 34, 6, '#00E436');
+          ctx.strokeStyle = '#FFF1E8'; ctx.lineWidth = 1; ctx.strokeRect(98, 157, 34, 6);
+        }
         const lfUp = !tiltLocked && (keys['ArrowLeft'] || keys['KeyA'] || keys['KeyZ'] || leftFlip);
         const rfUp = !tiltLocked && (keys['ArrowRight'] || keys['KeyD'] || keys['KeyM'] || rightFlip);
         ctx.strokeStyle = tiltLocked ? '#5F574F' : '#FFEC27'; ctx.lineWidth = 5; ctx.lineCap = 'round';
@@ -1892,9 +2022,10 @@ window.BUILD_GAMES_02_05 = function(api) {
         ctx.fillStyle = '#00E436'; ctx.fillText(`MULT: ${mult}x`, 272, 66);
         ctx.fillStyle = '#29ADFF'; ctx.fillText(`BOLAS: ${ballsLeft}`, 272, 82);
         ctx.fillStyle = '#FF77A8'; ctx.fillText(`REC: ${getHighScore('pico_pinball')}`, 272, 98);
-        ctx.fillStyle = tiltLocked ? '#FF004D' : '#C2C3C7';
-        ctx.fillText(tiltLocked ? '🚨 TILT!!' : `NUDGE: ${tiltCount}/3`, 272, 120);
-        ctx.fillStyle = '#FFF1E8'; ctx.fillText(balls.length > 1 ? `🔥 MULTIBALL x${balls.length}` : 'Acenda P-I-C-O', 272, 146);
+        ctx.fillStyle = kids() ? '#00E436' : (tiltLocked ? '#FF004D' : '#C2C3C7');
+        ctx.fillText(kids() ? '🎈 KIDS SEM TILT' : (tiltLocked ? '🚨 TILT!!' : `NUDGE: ${tiltCount}/3`), 272, 120);
+        ctx.fillStyle = kids() ? '#FFEC27' : '#FFF1E8';
+        ctx.fillText(balls.length > 1 ? `🔥 MULTIBALL x${balls.length}` : (kids() ? '🛡️ SALVA-BOLA ON' : 'Acenda P-I-C-O'), 272, 146);
 
         if (gameOver) {
           rect(24, 58, 190, 62, 'rgba(0,0,0,0.9)');
@@ -1941,11 +2072,11 @@ window.BUILD_GAMES_02_05 = function(api) {
 
     return {
       init() {
-        playerX = 0; dist = 0; speed = 90; turboMeter = 40; turboActive = false;
-        passed = 0; targetPassed = 18; timeLeft = 45; stage = 1; crashTimer = 0; gameOver = false;
+        playerX = 0; dist = 0; speed = 90; turboMeter = kids() ? 80 : 40; turboActive = false;
+        passed = 0; targetPassed = kids() ? 12 : 18; timeLeft = kids() ? 65 : 45; stage = 1; crashTimer = 0; gameOver = false;
         rivals = [];
         for (let i = 0; i < 6; i++) spawnRival(0.25 + i * 0.13);
-        syncCustomHud('45s', 'ENDURO', 0, '0/18');
+        syncCustomHud(`${timeLeft}s`, 'ENDURO', 0, `0/${targetPassed}`);
         setMobileControls([
           { label: '◀ ESQ', cls: 'accent', onHoldStart: () => steerL = true, onHoldEnd: () => steerL = false },
           { label: 'DIR ▶', cls: 'accent', onHoldStart: () => steerR = true, onHoldEnd: () => steerR = false },
@@ -1956,6 +2087,7 @@ window.BUILD_GAMES_02_05 = function(api) {
         if (isPausedState() || gameOver) return;
         timeLeft -= dt;
         if (timeLeft <= 0) { gameOver = true; sfx.hurt(); recordGameScore('pico_enduro', passed * 50 + stage * 500); return; }
+        if (kids()) turboMeter = Math.min(100, turboMeter + 14 * dt);
         if (crashTimer > 0) {
           crashTimer -= dt; speed = 25;
         } else {
@@ -1980,16 +2112,22 @@ window.BUILD_GAMES_02_05 = function(api) {
             drafting = true;
             turboMeter = Math.min(100, turboMeter + (r.isTruck ? 34 : 18) * dt);
           }
-          // Crash collision
+          // Crash collision (Kids mode has Rubber Bumper!)
           if (r.z <= 0.08 && r.z > 0.0 && Math.abs(r.lane - playerX) < (r.isTruck ? 0.28 : 0.22) && crashTimer <= 0) {
-            crashTimer = 0.75; sfx.boom(); turboActive = false; r.z = -0.1;
+            if (kids()) {
+              sfx.ding(2);
+              speed = Math.max(85, speed * 0.88);
+              r.z = -0.05;
+            } else {
+              crashTimer = 0.75; sfx.boom(); turboActive = false; r.z = -0.1;
+            }
           }
           if (r.z <= 0) {
             if (!r.passed && crashTimer <= 0) {
               r.passed = true; passed++; sfx.gem(passed % 6);
               recordGameScore('pico_enduro', passed * 50 + (stage - 1) * 900);
               if (passed >= targetPassed) {
-                stage++; targetPassed += 20; timeLeft += 25; sfx.lvl();
+                stage++; targetPassed += (kids() ? 14 : 20); timeLeft += (kids() ? 30 : 25); sfx.lvl();
               }
             }
             rivals.splice(i, 1);
@@ -2066,6 +2204,11 @@ window.BUILD_GAMES_02_05 = function(api) {
         ctx.textAlign = 'right'; ctx.fillStyle = timeLeft < 10 ? '#FF004D' : '#00E436';
         ctx.fillText(`${Math.ceil(timeLeft)}s · TURBO:`, W - 54, 15);
         rect(W - 50, 8, 42, 7, '#1D2B53'); rect(W - 49, 9, Math.round(40 * (turboMeter / 100)), 5, turboActive ? '#FF004D' : '#FFA300');
+        if (kids()) {
+          rect(4, 22, 118, 12, 'rgba(0,0,0,0.78)');
+          ctx.font = 'bold 6.5px ui-monospace, monospace'; ctx.textAlign = 'left'; ctx.fillStyle = '#00E436';
+          ctx.fillText('🎈 KIDS · PARA-CHOQUE', 8, 30.5);
+        }
 
         if (gameOver) {
           rect(54, 58, 212, 58, 'rgba(0,0,0,0.9)');
@@ -2105,7 +2248,7 @@ window.BUILD_GAMES_02_05 = function(api) {
     let mL = false, mR = false, mU = false, mD = false;
 
     function resetStage() {
-      p = { x: 32, y: 156, vx: 0, vy: 0, floor: 0, onGround: true, climb: false, dir: 1, hammerTimer: 0 };
+      p = { x: 32, y: 156, vx: 0, vy: 0, floor: 0, onGround: true, climb: false, dir: 1, hammerTimer: 0, kidsShield: 0 };
       barrels = [];
       hammers = [{ x: 150, y: 108, taken: false }, { x: 185, y: 42, taken: false }];
       barrelTimer = 0.8; winTimer = 0;
@@ -2113,14 +2256,14 @@ window.BUILD_GAMES_02_05 = function(api) {
 
     function jump() {
       if (gameOver) { OBRA_GAME.init(); return; }
-      if (p.onGround && !p.climb) { p.vy = -128; p.onGround = false; sfx.shoot(); }
+      if (p.onGround && !p.climb) { p.vy = kids() ? -142 : -128; p.onGround = false; sfx.shoot(); }
     }
 
     return {
       init() {
-        score = 0; lives = 3; level = 1; gameOver = false;
+        score = 0; lives = kids() ? 5 : 3; level = 1; gameOver = false;
         resetStage();
-        syncCustomHud('♥♥♥', 'OBRA', 0, 'NV 1');
+        syncCustomHud('♥'.repeat(lives), 'OBRA', 0, kids() ? 'KIDS' : 'NV 1');
         setMobileControls([
           { label: '◀', cls: 'accent', onHoldStart: () => mL = true, onHoldEnd: () => mL = false },
           { label: '▲', cls: '', onHoldStart: () => mU = true, onHoldEnd: () => mU = false },
@@ -2142,6 +2285,7 @@ window.BUILD_GAMES_02_05 = function(api) {
         const down = keys['ArrowDown'] || keys['KeyS'] || mD;
 
         if (p.hammerTimer > 0) p.hammerTimer -= dt;
+        if (p.kidsShield > 0) p.kidsShield -= dt;
 
         // Ladder check
         const lad = LADDERS.find(l => Math.abs(p.x - l.x) < 8 && p.y >= l.y1 - 2 && p.y <= l.y2 + 4);
@@ -2184,9 +2328,9 @@ window.BUILD_GAMES_02_05 = function(api) {
 
         // Spawn & Update Barrels
         barrelTimer -= dt;
-        if (barrelTimer <= 0 && barrels.length < 10) {
-          barrelTimer = Math.max(1.0, 2.2 - level * 0.22);
-          barrels.push({ x: 102, y: 22, floor: 4, dir: 1, spd: 58 + level * 8, falling: false, jumped: false });
+        if (barrelTimer <= 0 && barrels.length < (kids() ? 6 : 10)) {
+          barrelTimer = kids() ? Math.max(2.6, 3.8 - level * 0.15) : Math.max(1.0, 2.2 - level * 0.22);
+          barrels.push({ x: 102, y: 22, floor: 4, dir: 1, spd: (58 + level * 8) * (kids() ? 0.62 : 1), falling: false, jumped: false });
         }
         for (let i = barrels.length - 1; i >= 0; i--) {
           const b = barrels[i];
@@ -2212,6 +2356,10 @@ window.BUILD_GAMES_02_05 = function(api) {
           if (Math.hypot(p.x - b.x, (p.y - 5) - (b.y - 4)) < 9) {
             if (p.hammerTimer > 0) {
               barrels.splice(i, 1); score += 200; sfx.boom(); recordGameScore('pico_obra', score);
+            } else if (kids() && p.kidsShield <= 0) {
+              // Capacete Kids: quebra barril com escudo temporário
+              barrels.splice(i, 1); p.kidsShield = 1.5; score += 50; sfx.ding(4);
+              recordGameScore('pico_obra', score);
             } else {
               lives--; sfx.hurt();
               if (lives <= 0) gameOver = true;
@@ -2220,10 +2368,15 @@ window.BUILD_GAMES_02_05 = function(api) {
             }
           }
         }
-        syncCustomHud('♥'.repeat(Math.max(0, lives)), `OBRA ${level}`, score, p.hammerTimer > 0 ? '🔨 MARRETA!' : 'SUBA!');
+        syncCustomHud('♥'.repeat(Math.max(0, lives)), `OBRA ${level}`, score, p.hammerTimer > 0 ? '🔨 MARRETA!' : (kids() ? '⛑️ KIDS' : 'SUBA!'));
       },
       render() {
         rect(0, 0, W, H, '#29ADFF');
+        if (kids()) {
+          rect(218, 4, 96, 13, 'rgba(0,0,0,0.75)');
+          ctx.font = 'bold 6.5px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#FFEC27';
+          ctx.fillText(p.kidsShield > 0 ? '⛑️ RECARREGANDO!' : '🎈 KIDS CAPACETE ON', 266, 13);
+        }
         // Industrial Girders (#FF004D) & Yellow Ladders (#FFEC27)
         for (const fl of FLOORS) {
           rect(fl.x1, fl.y, fl.x2 - fl.x1, 5, '#FF004D');
@@ -2276,7 +2429,8 @@ window.BUILD_GAMES_02_05 = function(api) {
 
       // Cartridges #06 to #10 for PICO-OS Arcade Workstation
 window.BUILD_GAMES_06_10 = function(api) {
-  const { W, H, RAINBOW, rect, drawRainbowText, ctx, keys, sfx, syncCustomHud, recordGameScore, getHighScore, isPausedState, setMobileControls } = api;
+  const { W, H, RAINBOW, rect, drawRainbowText, ctx, keys, sfx, syncCustomHud, recordGameScore, getHighScore, isPausedState, setMobileControls, isKidsMode } = api;
+  const kids = () => typeof isKidsMode === 'function' && isKidsMode();
 
   // =========================================================================
   // #06 — PICO-LANDER: "Pouso na Marra" (Vetorial Fósforo Verde + Zoom Auto)
@@ -2312,7 +2466,7 @@ window.BUILD_GAMES_06_10 = function(api) {
 
     function spawnShip() {
       ship = { x: 44 + Math.random() * 60, y: 24, vx: 18 + stage * 3, vy: 2, angle: 0, fuel: 100, thrusting: false };
-      wind = ((Math.random() - 0.5) * (6 + stage * 3));
+      wind = kids() ? 0 : ((Math.random() - 0.5) * (6 + stage * 3));
       status = 'play'; statusTimer = 0;
     }
 
@@ -2329,14 +2483,14 @@ window.BUILD_GAMES_06_10 = function(api) {
 
     return {
       init() {
-        score = 0; ships = 3; stage = 1;
+        score = 0; ships = kids() ? 5 : 3; stage = 1;
         buildTerrain(); spawnShip();
-        syncCustomHud('🚀 3', 'LANDER', 0, 'FUEL 100%');
+        syncCustomHud(`🚀 ${ships}`, 'LANDER', 0, kids() ? 'KIDS' : 'FUEL 100%');
         setMobileControls([
           { label: '⟲ ESQ', cls: 'accent', onHoldStart: () => rotL = true, onHoldEnd: () => rotL = false },
           { label: '🔥 PROPULSOR', cls: 'danger', onHoldStart: () => thrustHold = true, onHoldEnd: () => thrustHold = false },
           { label: 'DIR ⟳', cls: 'accent', onHoldStart: () => rotR = true, onHoldEnd: () => rotR = false }
-        ], 'Pouse suave (v < 24, reta) nas bases 1x, 3x ou 5x!');
+        ], kids() ? 'MODO KIDS: Vento 0, Auto-Nível e pouso reforçado (v < 40)!' : 'Pouse suave (v < 24, reta) nas bases 1x, 3x ou 5x!');
       },
       update(dt) {
         if (isPausedState()) return;
@@ -2353,15 +2507,18 @@ window.BUILD_GAMES_06_10 = function(api) {
 
         if (left) ship.angle -= 2.3 * dt;
         if (right) ship.angle += 2.3 * dt;
-        // Gentle auto-stabilize hint when touch user isn't steering
-        if (!left && !right && Math.abs(ship.angle) < 0.14) ship.angle *= Math.pow(0.2, dt);
+        // Auto-level strongly in Kids mode, subtle otherwise
+        if (!left && !right) {
+          if (kids()) ship.angle *= Math.pow(0.08, dt);
+          else if (Math.abs(ship.angle) < 0.14) ship.angle *= Math.pow(0.2, dt);
+        }
 
-        ship.vy += 20 * dt;
+        ship.vy += (kids() ? 14 : 20) * dt;
         ship.vx += wind * 0.22 * dt;
         if (thrust) {
           ship.vx += Math.sin(ship.angle) * 52 * dt;
           ship.vy -= Math.cos(ship.angle) * 52 * dt;
-          ship.fuel = Math.max(0, ship.fuel - 15 * dt);
+          ship.fuel = Math.max(0, ship.fuel - (kids() ? 10 : 15) * dt);
           if (Math.random() < 0.4) sfx.shoot();
         }
         ship.x += ship.vx * dt; ship.y += ship.vy * dt;
@@ -2380,11 +2537,16 @@ window.BUILD_GAMES_06_10 = function(api) {
               break;
             }
           }
-          if (landedPad && spd < 26 && Math.abs(ship.angle) < 0.32) {
+          const maxSpd = kids() ? 40 : 26;
+          const maxAng = kids() ? 0.65 : 0.32;
+          if (landedPad && spd < maxSpd && Math.abs(ship.angle) < maxAng) {
             ship.y = gY - 5; ship.vx = 0; ship.vy = 0;
             const pts = 200 * landedPad + Math.round(ship.fuel * 3);
             score += pts; sfx.slot(); recordGameScore('pico_lander', score);
             status = 'landed'; statusTimer = 1.6;
+          } else if (kids() && spd < 24) {
+            // Trem de pouso Kids rebate suave em encosta!
+            ship.y = gY - 6; ship.vy = -18; ship.vx *= 0.5; sfx.ding(2);
           } else {
             ships--; sfx.boom();
             status = ships <= 0 ? 'gameover' : 'crashed';
@@ -2441,8 +2603,8 @@ window.BUILD_GAMES_06_10 = function(api) {
 
         // Cyan vector telemetry HUD
         ctx.font = 'bold 7.5px ui-monospace, monospace'; ctx.textAlign = 'left'; ctx.fillStyle = '#29ADFF';
-        ctx.fillText(`ALT:${alt}m  VEL:${spd}${spd > 25 ? '(!)' : ''}  VENTO:${wind >= 0 ? '→' : '←'}${Math.abs(Math.round(wind))}`, 6, 11);
-        ctx.fillText(`FUEL:${Math.ceil(ship.fuel)}%  NAVES:${ships}  PTS:${score}`, 6, 21);
+        ctx.fillText(`ALT:${alt}m  VEL:${spd}${spd > (kids() ? 39 : 25) ? '(!)' : ''}  VENTO:${wind >= 0 ? '→' : '←'}${Math.abs(Math.round(wind))}`, 6, 11);
+        ctx.fillText(`FUEL:${Math.ceil(ship.fuel)}%  NAVES:${ships}  PTS:${score}${kids() ? '  🎈KIDS' : ''}`, 6, 21);
         if (alt < 42 && status === 'play') { ctx.fillStyle = '#FFEC27'; ctx.textAlign = 'right'; ctx.fillText('🔍 AUTO-ZOOM', W - 6, 11); }
 
         if (status === 'landed') drawRainbowText('POUSO PERFEITO!', W / 2, 58, 12, 2);
@@ -2489,8 +2651,8 @@ window.BUILD_GAMES_06_10 = function(api) {
         const is8 = idx === 4;
         balls.push({ id: is8 ? 8 : idx + 1, x: pos[0], y: pos[1], vx: 0, vy: 0, r: 5, col: is8 ? '#000000' : colors[idx % colors.length], pocketed: false, is8 });
       });
-      turn = 'you'; moving = false; streak = 0; chalkFire = false; gameOver = false;
-      msg = 'Arraste na mesa p/ mirar e soltar!'; msgTimer = 2.0;
+      turn = 'you'; moving = false; streak = 0; chalkFire = kids(); gameOver = false;
+      msg = kids() ? '🎈 KIDS: Caçapas grandes + Giz Azul + Mira Longa!' : 'Arraste na mesa p/ mirar e soltar!'; msgTimer = 2.0;
     }
 
     function cycleSpin() {
@@ -2533,8 +2695,9 @@ window.BUILD_GAMES_06_10 = function(api) {
       }
       const aimX = target.x - Math.cos(Math.atan2(bestP.y - target.y, bestP.x - target.x)) * 8;
       const aimY = target.y - Math.sin(Math.atan2(bestP.y - target.y, bestP.x - target.x)) * 8;
-      const ang = Math.atan2(aimY - c.y, aimX - c.x) + (Math.random() - 0.5) * 0.14; // beer tremor!
-      shootCue(Math.cos(ang) * 210, Math.sin(ang) * 210);
+      const ang = Math.atan2(aimY - c.y, aimX - c.x) + (Math.random() - 0.5) * (kids() ? 0.44 : 0.14); // beer tremor!
+      const spd = kids() ? 155 : 210;
+      shootCue(Math.cos(ang) * spd, Math.sin(ang) * spd);
       msg = 'Bira tacou!'; msgTimer = 1.0;
     }
 
@@ -2580,9 +2743,10 @@ window.BUILD_GAMES_06_10 = function(api) {
           if (b.y - b.r < T.y) { b.y = T.y + b.r; b.vy = Math.abs(b.vy) * 0.85; sfx.hit(); }
           if (b.y + b.r > T.y + T.h) { b.y = T.y + T.h - b.r; b.vy = -Math.abs(b.vy) * 0.85; sfx.hit(); }
 
-          // Pockets
+          // Pockets (wider funnel in Kids mode!)
+          const pkRad = kids() ? 13.5 : 9.5;
           for (const pk of POCKETS) {
-            if (Math.hypot(b.x - pk.x, b.y - pk.y) < 9.5) {
+            if (Math.hypot(b.x - pk.x, b.y - pk.y) < pkRad) {
               b.pocketed = true; b.vx = 0; b.vy = 0;
               pocketedThisShot.push(b); sfx.gem(6);
               break;
@@ -2621,13 +2785,18 @@ window.BUILD_GAMES_06_10 = function(api) {
           for (const pb of pocketedThisShot) {
             if (pb.cue) {
               pb.pocketed = false; pb.x = 86; pb.y = 90; pb.vx = 0; pb.vy = 0;
-              msg = '🚫 Branca caiu!'; streak = 0; chalkFire = false;
+              msg = '🚫 Branca caiu!'; streak = 0; chalkFire = kids();
             } else if (pb.is8) {
               const rem = balls.some(x => !x.cue && !x.is8 && !x.pocketed);
-              gameOver = true;
-              if (!rem && turn === 'you') { score += 500; msg = '🏆 BOLA 8 NO BAR!! VOCÊ GANHOU!'; sfx.slot(); }
-              else { msg = rem ? '💀 Caiu na 8 cedo demais!' : '💀 Bira encaçapou a 8!'; sfx.hurt(); }
-              recordGameScore('pico_sinuca', score);
+              if (rem && kids()) {
+                pb.pocketed = false; pb.x = 205; pb.y = 90; pb.vx = 0; pb.vy = 0;
+                msg = '🎈 KIDS: Bola 8 protegida e devolvida!'; sfx.ding(4);
+              } else {
+                gameOver = true;
+                if (!rem && turn === 'you') { score += 500; msg = '🏆 BOLA 8 NO BAR!! VOCÊ GANHOU!'; sfx.slot(); }
+                else { msg = rem ? '💀 Caiu na 8 cedo demais!' : '💀 Bira encaçapou a 8!'; sfx.hurt(); }
+                recordGameScore('pico_sinuca', score);
+              }
             } else {
               score += turn === 'you' ? 150 : 0;
               recordGameScore('pico_sinuca', score);
@@ -2643,8 +2812,8 @@ window.BUILD_GAMES_06_10 = function(api) {
             streak++;
             if (streak >= 2) { chalkFire = true; msg = '🔥 GIZ AZUL EM CHAMAS!'; msgTimer = 1.5; sfx.lvl(); }
           } else {
-            if (turn === 'you') { turn = 'bot'; botWait = 0.8; streak = 0; chalkFire = false; }
-            else { turn = 'you'; }
+            if (turn === 'you') { turn = 'bot'; botWait = 0.8; streak = 0; chalkFire = kids(); }
+            else { turn = 'you'; chalkFire = kids(); }
           }
         }
         const remCount = balls.filter(b => !b.cue && !b.pocketed).length;
@@ -2658,7 +2827,8 @@ window.BUILD_GAMES_06_10 = function(api) {
         rect(T.x, T.y, T.w, T.h, '#008751');
 
         for (const pk of POCKETS) {
-          ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.arc(pk.x, pk.y, 7, 0, Math.PI * 2); ctx.fill();
+          if (kids()) { ctx.fillStyle = '#00E436'; ctx.beginPath(); ctx.arc(pk.x, pk.y, 10.5, 0, Math.PI * 2); ctx.fill(); }
+          ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.arc(pk.x, pk.y, kids() ? 9 : 7, 0, Math.PI * 2); ctx.fill();
         }
 
         for (const b of balls) {
@@ -2679,8 +2849,9 @@ window.BUILD_GAMES_06_10 = function(api) {
           const dx = c.x - aim.curX, dy = c.y - aim.curY;
           const dist = Math.min(85, Math.hypot(dx, dy));
           const ang = Math.atan2(dy, dx);
+          const aimLen = (35 + dist) * (kids() ? 1.6 : 1.0);
           ctx.strokeStyle = chalkFire ? '#29ADFF' : '#FFEC27'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]);
-          ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(c.x + Math.cos(ang) * (35 + dist), c.y + Math.sin(ang) * (35 + dist)); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(c.x + Math.cos(ang) * aimLen, c.y + Math.sin(ang) * aimLen); ctx.stroke();
           ctx.setLineDash([]);
           // Cue Stick behind ball
           ctx.strokeStyle = '#FFA300'; ctx.lineWidth = 3;
@@ -2689,7 +2860,7 @@ window.BUILD_GAMES_06_10 = function(api) {
         }
 
         ctx.font = 'bold 7.5px ui-monospace, monospace'; ctx.textAlign = 'left'; ctx.fillStyle = '#FFF1E8';
-        ctx.fillText(`VEZ: ${turn === 'you' ? 'VOCÊ' : 'BIRA DO BAR'} · EFEITO: ${SPINS[spinIdx].label}`, 10, 10);
+        ctx.fillText(`VEZ: ${turn === 'you' ? 'VOCÊ' : 'BIRA DO BAR'} · EFEITO: ${SPINS[spinIdx].label}${kids() ? ' · 🎈KIDS' : ''}`, 10, 10);
         if (msgTimer > 0 || gameOver) {
           rect(56, H - 15, 208, 13, 'rgba(0,0,0,0.88)');
           ctx.fillStyle = '#FFEC27'; ctx.textAlign = 'center'; ctx.fillText(msg, W / 2, H - 6);
@@ -2729,11 +2900,12 @@ window.BUILD_GAMES_06_10 = function(api) {
     function emptyGrid() { return Array.from({ length: ROWS }, () => Array(COLS).fill(null)); }
 
     function randPiece() {
-      const bomb = Math.random() < 0.16;
+      const bomb = Math.random() < (kids() ? 0.22 : 0.16);
+      const palCount = kids() ? 3 : 4;
       return {
         x: 3, y: 0, rot: 0,
-        c1: bomb ? -1 : Math.floor(Math.random() * 4), // -1 = bomb
-        c2: Math.floor(Math.random() * 4)
+        c1: bomb ? -1 : Math.floor(Math.random() * palCount), // -1 = bomb
+        c2: Math.floor(Math.random() * palCount)
       };
     }
 
@@ -2804,12 +2976,14 @@ window.BUILD_GAMES_06_10 = function(api) {
       if (cleared > 0) {
         applyGravity(grid);
         if (isPlayer) { score += cleared * 40; chains++; sfx.gem(chains + 2); recordGameScore('pico_detona', score); }
-        // Push concrete blocks to opponent!
-        const garbage = Math.max(1, Math.floor(cleared / 3));
-        for (let g = 0; g < garbage; g++) {
-          const rx = Math.floor(Math.random() * COLS);
-          for (let y = 0; y < ROWS - 1; y++) targetOppGrid[y][rx] = targetOppGrid[y + 1][rx];
-          targetOppGrid[ROWS - 1][rx] = 99; // Gray concrete!
+        // Push concrete blocks to opponent (in Kids mode, CPU never pushes concrete onto Player!)
+        if (isPlayer || !kids()) {
+          const garbage = Math.max(1, Math.floor(cleared / 3));
+          for (let g = 0; g < garbage; g++) {
+            const rx = Math.floor(Math.random() * COLS);
+            for (let y = 0; y < ROWS - 1; y++) targetOppGrid[y][rx] = targetOppGrid[y + 1][rx];
+            targetOppGrid[ROWS - 1][rx] = 99; // Gray concrete!
+          }
         }
       }
       return cleared;
@@ -2858,8 +3032,8 @@ window.BUILD_GAMES_06_10 = function(api) {
       init() {
         pGrid = emptyGrid(); bGrid = emptyGrid();
         pCur = randPiece(); bCur = randPiece(); botPickColumn(bCur);
-        dropTimer = 0.55; bTimer = 0.7; score = 0; chains = 0; gameOver = false; winner = '';
-        syncCustomHud('1v1', 'PUYO-TRIS', 0, 'BOMBAS!');
+        dropTimer = kids() ? 0.88 : 0.55; bTimer = kids() ? 0.78 : 0.7; score = 0; chains = 0; gameOver = false; winner = '';
+        syncCustomHud('1v1', kids() ? 'KIDS' : 'PUYO-TRIS', 0, 'BOMBAS!');
         setMobileControls([
           { label: '◀', cls: 'accent', onClick: () => moveP(-1) },
           { label: '▶', cls: 'accent', onClick: () => moveP(1) },
@@ -2872,7 +3046,7 @@ window.BUILD_GAMES_06_10 = function(api) {
         const fast = keys['ArrowDown'] || keys['KeyS'];
         dropTimer -= dt * (fast ? 5 : 1);
         if (dropTimer <= 0) {
-          dropTimer = 0.55;
+          dropTimer = kids() ? 0.88 : 0.55;
           pCur.y++;
           if (!canPlace(pGrid, pCur)) {
             pCur.y--;
@@ -2883,7 +3057,7 @@ window.BUILD_GAMES_06_10 = function(api) {
         }
         bTimer -= dt;
         if (bTimer <= 0) {
-          bTimer = 0.35;
+          bTimer = kids() ? 0.78 : 0.35;
           bCur.y++;
           if (!canPlace(bGrid, bCur)) {
             bCur.y--;
@@ -2922,6 +3096,11 @@ window.BUILD_GAMES_06_10 = function(api) {
         ctx.fillStyle = '#00E436';
         ctx.fillText('4+ CORES OU', W / 2, 114);
         ctx.fillText('LINHA = BOMBA!', W / 2, 125);
+        if (kids()) {
+          rect(W / 2 - 38, 134, 76, 12, '#00E436');
+          ctx.fillStyle = '#000000'; ctx.font = 'bold 6.5px ui-monospace, monospace';
+          ctx.fillText('🎈KIDS (3 CORES)', W / 2, 142.5);
+        }
         if (gameOver) {
           rect(54, 60, 212, 52, 'rgba(0,0,0,0.92)');
           drawRainbowText(winner, W / 2, 80, 10, 2);
@@ -2995,9 +3174,9 @@ window.BUILD_GAMES_06_10 = function(api) {
 
     return {
       init() {
-        score = 0; lives = 3; frightTimer = 0; eatChain = 0; gameOver = false;
+        score = 0; lives = kids() ? 5 : 3; frightTimer = kids() ? 5.0 : 0; eatChain = 0; gameOver = false;
         buildMap();
-        syncCustomHud('♥♥♥', 'LABIRINTO', 0, 'NEON CRT');
+        syncCustomHud('♥'.repeat(lives), kids() ? 'KIDS' : 'LABIRINTO', 0, 'NEON CRT');
         setMobileControls([
           { label: '◀', cls: 'accent', onClick: () => setTurn(-1, 0) },
           { label: '▲', cls: 'accent', onClick: () => setTurn(0, -1) },
@@ -3026,7 +3205,7 @@ window.BUILD_GAMES_06_10 = function(api) {
           const tile = map[pac.r][pac.c];
           if (tile === '.' || tile === 'o') {
             map[pac.r][pac.c] = ' '; totalDots--;
-            if (tile === 'o') { frightTimer = 6.5; eatChain = 0; score += 50; sfx.slot(); }
+            if (tile === 'o') { frightTimer = kids() ? 11.0 : 6.5; eatChain = 0; score += 50; sfx.slot(); }
             else { score += 15; sfx.gem(2); }
             recordGameScore('pico_labirinto', score);
             if (totalDots <= 0) { score += 500; buildMap(); sfx.lvl(); }
@@ -3042,7 +3221,7 @@ window.BUILD_GAMES_06_10 = function(api) {
 
         // Move 4 Bugs with 1980 tile targeting (zero heavy AI!)
         for (const b of bugs) {
-          b.step += dt * (frightTimer > 0 ? 4.4 : 5.6);
+          b.step += dt * (frightTimer > 0 ? (kids() ? 3.2 : 4.4) : (kids() ? 3.6 : 5.6));
           while (b.step >= 1) {
             b.step -= 1;
             const opts = [[1,0],[-1,0],[0,1],[0,-1]].filter(([dx, dy]) => {
@@ -3108,7 +3287,7 @@ window.BUILD_GAMES_06_10 = function(api) {
         }
 
         ctx.font = 'bold 7.5px ui-monospace, monospace'; ctx.textAlign = 'left'; ctx.fillStyle = '#29ADFF';
-        ctx.fillText(`PTS: ${score}  ·  VIDAS: ${lives}  ·  ${frightTimer > 0 ? '⚡ SUPER CHIP!' : 'PAC-GLITCH CRT'}`, 8, 11);
+        ctx.fillText(`PTS: ${score} · VIDAS: ${lives} · ${frightTimer > 0 ? '⚡ SUPER CHIP!' : 'PAC-GLITCH CRT'}${kids() ? ' · 🎈KIDS' : ''}`, 8, 11);
         if (gameOver) {
           rect(62, 60, 196, 52, 'rgba(0,0,0,0.92)');
           drawRainbowText('GLITCH FATAL!', W / 2, 78, 12, 2);
@@ -3143,7 +3322,7 @@ window.BUILD_GAMES_06_10 = function(api) {
       else if (r < 0.28) kind = 'river';
       else if (r < 0.42) kind = 'rail';
       const dir = Math.random() < 0.5 ? 1 : -1;
-      const spd = kind === 'rail' ? 280 : (28 + Math.min(45, idx * 1.4)) * (kind === 'river' ? 0.7 : 1);
+      const spd = (kind === 'rail' ? 280 : (28 + Math.min(45, idx * 1.4)) * (kind === 'river' ? 0.7 : 1)) * (kids() ? 0.62 : 1);
       const objs = [];
       if (kind === 'road') {
         const count = 2 + Math.floor(Math.random() * 2);
@@ -3191,10 +3370,10 @@ window.BUILD_GAMES_06_10 = function(api) {
 
     return {
       init() {
-        frog = { x: W / 2, row: 1, maxRow: 1 };
+        frog = { x: W / 2, row: 1, maxRow: 1, floating: false, invuln: 0 };
         lanes = []; ensureLanes();
         camY = 0; floodY = -3; score = 0; combo = 1; comboT = 0; gameOver = false; cause = '';
-        syncCustomHud('🐸', 'x1', 0, 'MARG.');
+        syncCustomHud('🐸', 'x1', 0, kids() ? 'KIDS' : 'MARG.');
         setMobileControls([
           { label: '◀', cls: 'accent', onClick: () => hop(-1, 0) },
           { label: '▲ PULAR!', cls: 'primary', onClick: () => hop(0, 1) },
@@ -3205,10 +3384,14 @@ window.BUILD_GAMES_06_10 = function(api) {
       update(dt) {
         if (isPausedState() || gameOver) return;
         if (comboT > 0) { comboT -= dt; if (comboT <= 0) combo = 1; }
+        if (frog.invuln > 0) frog.invuln -= dt;
         const targetCam = Math.max(0, frog.row - 3);
         camY += (targetCam - camY) * Math.min(1, dt * 8);
-        floodY += (0.52 + frog.maxRow * 0.012) * dt;
-        if (frog.row < floodY - 0.5) { gameOver = true; cause = '🌊 ENGOLIDA PELA ENCHENTE!'; sfx.hurt(); return; }
+        floodY += (0.52 + frog.maxRow * 0.012) * (kids() ? 0.45 : 1) * dt;
+        if (frog.row < floodY - 0.5) {
+          if (kids()) { frog.row = Math.ceil(floodY + 1); frog.floating = true; sfx.ding(3); }
+          else { gameOver = true; cause = '🌊 ENGOLIDA PELA ENCHENTE!'; sfx.hurt(); return; }
+        }
 
         // Update visible + nearby lanes
         const minL = Math.max(0, Math.floor(camY) - 2);
@@ -3233,22 +3416,30 @@ window.BUILD_GAMES_06_10 = function(api) {
         }
 
         // Frog collision with current lane
+        frog.floating = false;
         const cur = lanes[frog.row];
         if (cur) {
           if (cur.kind === 'road') {
-            if (cur.objs.some(o => frog.x > o.x - 4 && frog.x < o.x + o.w + 4)) {
-              gameOver = true; cause = '🚚 ATROPELADA NA MARGINAL!'; sfx.boom();
+            if (frog.invuln <= 0 && cur.objs.some(o => frog.x > o.x - 4 && frog.x < o.x + o.w + 4)) {
+              if (kids()) { frog.row = Math.max(0, frog.row - 1); frog.invuln = 1.1; sfx.ding(3); }
+              else { gameOver = true; cause = '🚚 ATROPELADA NA MARGINAL!'; sfx.boom(); }
             }
           } else if (cur.kind === 'rail') {
-            if (cur.trainTimer <= 0 && frog.x > cur.trainX && frog.x < cur.trainX + 120) {
-              gameOver = true; cause = '🚄 TREM-BALA!'; sfx.boom();
+            if (frog.invuln <= 0 && cur.trainTimer <= 0 && frog.x > cur.trainX && frog.x < cur.trainX + 120) {
+              if (kids()) { frog.row = Math.max(0, frog.row - 1); frog.invuln = 1.1; sfx.ding(3); }
+              else { gameOver = true; cause = '🚄 TREM-BALA!'; sfx.boom(); }
             }
           } else if (cur.kind === 'river') {
             const log = cur.objs.find(o => frog.x >= o.x - 2 && frog.x <= o.x + o.w + 2);
-            if (!log) { gameOver = true; cause = '💧 CAIU NO TIETÊ!'; sfx.hurt(); }
-            else {
+            if (!log) {
+              if (kids()) {
+                frog.floating = true;
+                frog.x = Math.max(10, Math.min(W - 10, frog.x + cur.dir * cur.spd * 0.25 * dt));
+              } else { gameOver = true; cause = '💧 CAIU NO TIETÊ!'; sfx.hurt(); }
+            } else {
               frog.x += cur.dir * cur.spd * dt;
-              if (frog.x < 4 || frog.x > W - 4) { gameOver = true; cause = '🐊 LEVADA PRA FORA!'; sfx.hurt(); }
+              if (kids()) frog.x = Math.max(10, Math.min(W - 10, frog.x));
+              else if (frog.x < 4 || frog.x > W - 4) { gameOver = true; cause = '🐊 LEVADA PRA FORA!'; sfx.hurt(); }
             }
           }
         }
@@ -3298,15 +3489,19 @@ window.BUILD_GAMES_06_10 = function(api) {
         const flY = laneScreenY(floodY);
         if (flY < H) { ctx.globalAlpha = 0.65; rect(0, flY, W, H - flY, '#29ADFF'); ctx.globalAlpha = 1; }
 
-        // Frog
+        // Frog (+ Yellow Life Tube in Kids Mode!)
         const fy = laneScreenY(frog.row);
+        if (frog.floating && kids()) {
+          rect(frog.x - 7, fy + 1, 14, 14, '#FFEC27');
+          rect(frog.x - 6, fy + 2, 12, 2, '#FF004D');
+        }
         rect(frog.x - 5, fy + 3, 10, 10, '#000000');
         rect(frog.x - 4, fy + 4, 8, 8, '#FFEC27');
         rect(frog.x - 3, fy + 5, 2, 2, '#000000'); rect(frog.x + 1, fy + 5, 2, 2, '#000000');
 
-        rect(4, 4, 150, 13, 'rgba(0,0,0,0.75)');
+        rect(4, 4, kids() ? 196 : 150, 13, 'rgba(0,0,0,0.75)');
         ctx.font = 'bold 7.5px ui-monospace, monospace'; ctx.textAlign = 'left'; ctx.fillStyle = '#FFEC27';
-        ctx.fillText(`PTS: ${score}  ·  COMBO x${combo}`, 8, 13);
+        ctx.fillText(`PTS: ${score}  ·  COMBO x${combo}${kids() ? '  ·  🎈BOIA KIDS' : ''}`, 8, 13);
 
         if (gameOver) {
           rect(44, 58, 232, 56, 'rgba(0,0,0,0.92)');
@@ -3539,12 +3734,14 @@ window.BUILD_GAMES_06_10 = function(api) {
       function initGame(startImmediately = false, presetTop10 = null) {
         if (presetTop10) activeTop10 = { ...defaultActiveTop10(), ...presetTop10 };
         const is1HP = !!activeTop10.m5;
+        const kidsOn = isKidsMode();
+        const baseHp = is1HP ? (kidsOn ? 5 : 1) : (kidsOn ? 10 : 5);
         player = {
-          x: W / 2, y: H / 2, hp: is1HP ? 1 : 5, maxHp: is1HP ? 1 : 5, invuln: 0,
+          x: W / 2, y: H / 2, hp: baseHp, maxHp: baseHp, invuln: kidsOn ? 1.5 : 0,
           dashCd: 0, dashTime: 0, dashDx: 1, dashDy: 0, dashStartX: W / 2, dashStartY: H / 2,
-          faceX: 1, faceY: 0, lvl: 1, xp: 0, nextXp: 8, fireCd: 0, fireRate: 0.42,
-          projCount: 1, orbits: 0, orbitAngle: 0, zapLvl: 0, zapCd: 1.5, dashBoom: 0, magRadius: 34,
-          grazeResetFlag: false
+          faceX: 1, faceY: 0, lvl: 1, xp: 0, nextXp: 8, fireCd: 0, fireRate: kidsOn ? 0.34 : 0.42,
+          projCount: kidsOn ? 2 : 1, orbits: kidsOn ? 2 : 0, orbitAngle: 0, zapLvl: 0, zapCd: 1.5, dashBoom: 0, magRadius: kidsOn ? 80 : 34,
+          grazeResetFlag: false, kidsRegenTimer: 0
         };
         resetEntities();
         score = 0; wave = 1; combo = 0; comboTimer = 0;
@@ -3598,7 +3795,7 @@ window.BUILD_GAMES_06_10 = function(api) {
 
       function syncHud() {
         if (!player) return;
-        if (activeTop10.m5) hudHp.textContent = '🥚 1 HP';
+        if (activeTop10.m5 && !isKidsMode()) hudHp.textContent = '🥚 1 HP';
         else hudHp.textContent = '♥'.repeat(Math.max(0, player.hp)) + '♡'.repeat(Math.max(0, player.maxHp - player.hp));
         hudWave.textContent = `W${wave}`;
         hudScore.textContent = `${score}`;
@@ -3823,7 +4020,7 @@ window.BUILD_GAMES_06_10 = function(api) {
         player.dashDx = player.faceX / len; player.dashDy = player.faceY / len;
         player.dashStartX = player.x; player.dashStartY = player.y;
         player.dashTime = 0.15;
-        player.dashCd = activeTop10.m9 ? 0.48 : 0.92;
+        player.dashCd = (activeTop10.m9 ? 0.48 : 0.92) * (isKidsMode() ? 0.55 : 1);
         player.invuln = Math.max(player.invuln, 0.28);
         player.grazeResetFlag = false;
         pinballChain = 0;
@@ -4047,7 +4244,7 @@ window.BUILD_GAMES_06_10 = function(api) {
 
       function hurtPlayer() {
         if (player.invuln > 0) return;
-        player.hp--; player.invuln = 1.05; shake = 6; hitStop = 0.05; sfx.hurt();
+        player.hp--; player.invuln = isKidsMode() ? 1.55 : 1.05; shake = 6; hitStop = 0.05; sfx.hurt();
         burst(player.x, player.y, '#FF004D', 12, 85);
         addRing(player.x, player.y, 3, 28, '#FF004D', 0.3);
         syncHud();
@@ -4134,6 +4331,15 @@ window.BUILD_GAMES_06_10 = function(api) {
 
         if (player.dashCd > 0) player.dashCd -= dtBase;
         if (player.invuln > 0) player.invuln -= dtBase;
+        if (isKidsMode() && player.hp < player.maxHp) {
+          player.kidsRegenTimer = (player.kidsRegenTimer || 0) + dtBase;
+          if (player.kidsRegenTimer >= 4.5) {
+            player.kidsRegenTimer = 0;
+            player.hp++;
+            addFloater(player.x, player.y - 10, '+1 ♥ KIDS', '#00E436');
+            syncHud();
+          }
+        }
 
         const isDashing = player.dashTime > 0;
         if (isDashing) {
@@ -4206,8 +4412,9 @@ window.BUILD_GAMES_06_10 = function(api) {
             }
           }
         } else {
-          player.x += mx * 76 * dtBase;
-          player.y += my * 76 * dtBase;
+          const pSpd = isKidsMode() ? 92 : 76;
+          player.x += mx * pSpd * dtBase;
+          player.y += my * pSpd * dtBase;
           // #09 End of dash Supernova!
           if (dashPrevActive && activeTop10.m9) {
             player.invuln = Math.max(player.invuln, 0.25);
@@ -4485,7 +4692,7 @@ window.BUILD_GAMES_06_10 = function(api) {
             }
           } else {
             const dx = player.x - e.x, dy = player.y - e.y, dist = Math.hypot(dx, dy) || 1;
-            let spd = e.spd;
+            let spd = e.spd * (isKidsMode() ? 0.65 : 1);
             if (e.type === 'ghost' && Math.sin(e.phase * 0.5) > 0.65) spd *= 1.9;
             const wobble = e.type === 'bat' ? Math.sin(e.phase * 1.4) * 28 : 0;
             e.vx *= Math.pow(0.05, dt); e.vy *= Math.pow(0.05, dt);
@@ -4803,6 +5010,12 @@ window.BUILD_GAMES_06_10 = function(api) {
         // Top HUD XP bar & #08 Slot Marquee
         if (state !== 'title') {
           rect(0, 0, W, 3, '#000000'); rect(0, 0, Math.round(W * (player.xp / player.nextXp)), 2, '#00E436');
+          if (isKidsMode()) {
+            rect(W / 2 - 30, 5, 60, 10, '#00E436');
+            ctx.strokeStyle = '#000000'; ctx.lineWidth = 1; ctx.strokeRect(W / 2 - 30, 5, 60, 10);
+            ctx.font = 'bold 6.5px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#000000';
+            ctx.fillText('🎈 MODO KIDS', W / 2, 12.5);
+          }
           if (combo >= 3) {
             ctx.font = 'bold 8.5px ui-monospace, Consolas, monospace'; ctx.textAlign = 'left';
             ctx.fillStyle = '#000000'; ctx.fillText(`COMBO x${combo}`, 6, 14);
@@ -5227,14 +5440,33 @@ window.BUILD_GAMES_06_10 = function(api) {
 
       // --- Render Estante (#01 ao #10) & Cache View ---
       function renderHubAndData() {
-        hubSummary.textContent = `RECORDE SURVIVOR: ${store.stats.bestScore} PTS · ${(store.stats.playedGames || []).length}/10 JOGADOS`;
+        syncKidsUI();
+        const kidsOn = isKidsMode();
+        hubSummary.textContent = `${kidsOn ? '🎈 MODO KIDS ON' : '🔥 MODO RAIZ'} · RECORDE SURVIVOR: ${store.stats.bestScore} PTS · ${(store.stats.playedGames || []).length}/10 JOGADOS`;
         lastSavedLabel.textContent = `Último save: ${formatSavedTime(store.lastSavedAt)}`;
 
         const surv = GAMES_MAP.pico_survivor;
         const hasSave = !!store.savedRun;
         const saveDesc = hasSave ? `Continuar de Onda ${store.savedRun.wave} · Nível ${store.savedRun.lvl} (${store.savedRun.score} pts)` : surv.desc;
 
-        shelfHero.innerHTML = `
+        const kidsBannerHtml = `
+          <div id="kids-shelf-banner" class="kids-banner ${kidsOn ? 'on' : 'off'}">
+            <div style="flex:1 1 280px;display:flex;flex-direction:column;gap:3px;">
+              <strong style="font-size:14px;color:${kidsOn ? '#FFEC27' : '#FF77A8'};">
+                ${kidsOn ? '🎈 MODO KIDS (FÁCIL) ESTÁ LIGADO EM TODOS OS 10 JOGOS!' : '🔥 MODO RAIZ (ARCADE CLÁSSICO) ATIVO'}
+              </strong>
+              <span style="font-size:11px;color:#FFF1E8;line-height:1.35;">
+                ${kidsOn
+                  ? 'Mais vidas, regeneração, dicas nas cartas do Truco, Salva-Bola no Pinball, vento zero no Lander, caçapa gigante na Sinuca e boia no Travessia. Desligar salva em cache!'
+                  : 'Regras originais Arcade sem ajudinhas! Quer facilitar pra crianças ou iniciantes? Ligue o Modo Kids — sua escolha fica salva no cache local.'}
+              </span>
+            </div>
+            <button id="hub-kids-toggle-btn" type="button" class="pico-btn kids-toggle ${kidsOn ? 'off' : 'on'}" style="padding:8px 14px;font-size:12px;">
+              ${kidsOn ? '🔥 DESLIGAR MODO KIDS (Modo Raiz)' : '🎈 LIGAR MODO KIDS (Modo Fácil)'}
+            </button>
+          </div>`;
+
+        shelfHero.innerHTML = kidsBannerHtml + `
           <div class="cart-card featured">
             <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:12px;">
               <div style="display:flex;align-items:center;gap:12px;flex:1 1 280px;">
@@ -5304,6 +5536,7 @@ window.BUILD_GAMES_06_10 = function(api) {
             </article>`;
         }).join('');
 
+        document.getElementById('hub-kids-toggle-btn')?.addEventListener('click', toggleKidsMode);
         document.getElementById('hub-resume-btn')?.addEventListener('click', () => {
           launchCartridge('pico_survivor', { resume: !!store.savedRun });
         });

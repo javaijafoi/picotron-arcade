@@ -19,6 +19,7 @@ Estação de trabalho arcade retrô inspirada no **Picotron** (`320x176` escalad
 
 ## Recursos da Workstation
 
+- **Modo Kids / Fácil em Todos os 10 Jogos (`🎈 MODO KIDS`)**: inicia **ligado por padrão** com botão e banner de alto destaque (na barra superior, na Estante e dentro de cada jogo), podendo ser desligado a qualquer momento — a escolha é salva automaticamente no cache (`localStorage`). Cada cartucho ganha ajudas sob medida: regeneração/10 HP no Survivor, dicas de força das cartas no Truco, Salva-Bola e zero TILT no Pinball, para-choque de borracha no Enduro, Capacete Kids no Obra, vento zero + auto-nível no Lander, caçapa gigante + Giz Azul + proteção na Bola 8 na Sinuca, 3 cores sem concreto rival no Detona, Bugs lentos + Super Chip longo no Labirinto e boia salva-vidas + para-choque elástico no Travessia.
 - **Gaveta Dobrável no #01 (`🧪 Ver 10 Modos Malucos`)**: começa recolhida para manter a estante limpa; ao expandir, permite jogar qualquer um dos 10 mutadores clássicos do Pico-Survivor (ou ligar os 10 ao mesmo tempo).
 - **Tela Cheia & Controles Adaptados por Cartucho**: cada jogo configura seu painel de botões touch/mouse dedicado (flippers no Pinball, Truco/Coberta/Sinal no Truco, acelerador/freio/turbo no Enduro, giz/spin na Sinuca, etc.) e pausa universal (`P`, `Esc` ou botão `⏸`).
 - **Conquistas, Recordes por Cartucho & Cache Local**: aba `🏆 Conquistas & Save` exibe recorde individual dos 10 jogos, conquistas desbloqueadas e exportação/importação `.json`.
