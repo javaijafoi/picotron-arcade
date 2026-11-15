@@ -4944,7 +4944,7 @@ window.BUILD_GAMES_06_10 = function(api) {
         if (activeGameId !== 'pico_survivor') {
           e.preventDefault();
           ensureAudio();
-          const p = toCanvasPos(e);
+          const p = canvasPos(e.clientX, e.clientY);
           if (customPaused) {
             const hit = (b) => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
             if (hit(CUSTOM_PAUSE_BOX.restart)) { restartActiveGame(); return; }
@@ -5032,7 +5032,7 @@ window.BUILD_GAMES_06_10 = function(api) {
 
       canvas.addEventListener('pointermove', (e) => {
         if (activeGameId !== 'pico_survivor') {
-          if (!customPaused) CARTRIDGES[activeGameId]?.onPointerMove?.(toCanvasPos(e));
+          if (!customPaused) CARTRIDGES[activeGameId]?.onPointerMove?.(canvasPos(e.clientX, e.clientY));
           return;
         }
         const p = canvasPos(e.clientX, e.clientY);
@@ -5048,7 +5048,7 @@ window.BUILD_GAMES_06_10 = function(api) {
 
       canvas.addEventListener('pointerup', (e) => {
         if (activeGameId !== 'pico_survivor') {
-          if (!customPaused) CARTRIDGES[activeGameId]?.onPointerUp?.(toCanvasPos(e));
+          if (!customPaused) CARTRIDGES[activeGameId]?.onPointerUp?.(canvasPos(e.clientX, e.clientY));
           return;
         }
         if (pauseBox.dragging) { pauseBox.dragging = false; }
@@ -5221,7 +5221,7 @@ window.BUILD_GAMES_06_10 = function(api) {
       // --- Render Estante (#01 ao #10) & Cache View ---
       function renderHubAndData() {
         hubSummary.textContent = `RECORDE SURVIVOR: ${store.stats.bestScore} PTS · ${(store.stats.playedGames || []).length}/10 JOGADOS`;
-        lastSavedLabel.textContent = `Último save: ${fmtTime(store.lastSavedAt)}`;
+        lastSavedLabel.textContent = `Último save: ${formatSavedTime(store.lastSavedAt)}`;
 
         const surv = GAMES_MAP.pico_survivor;
         const hasSave = !!store.savedRun;
