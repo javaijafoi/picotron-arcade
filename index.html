@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PICO-OS // Arcade Workstation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>PICO-OS // Arcade Workstation — Top 10 Maluco</title>
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
       margin: 0;
       padding: 0;
@@ -18,19 +18,20 @@
       background-position: 0 0, 8px 8px;
       color: #FFF1E8;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      overscroll-behavior: contain;
     }
     body {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 14px;
+      padding: 10px;
     }
     .workstation {
       width: 100%;
-      max-width: 920px;
+      max-width: 960px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
     .pico-win {
       border: 3px solid #000000;
@@ -38,8 +39,8 @@
       box-shadow: 5px 5px 0 #000000;
     }
     .pico-titlebar {
-      min-height: 34px;
-      padding: 4px 10px;
+      min-height: 36px;
+      padding: 5px 10px;
       background: #C2C3C7;
       color: #000000;
       border-bottom: 3px solid #000000;
@@ -47,8 +48,8 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      font-size: 13px;
+      gap: 6px;
+      font-size: 12px;
       font-weight: 700;
     }
     .flex-row {
@@ -72,31 +73,23 @@
       font-family: inherit;
       font-size: 12px;
       font-weight: 700;
-      padding: 5px 10px;
+      padding: 6px 10px;
+      min-height: 30px;
       cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
       box-shadow: inset 1px 1px 0 #FFF1E8, inset -1px -1px 0 #5F574F, 1px 1px 0 #000000;
     }
-    .pico-btn:hover { filter: brightness(1.05); }
+    .pico-btn:hover { filter: brightness(1.06); }
     .pico-btn:active {
       box-shadow: inset 1px 1px 0 #5F574F, inset -1px -1px 0 #FFF1E8;
       transform: translate(1px, 1px);
     }
-    .pico-btn.active-tab {
-      background: #FFEC27;
-      color: #000000;
-    }
-    .pico-btn.primary {
-      background: #00E436;
-      color: #000000;
-    }
-    .pico-btn.accent {
-      background: #29ADFF;
-      color: #000000;
-    }
-    .pico-btn.danger {
-      background: #FF004D;
-      color: #FFF1E8;
-    }
+    .pico-btn.active-tab { background: #FFEC27; color: #000000; }
+    .pico-btn.primary { background: #00E436; color: #000000; }
+    .pico-btn.accent { background: #29ADFF; color: #000000; }
+    .pico-btn.danger { background: #FF004D; color: #FFF1E8; }
+    .pico-btn.warn { background: #FFA300; color: #000000; }
     .pill {
       display: inline-block;
       padding: 2px 6px;
@@ -105,13 +98,20 @@
       font-weight: 700;
       line-height: 1.3;
     }
+    .plat-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      border: 1px solid #000000;
+    }
+    .plat-both { background: #008751; color: #FFF1E8; }
+    .plat-pc { background: #FFA300; color: #000000; }
     .views-stage {
       position: relative;
       min-height: 460px;
     }
-    .spa-view {
-      outline: none;
-    }
+    .spa-view { outline: none; }
     .spa-view.inactive {
       content-visibility: hidden;
       position: absolute;
@@ -123,18 +123,22 @@
       pointer-events: none;
     }
     @supports not (content-visibility: hidden) {
-      .spa-view.inactive {
-        display: none;
-      }
+      .spa-view.inactive { display: none; }
     }
     .picotron-game-shell {
       content-visibility: auto;
       contain-intrinsic-size: auto 320px auto 520px;
     }
+    .shelf-hero {
+      padding: 12px 12px 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
     .shelf-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 10px;
       padding: 12px;
     }
     .cart-card {
@@ -145,21 +149,19 @@
       flex-direction: column;
       justify-content: space-between;
     }
-    .cart-card.slot-empty {
-      background: #141e3d;
-      border-style: dashed;
-      border-color: #83769C;
-      box-shadow: none;
+    .cart-card.featured {
+      border-color: #FFEC27;
+      background: linear-gradient(135deg, #0f1733 0%, #1D2B53 100%);
     }
     .cart-art {
-      height: 108px;
+      min-height: 92px;
       background: #000000;
       border-bottom: 2px solid #000000;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 8px;
+      padding: 10px;
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -176,6 +178,8 @@
       background: #000000;
       display: flex;
       justify-content: center;
+      align-items: center;
+      position: relative;
     }
     canvas#game {
       display: block;
@@ -183,6 +187,7 @@
       aspect-ratio: 320 / 176;
       touch-action: none;
       cursor: crosshair;
+      user-select: none;
     }
     .statusbar {
       padding: 6px 10px;
@@ -192,10 +197,10 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      font-size: 12px;
+      gap: 6px;
+      font-size: 11px;
     }
-    .hood-panel {
+    .hood-panel, .top10-panel {
       padding: 8px 10px;
       background: #1D2B53;
       border-top: 3px solid #000000;
@@ -203,17 +208,121 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
       font-size: 12px;
     }
-    .hood-panel.hidden { display: none; }
+    .hood-panel.hidden, .top10-panel.hidden { display: none; }
+    .top10-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      width: 100%;
+    }
+    .mode-chip {
+      border: 2px solid #000000;
+      background: #0f1733;
+      color: #C2C3C7;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 7px;
+      min-height: 30px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .mode-chip.on {
+      background: #FFEC27;
+      color: #000000;
+      box-shadow: 2px 2px 0 #000000;
+    }
     .col-btn {
-      width: 18px;
-      height: 18px;
+      width: 22px;
+      height: 22px;
       border: 2px solid #000000;
       cursor: pointer;
       padding: 0;
     }
+
+    /* Mobile Touch Arcade Deck */
+    .mobile-deck {
+      display: none;
+      background: #0f1733;
+      border-top: 3px solid #000000;
+      padding: 8px 10px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      user-select: none;
+    }
+    .mobile-deck.visible { display: flex; }
+    .touch-action-btn {
+      min-height: 48px;
+      min-width: 96px;
+      padding: 8px 14px;
+      font-size: 13px;
+      border: 2px solid #000000;
+      box-shadow: 3px 3px 0 #000000;
+    }
+    .touch-action-btn.virus-alert {
+      background: #FFEC27;
+      color: #000000;
+      animation: pulse-btn 0.45s infinite alternate;
+    }
+    @keyframes pulse-btn {
+      from { transform: scale(1); background: #FFEC27; }
+      to { transform: scale(1.06); background: #00E436; }
+    }
+
+    /* Universal Fullscreen Mode (works on Desktop, Android & iOS Safari) */
+    #pico-shell.fullscreen-mode {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      width: 100vw;
+      height: 100dvh;
+      max-width: none;
+      margin: 0;
+      border: 0;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #000000;
+    }
+    #pico-shell.fullscreen-mode .pico-titlebar {
+      padding: 4px 8px;
+      padding-top: max(4px, env(safe-area-inset-top));
+      min-height: 34px;
+    }
+    #pico-shell.fullscreen-mode .canvas-wrap {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      background: #000000;
+      padding: 2px;
+    }
+    #pico-shell.fullscreen-mode canvas#game {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 100%;
+      margin: auto;
+    }
+    #pico-shell.fullscreen-mode .mobile-deck {
+      display: flex;
+    }
+    #pico-shell.fullscreen-mode .statusbar .hint-text {
+      display: none;
+    }
+
+    @media (hover: none), (pointer: coarse) {
+      body { padding: 6px; }
+      .pico-btn { min-height: 36px; padding: 6px 10px; }
+      .mobile-deck { display: flex; }
+      .statusbar .hint-text { display: none; }
+    }
+
     .data-grid {
       padding: 12px;
       display: grid;
@@ -250,7 +359,7 @@
       font-size: 12px;
       font-weight: 700;
       box-shadow: 4px 4px 0 #000000;
-      z-index: 50;
+      z-index: 10050;
       display: none;
     }
     .toast.show { display: block; }
@@ -266,14 +375,14 @@
             <span style="background:#FF004D"></span><span style="background:#FFEC27"></span>
             <span style="background:#00E436"></span><span style="background:#29ADFF"></span>
           </span>
-          <span>PICO-OS v1.0 // ARCADE WORKSTATION</span>
+          <span>PICO-OS v2.0 // TOP 10 ARCADE</span>
           <span id="cache-badge" class="pill" style="background:#008751;color:#FFF1E8;">💾 Cache Local OK</span>
         </div>
 
         <nav class="flex-row" aria-label="Navegação do Arcade">
-          <button id="nav-hub" data-view="view-hub" class="nav-btn pico-btn active-tab" type="button">🕹️ Estante</button>
-          <button id="nav-game" data-view="view-game" class="nav-btn pico-btn" type="button">▶ pico_survivor.p64</button>
-          <button id="nav-data" data-view="view-data" class="nav-btn pico-btn" type="button">🏆 Conquistas & Cache</button>
+          <button id="nav-hub" data-view="view-hub" class="nav-btn pico-btn active-tab" type="button">🕹️ Estante (#01-#10)</button>
+          <button id="nav-game" data-view="view-game" class="nav-btn pico-btn" type="button">▶ Jogar</button>
+          <button id="nav-data" data-view="view-data" class="nav-btn pico-btn" type="button">🏆 Conquistas & Save</button>
         </nav>
       </div>
     </header>
@@ -284,14 +393,15 @@
       <section id="view-hub" class="spa-view" tabindex="-1" aria-hidden="false">
         <div class="pico-win">
           <div class="pico-titlebar">
-            <span>ESTANTE DE CARTUCHOS (.P64) — PROGRESSO SALVO NO NAVEGADOR</span>
+            <span>ESTANTE DE CARTUCHOS (.P64) — TOP 10 MALUCO (#01 AO #10)</span>
             <span id="hub-summary" class="pill" style="color:#FFEC27;">RECORDE: 0</span>
           </div>
 
+          <div id="shelf-hero" class="shelf-hero"></div>
           <div id="shelf-grid" class="shelf-grid"></div>
 
           <div class="statusbar">
-            <span style="color:#FFF1E8;">⚡ Zero cadastro, zero servidor: seu progresso fica salvo automaticamente neste navegador.</span>
+            <span style="color:#FFF1E8;">📱 Dica Celular: use <strong>⛶ Tela Cheia</strong> para aproveitar toda a tela e botões grandes de Dash/Pause.</span>
             <span id="last-saved-label" style="color:#FFEC27;font-weight:700;">Último save: --</span>
           </div>
         </div>
@@ -302,17 +412,18 @@
         <div id="pico-shell" class="picotron-game-shell pico-win">
           <div class="pico-titlebar">
             <div class="flex-row">
-              <button id="btn-back-hub" type="button" class="pico-btn" style="padding:2px 7px;">← Estante</button>
-              <span>pico_survivor.p64</span>
+              <button id="btn-back-hub" type="button" class="pico-btn" style="padding:4px 8px;">← Estante</button>
+              <span id="active-mode-label">pico_survivor.p64</span>
               <span id="cart-size" class="pill" style="background:#1D2B53;color:#FFF1E8;">-- KB</span>
             </div>
             <div class="flex-row" style="font-variant-numeric:tabular-nums;">
               <span id="hud-hp" class="pill" style="color:#FF004D;">♥♥♥♥♥</span>
               <span id="hud-wave" class="pill" style="color:#FFEC27;">W1</span>
               <span id="hud-score" class="pill" style="color:#00E436;">0</span>
-              <button id="btn-pause" type="button" title="Pausar (P / Esc)" class="pico-btn" style="background:#FFF1E8;padding:3px 7px;">⏸</button>
-              <button id="btn-sound" type="button" title="Som (M)" class="pico-btn" style="background:#FFF1E8;padding:3px 7px;">🔊</button>
-              <button id="btn-reset" type="button" title="Nova Partida (R)" class="pico-btn" style="background:#FFF1E8;padding:3px 7px;">↻</button>
+              <button id="btn-fullscreen" type="button" title="Tela Cheia (Celular e PC)" class="pico-btn accent" style="padding:4px 8px;">⛶ Tela Cheia</button>
+              <button id="btn-pause" type="button" title="Pausar (P / Esc)" class="pico-btn" style="background:#FFF1E8;padding:4px 8px;">⏸</button>
+              <button id="btn-sound" type="button" title="Som (M)" class="pico-btn" style="background:#FFF1E8;padding:4px 8px;">🔊</button>
+              <button id="btn-reset" type="button" title="Nova Partida (R)" class="pico-btn" style="background:#FFF1E8;padding:4px 8px;">↻</button>
             </div>
           </div>
 
@@ -320,12 +431,41 @@
             <canvas id="game" width="960" height="528"></canvas>
           </div>
 
+          <!-- Mobile / Fullscreen Dedicated Arcade Deck -->
+          <div id="mobile-deck" class="mobile-deck">
+            <div class="flex-row">
+              <button id="btn-touch-top10" type="button" class="pico-btn warn" style="min-height:44px;">🧪 Top 10</button>
+              <button id="btn-touch-virus" type="button" class="pico-btn" style="min-height:44px;display:none;">🦠 [F] Vírus!</button>
+              <span id="touch-hint" style="font-size:11px;color:#C2C3C7;">Arraste na tela p/ mover</span>
+            </div>
+            <div class="flex-row">
+              <button id="btn-touch-pause" type="button" class="pico-btn touch-action-btn" style="background:#FFF1E8;color:#000;min-width:78px;">⏸ PAUSE</button>
+              <button id="btn-touch-dash" type="button" class="pico-btn danger touch-action-btn">⚡ DASH!</button>
+            </div>
+          </div>
+
           <div class="statusbar">
             <div class="flex-row">
               <span id="hud-lvl" style="color:#FFEC27;font-weight:700;">LV 1</span>
-              <span style="color:#FFF1E8;">Mouse/WASD: mover · Clique/Espaço: Dash · P/Esc: Pausar</span>
+              <span id="hud-active-badges" class="pill" style="color:#29ADFF;">Base</span>
+              <span class="hint-text" style="color:#FFF1E8;">Mouse/WASD: mover · Clique/Espaço: Dash · P/Esc: Pause · F: Vírus</span>
             </div>
-            <button id="btn-hood" type="button" class="pico-btn" style="background:#FFEC27;">⚡ Abrir Capô</button>
+            <div class="flex-row">
+              <button id="btn-toggle-top10" type="button" class="pico-btn warn">🧪 Top 10 (#01-#10)</button>
+              <button id="btn-hood" type="button" class="pico-btn" style="background:#FFEC27;">⚡ Capô</button>
+            </div>
+          </div>
+
+          <!-- Top 10 Live Toggle Lab -->
+          <div id="top10-panel" class="top10-panel hidden">
+            <div class="flex-row" style="width:100%;justify-content:space-between;">
+              <strong style="color:#FFEC27;">🧪 LABORATÓRIO TOP 10 — LIGUE/DESLIGUE AO VIVO (#01 AO #10):</strong>
+              <div class="flex-row">
+                <button id="btn-all-top10" type="button" class="pico-btn danger">🔥 TODOS OS 10!</button>
+                <button id="btn-clear-top10" type="button" class="pico-btn">↺ Só Base</button>
+              </div>
+            </div>
+            <div id="top10-chips" class="top10-chips"></div>
           </div>
 
           <div id="hood-panel" class="hood-panel hidden">
@@ -346,6 +486,7 @@
             <div class="flex-row">
               <button id="btn-chaos" type="button" class="pico-btn">Partículas: 1x</button>
               <button id="btn-speed" type="button" class="pico-btn">Vel: 1.0x</button>
+              <button id="btn-deck-toggle" type="button" class="pico-btn">📱 Botões Touch</button>
               <button id="btn-boss" type="button" class="pico-btn danger">👑 Boss!</button>
             </div>
           </div>
@@ -356,7 +497,7 @@
       <section id="view-data" class="spa-view inactive" tabindex="-1" aria-hidden="true" inert="inert">
         <div class="pico-win">
           <div class="pico-titlebar">
-            <span>CONQUISTAS & GERENCIADOR DE CACHE LOCAL (LOCALSTORAGE)</span>
+            <span>CONQUISTAS & GERENCIADOR DE CACHE LOCAL</span>
             <span id="storage-bytes" class="pill" style="color:#29ADFF;">0 B</span>
           </div>
 
@@ -369,15 +510,13 @@
             <div class="panel-box">
               <div style="font-weight:700;color:#29ADFF;">📊 ESTATÍSTICAS & SAVE LOCAL</div>
               <div id="stats-box" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;"></div>
-
               <div id="checkpoint-box" style="border:2px solid #000000;background:#1D2B53;padding:8px;font-size:12px;"></div>
-
-              <div style="font-weight:700;color:#00E436;margin-top:4px;">💾 BACKUP PORTÁTIL (SEM SUPABASE)</div>
+              <div style="font-weight:700;color:#00E436;margin-top:4px;">💾 BACKUP PORTÁTIL (.JSON)</div>
               <p style="margin:0;font-size:11px;color:#C2C3C7;">
-                Tudo fica salvo no cache local deste navegador. Quer levar seu save para outro PC ou celular? Exporte o arquivo .json abaixo.
+                Tudo fica salvo no cache deste navegador. Leve seu progresso entre PC e celular exportando o .json abaixo.
               </p>
               <div class="flex-row">
-                <button id="btn-export" type="button" class="pico-btn accent">⬇ Exportar Save (.json)</button>
+                <button id="btn-export" type="button" class="pico-btn accent">⬇ Exportar Save</button>
                 <button id="btn-import" type="button" class="pico-btn">⬆ Importar Save</button>
                 <input id="file-import" type="file" accept=".json,application/json" style="display:none;" />
               </div>
@@ -398,6 +537,70 @@
       const STORAGE_KEY = 'pico_os_hub_v1';
       const W = 320, H = 176, SCALE = 3;
       const RAINBOW = ['#FF004D','#FFA300','#FFEC27','#00E436','#29ADFF','#FF77A8'];
+      const isTouchCapable = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(pointer: coarse)').matches;
+
+      const TOP10_MODES = [
+        {
+          key: 'm1', num: '01', icon: '☄️', name: 'Liquidificador Cósmico',
+          short: '#01 Bolas+Eco', col: '#29ADFF', platform: 'both',
+          platLabel: '📱+💻 Mobile & PC',
+          desc: 'Bolas de ferro quicam pela tela; dê Dash perto pra dar RAQUETADA a 500 km/h e cruze seu Eco de Dash pra duplicar (1→2→4→8...)!'
+        },
+        {
+          key: 'm2', num: '02', icon: '🪟', name: 'Arena-Janela Viva',
+          short: '#02 Janela Viva', col: '#FFA300', platform: 'pc',
+          platLabel: '💻 Ideal no PC · Toque Adaptado',
+          desc: 'A moldura do PICO-OS vai encolhendo! Dê Dash na borda pra chutar a parede, prensar monstros e derrubar pixel de cura dos ícones!'
+        },
+        {
+          key: 'm3', num: '03', icon: '⏸️', name: 'Pause Arma-Secreta',
+          short: '#03 Pause Bomba', col: '#FFF1E8', platform: 'pc',
+          platLabel: '💻 Ideal no PC · Toque Adaptado',
+          desc: 'Pausar congela tudo em P&B pra você ARRASTAR a caixa do menu e explodir quem estiver embaixo! Spamou 3x? O botão foge com perninhas!'
+        },
+        {
+          key: 'm4', num: '04', icon: '👹', name: 'Mímico Contador',
+          short: '#04 Mímico Chefe', col: '#FF004D', platform: 'both',
+          platLabel: '📱+💻 Mobile & PC',
+          desc: 'Chefe-baú de óculos e prancheta que ROUBA seus upgrades! Dê Dash na cara dele pra arrancar tudo de volta com JUROS!'
+        },
+        {
+          key: 'm5', num: '05', icon: '💀', name: 'Casca de Ovo (1 HP)',
+          short: '#05 1HP Deus', col: '#FFEC27', platform: 'both',
+          platLabel: '📱+💻 Mobile & PC',
+          desc: 'Trava seu HP em 1 pontinho! Em troca: +400% velocidade de tiro, balas 3x gigantes e tirar fina no Dash reseta 80% do cooldown!'
+        },
+        {
+          key: 'm6', num: '06', icon: '🎱', name: 'Dash de Pinball',
+          short: '#06 Pinball Dash', col: '#00E436', platform: 'both',
+          platLabel: '📱+💻 Mobile & PC',
+          desc: 'Seu Dash vira bumper invencível! Trombar num bicho toca DING-DING-DING e arremessa o monstro quicando igual boliche nos outros!'
+        },
+        {
+          key: 'm7', num: '07', icon: '👾', name: 'Vírus Relâmpago (3s)',
+          short: '#07 Vírus 3s', col: '#29ADFF', platform: 'pc',
+          platLabel: '💻 Ideal no PC · Toque Adaptado',
+          desc: 'Brota pop-up falso no meio da horda! Clique no [X] / aperte F rápido pra Tela Azul da Vitória — ou exploda janelas de spam!'
+        },
+        {
+          key: 'm8', num: '08', icon: '🎰', name: 'Caça-Níquel 777',
+          short: '#08 Jackpot 777', col: '#FFEC27', platform: 'both',
+          platLabel: '📱+💻 Mobile & PC',
+          desc: 'Mate monstros ou cate Dados Dourados pra girar o 7-7-7! Saiu Jackpot? Chove moeda quicante e tiros viram raios arco-íris!'
+        },
+        {
+          key: 'm9', num: '09', icon: '☢️', name: 'Pacifista do Apocalipse',
+          short: '#09 Buraco Negro', col: '#FF77A8', platform: 'both',
+          platLabel: '📱+💻 Mobile & PC',
+          desc: 'Desliga tiros normais e dobra a frequência do Dash: cada Dash suga 40 bichos num buraco negro e explode tudo em supernova elétrica!'
+        },
+        {
+          key: 'm10', num: '10', icon: '💥', name: 'Dominó de Pólvora',
+          short: '#10 Cadeia Boom', col: '#FFA300', platform: 'both',
+          platLabel: '📱+💻 Mobile & PC',
+          desc: 'Matar 1 bicho solta uma faísca que salta pro próximo e explode em cadeia (pá-pá-pá-KABOOM!), limpando hordas inteiras!'
+        }
+      ];
 
       const ACHIEVEMENTS = [
         { id: 'first_blood', title: 'Primeira Faísca', desc: 'Elimine 10 inimigos no total' },
@@ -405,40 +608,23 @@
         { id: 'wave_5',      title: 'Imparável',       desc: 'Alcance a Onda 5' },
         { id: 'boss_slayer', title: 'Caçador de Coroas', desc: 'Derrote um Boss Coroado' },
         { id: 'combo_15',    title: 'Ritmo Chiptune',  desc: 'Alcance Combo x15 em gemas' },
-        { id: 'tinkerer',    title: 'Mecânico do Capô', desc: 'Customize o herói em Abrir Capô' },
-        { id: 'score_1000',  title: 'Milionário 16-Bit', desc: 'Faça 1.000 pontos numa partida' }
+        { id: 'tinkerer',    title: 'Mecânico do Capô', desc: 'Customize o herói em Capô' },
+        { id: 'score_1000',  title: 'Milionário 16-Bit', desc: 'Faça 1.000 pontos numa partida' },
+        { id: 'mimic_robbed', title: 'Leão da Receita', desc: 'Pegue restituição com juros do Mímico (#04)' },
+        { id: 'virus_slayer', title: 'Antivírus Humano', desc: 'Vença um Vírus Relâmpago (#07)' },
+        { id: 'top10_master', title: 'Rei do Caos 16-Bit', desc: 'Ative TODOS os 10 modos ao mesmo tempo' }
       ];
 
-      const GAMES_CATALOG = [
-        {
-          id: 'pico_survivor',
-          filename: 'pico_survivor.p64',
-          title: 'PICO-SURVIVOR',
-          subtitle: 'Arena Survivor pocket com dash, raio em cadeia, lâminas orbitais e editor ao vivo.',
-          playable: true,
-          badgeColor: '#00E436'
-        },
-        {
-          id: 'slot_02',
-          filename: 'slot_02.p64',
-          title: 'CARTUCHO #02 (LIVRE)',
-          subtitle: 'Espaço pronto no Arcade Hub para o próximo joguinho minimalista que criarmos juntos.',
-          playable: false,
-          badgeColor: '#29ADFF'
-        },
-        {
-          id: 'slot_03',
-          filename: 'slot_03.p64',
-          title: 'CARTUCHO #03 (LIVRE)',
-          subtitle: 'Mais um slot da estante esperando a próxima experiência estilo Picotron.',
-          playable: false,
-          badgeColor: '#FF77A8'
-        }
-      ];
+      function defaultActiveTop10() {
+        return { m1: false, m2: false, m3: false, m4: false, m5: false, m6: false, m7: false, m8: false, m9: false, m10: false };
+      }
+      function allTop10On() {
+        return { m1: true, m2: true, m3: true, m4: true, m5: true, m6: true, m7: true, m8: true, m9: true, m10: true };
+      }
 
       function defaultStore() {
         return {
-          version: 1,
+          version: 2,
           lastSavedAt: null,
           prefs: { skin: 'slime', heroColor: '#29ADFF', chaos: 1, speedMult: 1, soundOn: true },
           stats: { bestScore: 0, bestWave: 1, bestLevel: 1, totalKills: 0, totalRuns: 0, achievements: [] },
@@ -453,7 +639,7 @@
           const parsed = JSON.parse(raw);
           const base = defaultStore();
           return {
-            version: 1,
+            version: 2,
             lastSavedAt: parsed.lastSavedAt || null,
             prefs: { ...base.prefs, ...(parsed.prefs || {}) },
             stats: { ...base.stats, ...(parsed.stats || {}), achievements: Array.isArray(parsed.stats?.achievements) ? parsed.stats.achievements : [] },
@@ -481,6 +667,7 @@
       // --- DOM Refs ---
       const navBtns = document.querySelectorAll('.nav-btn');
       const views = document.querySelectorAll('.spa-view');
+      const shelfHero = document.getElementById('shelf-hero');
       const shelfGrid = document.getElementById('shelf-grid');
       const hubSummary = document.getElementById('hub-summary');
       const lastSavedLabel = document.getElementById('last-saved-label');
@@ -496,17 +683,31 @@
       const ctx = canvas.getContext('2d');
       ctx.imageSmoothingEnabled = false;
 
+      const activeModeLabel = document.getElementById('active-mode-label');
       const hudHp = document.getElementById('hud-hp');
       const hudWave = document.getElementById('hud-wave');
       const hudScore = document.getElementById('hud-score');
       const hudLvl = document.getElementById('hud-lvl');
+      const hudActiveBadges = document.getElementById('hud-active-badges');
       const cartSizeEl = document.getElementById('cart-size');
+      const btnFullscreen = document.getElementById('btn-fullscreen');
       const btnPause = document.getElementById('btn-pause');
       const btnSound = document.getElementById('btn-sound');
       const btnReset = document.getElementById('btn-reset');
       const btnBackHub = document.getElementById('btn-back-hub');
       const btnHood = document.getElementById('btn-hood');
       const hoodPanel = document.getElementById('hood-panel');
+      const btnToggleTop10 = document.getElementById('btn-toggle-top10');
+      const top10Panel = document.getElementById('top10-panel');
+      const top10Chips = document.getElementById('top10-chips');
+      const btnAllTop10 = document.getElementById('btn-all-top10');
+      const btnClearTop10 = document.getElementById('btn-clear-top10');
+      const mobileDeck = document.getElementById('mobile-deck');
+      const btnTouchTop10 = document.getElementById('btn-touch-top10');
+      const btnTouchVirus = document.getElementById('btn-touch-virus');
+      const btnTouchPause = document.getElementById('btn-touch-pause');
+      const btnTouchDash = document.getElementById('btn-touch-dash');
+      const btnDeckToggle = document.getElementById('btn-deck-toggle');
       const btnChaos = document.getElementById('btn-chaos');
       const btnSpeed = document.getElementById('btn-speed');
       const btnBoss = document.getElementById('btn-boss');
@@ -535,9 +736,8 @@
 
       function formatSavedTime(iso) {
         if (!iso) return 'Nenhum ainda';
-        try {
-          return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        } catch { return 'Agora'; }
+        try { return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+        catch { return 'Agora'; }
       }
 
       function updateCacheIndicators(byteLen = null) {
@@ -547,10 +747,42 @@
         cacheBadge.textContent = store.savedRun ? '💾 Partida + Stats Salvos' : '💾 Cache Local OK';
       }
 
-      // --- SPA View Routing (faster-spa-view-transitions) ---
+      // --- Fullscreen Handling (Works on Mobile Safari, Android & Desktop) ---
+      let isFullscreen = false;
+      function syncFullscreenUI() {
+        shell.classList.toggle('fullscreen-mode', isFullscreen);
+        btnFullscreen.textContent = isFullscreen ? '✕ Sair Tela Cheia' : '⛶ Tela Cheia';
+      }
+      async function setFullscreen(wantFull) {
+        isFullscreen = wantFull;
+        syncFullscreenUI();
+        if (wantFull) {
+          try {
+            if (shell.requestFullscreen) await shell.requestFullscreen();
+            else if (shell.webkitRequestFullscreen) shell.webkitRequestFullscreen();
+            if (screen.orientation?.lock) await screen.orientation.lock('landscape').catch(() => {});
+          } catch {}
+        } else {
+          try {
+            if (document.fullscreenElement) await document.exitFullscreen();
+            else if (document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
+          } catch {}
+        }
+      }
+      btnFullscreen.addEventListener('click', () => setFullscreen(!isFullscreen));
+      document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && isFullscreen) {
+          // Keep CSS fullscreen only if native exited unexpectedly via button; if user hit Esc on desktop, exit cleanly
+          isFullscreen = false;
+          syncFullscreenUI();
+        }
+      });
+
+      // --- SPA View Routing ---
       let currentView = 'view-hub';
       function switchToView(viewId) {
         if (currentView === 'view-game' && viewId !== 'view-game') {
+          if (isFullscreen) setFullscreen(false);
           saveCheckpoint();
           stopLoop();
         }
@@ -578,124 +810,6 @@
 
       navBtns.forEach(btn => btn.addEventListener('click', () => switchToView(btn.dataset.view)));
       btnBackHub.addEventListener('click', () => switchToView('view-hub'));
-
-      // --- Render Hub & Cache Inspector ---
-      function renderHubAndData() {
-        hubSummary.textContent = `RECORDE: ${store.stats.bestScore} · ONDA MÁX: ${store.stats.bestWave}`;
-        const r = store.savedRun;
-
-        shelfGrid.innerHTML = GAMES_CATALOG.map((g, idx) => {
-          if (!g.playable) {
-            return `
-              <article class="cart-card slot-empty">
-                <div class="cart-art" style="background:#0c1329;">
-                  <div style="font-size:22px;color:#83769C;margin-bottom:4px;">[ + ]</div>
-                  <div style="font-size:11px;color:#83769C;font-weight:700;">${g.filename}</div>
-                </div>
-                <div class="cart-body">
-                  <div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
-                      <strong style="color:#C2C3C7;">#${String(idx + 1).padStart(2, '0')} ${g.title}</strong>
-                      <span class="pill" style="color:${g.badgeColor};">EM BREVE</span>
-                    </div>
-                    <p style="margin:6px 0 0;font-size:11px;color:#83769C;line-height:1.4;">${g.subtitle}</p>
-                  </div>
-                  <button type="button" class="pico-btn" disabled style="opacity:0.45;cursor:not-allowed;">Aguardando Cartucho</button>
-                </div>
-              </article>
-            `;
-          }
-
-          const actionButtons = r
-            ? `
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <button id="hub-resume-btn" type="button" class="pico-btn primary" style="width:100%;">
-                  ▶ CONTINUAR (W${r.wave} · LV ${r.lvl} · ${r.score} PTS)
-                </button>
-                <button id="hub-new-btn" type="button" class="pico-btn" style="width:100%;">
-                  ↺ Nova Partida do Zero
-                </button>
-              </div>
-            `
-            : `<button id="hub-new-btn" type="button" class="pico-btn primary" style="width:100%;">▶ Jogar ${g.filename}</button>`;
-
-          return `
-            <article class="cart-card">
-              <div class="cart-art">
-                <span class="pill" style="position:absolute;top:6px;left:6px;color:#FFEC27;">#${String(idx + 1).padStart(2, '0')} P64</span>
-                <span class="pill" style="position:absolute;top:6px;right:6px;color:${g.badgeColor};">RECORDE ${store.stats.bestScore}</span>
-                <div style="font-size:20px;font-weight:700;letter-spacing:1px;color:#29ADFF;text-shadow:2px 2px 0 #000000;">PICO-SURVIVOR</div>
-                <div style="font-size:11px;color:#00E436;margin-top:4px;">♥ ARENA · SINTETIZADOR · LIVE-EDIT</div>
-              </div>
-              <div class="cart-body">
-                <div>
-                  <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
-                    <strong style="color:#FFF1E8;">${g.filename}</strong>
-                    <span class="pill" style="color:#FF77A8;">ONDA MÁX ${store.stats.bestWave}</span>
-                  </div>
-                  <p style="margin:6px 0 0;font-size:11px;color:#C2C3C7;line-height:1.4;">${g.subtitle}</p>
-                </div>
-                ${actionButtons}
-              </div>
-            </article>
-          `;
-        }).join('');
-
-        const resumeBtn = document.getElementById('hub-resume-btn');
-        if (resumeBtn) {
-          resumeBtn.addEventListener('click', () => {
-            ensureAudio();
-            restoreSavedRun();
-            switchToView('view-game');
-          });
-        }
-        const newBtn = document.getElementById('hub-new-btn');
-        if (newBtn) {
-          newBtn.addEventListener('click', () => {
-            ensureAudio();
-            initGame(true);
-            switchToView('view-game');
-          });
-        }
-
-        // Achievements & Stats View
-        achListEl.innerHTML = ACHIEVEMENTS.map(a => {
-          const ok = store.stats.achievements.includes(a.id);
-          return `
-            <div class="ach-item ${ok ? 'unlocked' : 'locked'}">
-              <div>
-                <div style="font-weight:700;color:${ok ? '#00E436' : '#C2C3C7'};">${ok ? '✓' : '🔒'} ${a.title}</div>
-                <div style="font-size:11px;color:#C2C3C7;">${a.desc}</div>
-              </div>
-              <span class="pill" style="color:${ok ? '#FFEC27' : '#5F574F'};">${ok ? 'LIBERADA' : 'BLOQ'}</span>
-            </div>
-          `;
-        }).join('');
-
-        statsBoxEl.innerHTML = `
-          <div class="pill" style="padding:6px;color:#00E436;">Recorde: ${store.stats.bestScore}</div>
-          <div class="pill" style="padding:6px;color:#FFEC27;">Onda Máx: ${store.stats.bestWave}</div>
-          <div class="pill" style="padding:6px;color:#29ADFF;">Nível Máx: ${store.stats.bestLevel}</div>
-          <div class="pill" style="padding:6px;color:#FF77A8;">Abates: ${store.stats.totalKills}</div>
-          <div class="pill" style="padding:6px;color:#FFF1E8;grid-column:span 2;">Partidas iniciadas: ${store.stats.totalRuns}</div>
-        `;
-
-        if (r) {
-          checkpointBoxEl.innerHTML = `
-            <div style="color:#00E436;font-weight:700;margin-bottom:4px;">💾 Partida em andamento salva!</div>
-            <div style="color:#FFF1E8;">Onda ${r.wave} · Nível ${r.lvl} · ${r.score} pts · ${r.hp}/${r.maxHp} ♥</div>
-            <button id="data-resume-btn" type="button" class="pico-btn primary" style="margin-top:6px;">▶ Retomar Partida Agora</button>
-          `;
-          document.getElementById('data-resume-btn').addEventListener('click', () => {
-            ensureAudio();
-            restoreSavedRun();
-            switchToView('view-game');
-          });
-        } else {
-          checkpointBoxEl.innerHTML = `<div style="color:#C2C3C7;">Nenhuma partida pausada no momento. Comece a jogar e seu avanço será salvo a cada 2s!</div>`;
-        }
-        updateCacheIndicators();
-      }
 
       // --- Web Audio API Chiptune Synthesizer ---
       let audioCtx = null;
@@ -725,16 +839,21 @@
         osc.start(t); osc.stop(t + dur);
       }
       const sfx = {
-        shoot: () => tone(560, 0.055, 'square', 0.035, 210),
-        hit: () => tone(160, 0.05, 'triangle', 0.06, 75),
-        kill: () => tone(320, 0.06, 'square', 0.05, 680),
+        shoot: () => tone(560, 0.055, 'square', 0.032, 210),
+        hit: () => tone(160, 0.05, 'triangle', 0.055, 75),
+        kill: () => tone(320, 0.06, 'square', 0.048, 680),
         gem: (c) => {
           const notes = [440, 494, 587, 659, 784, 880, 988, 1175];
-          tone(notes[Math.min(notes.length - 1, c % notes.length)] * (1 + Math.floor(c / 8) * 0.15), 0.06, 'triangle', 0.055);
+          tone(notes[Math.min(notes.length - 1, c % notes.length)] * (1 + Math.floor(c / 8) * 0.15), 0.06, 'triangle', 0.05);
         },
         dash: () => tone(240, 0.12, 'sawtooth', 0.05, 760),
         hurt: () => tone(120, 0.18, 'sawtooth', 0.09, 45),
         zap: () => tone(920, 0.08, 'sawtooth', 0.04, 300),
+        ding: (n = 0) => tone(660 + Math.min(8, n) * 90, 0.09, 'triangle', 0.07, 980 + n * 50),
+        raquetada: () => { tone(280, 0.06, 'square', 0.08, 1200); setTimeout(() => tone(880, 0.09, 'triangle', 0.06, 1500), 35); },
+        boom: () => tone(95, 0.24, 'sawtooth', 0.09, 28),
+        slot: () => [523, 659, 784, 1046, 1318].forEach((f, i) => setTimeout(() => tone(f, 0.12, 'square', 0.06), i * 70)),
+        virus: () => { tone(880, 0.07, 'square', 0.06, 440); setTimeout(() => tone(880, 0.07, 'square', 0.06, 440), 90); },
         boss: () => { tone(110, 0.25, 'sawtooth', 0.08, 220); setTimeout(() => tone(140, 0.3, 'square', 0.08, 70), 140); },
         lvl: () => [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, 0.11, 'square', 0.06), i * 65))
       };
@@ -765,17 +884,111 @@
         { id: 'mag',   name: 'IMA + CURA', desc: '+1 Vida e super ima', col: '#FF004D' }
       ];
 
+      let activeTop10 = defaultActiveTop10();
       let state = 'title', time = 0, shake = 0, hitStop = 0, score = 0, wave = 1;
       let combo = 0, comboTimer = 0, spawnTimer = 0, bossTimer = 28, saveTimer = 0;
       let bannerText = '', bannerTimer = 0, levelChoices = [];
-      const keys = {}, pointer = { x: W / 2, y: H / 2, inside: false };
-      let player, bullets, enemies, gems, particles, floaters, ghosts, bolts, rings, splats;
+      const keys = {}, pointer = { x: W / 2, y: H / 2, inside: false, type: 'mouse', downTime: 0, startX: 0, startY: 0, moved: false };
+      let player, bullets, taxBullets, enemies, gems, particles, floaters, ghosts, bolts, rings, splats;
+
+      // --- TOP 10 DEDICATED STATES ---
+      // #01 Liquidificador Cósmico
+      let pinballs = [], echoTrails = [];
+      // #02 Arena-Janela Viva
+      let arenaBounds = { left: 0, right: W, top: 0, bottom: H };
+      let wallKickCd = 0, healPixels = [];
+      const osIcons = [
+        { x: 18, y: 24, label: 'SYS', col: '#29ADFF', cd: 0 },
+        { x: W - 20, y: 26, label: 'MEM', col: '#00E436', cd: 0 },
+        { x: 18, y: H - 22, label: 'GFX', col: '#FFEC27', cd: 0 },
+        { x: W - 20, y: H - 22, label: 'SFX', col: '#FF77A8', cd: 0 }
+      ];
+      // #03 Pause Arma-Secreta
+      let pauseBox = { x: (W - 156) / 2, y: (H - 96) / 2, w: 156, h: 96, dragging: false, offX: 0, offY: 0 };
+      let pauseBoomCd = 0, pauseSpamTimes = [], zaWarudoPulse = 0;
+      let runawayBtn = { active: false, x: W / 2, y: H / 2 + 12, vx: 88, vy: 64, timer: 0, pauseWait: 0 };
+      // #04 Mímico Contador
+      let mimicSpawnTimer = 18;
+      // #06 Dash Pinball
+      let pinballChain = 0;
+      // #07 Vírus Relâmpago
+      let virusEvent = null, virusCd = 14, bsodTimer = 0, spamPopups = [];
+      // #08 Caça-Níquel 777
+      let slotKills = 0, slotMachine = { spinning: false, timer: 0, reels: ['7','7','7'], label: '' };
+      let jackpotTimer = 0, goldDice = [], jackpotCoins = [], diceSpawnTimer = 11;
+      // #09 Pacifista do Apocalipse
+      let dashPrevActive = false;
+      // #10 Dominó de Pólvora
+      let sparks = [];
 
       const stars = Array.from({ length: 42 }, () => ({
         x: Math.random() * W, y: Math.random() * H,
         s: Math.random() < 0.35 ? 2 : 1, spd: 4 + Math.random() * 10,
         col: Math.random() < 0.5 ? '#1D2B53' : '#83769C'
       }));
+
+      function countActiveTop10() {
+        return Object.values(activeTop10).filter(Boolean).length;
+      }
+
+      function applyTop10SideEffects(justToggledKey = null) {
+        const activeList = TOP10_MODES.filter(m => activeTop10[m.key]);
+        if (activeList.length === 10) unlockAchievement('top10_master');
+        activeModeLabel.textContent = activeList.length === 10 ? 'CAOS TOTAL (10/10)'
+          : activeList.length === 1 ? `#${activeList[0].num} ${activeList[0].name}`
+          : activeList.length > 1 ? `MIX ${activeList.length} MODOS`
+          : 'pico_survivor.p64';
+
+        hudActiveBadges.textContent = activeList.length === 0 ? 'Base'
+          : activeList.map(m => `#${m.num}`).join(' ');
+
+        // #05 1 HP Modo Deus toggle safety
+        if (player) {
+          if (activeTop10.m5) {
+            player.maxHp = 1;
+            player.hp = 1;
+          } else if (player.maxHp === 1) {
+            player.maxHp = 5;
+            player.hp = 3;
+          }
+        }
+        // #02 Reset bounds if turned off, or give an immediate visible OS frame if turned on
+        if (!activeTop10.m2) {
+          arenaBounds = { left: 0, right: W, top: 0, bottom: H };
+        } else if (arenaBounds.left === 0 && arenaBounds.right === W) {
+          arenaBounds = { left: 10, right: W - 10, top: 12, bottom: H - 8 };
+        }
+        // Instant action triggers when activating a specific mode
+        if (state === 'play' || state === 'paused') {
+          if (justToggledKey === 'm1' && activeTop10.m1 && pinballs.length < 2) spawnPinball();
+          if (justToggledKey === 'm4' && activeTop10.m4 && !enemies.some(e => e.type === 'mimic')) spawnEnemy('mimic');
+          if (justToggledKey === 'm7' && activeTop10.m7) virusCd = Math.min(virusCd, 2.2);
+          if (justToggledKey === 'm8' && activeTop10.m8 && goldDice.length === 0) spawnGoldDie();
+        }
+        renderTop10Lab();
+        syncHud();
+      }
+
+      function toggleMode(key) {
+        activeTop10[key] = !activeTop10[key];
+        const m = TOP10_MODES.find(x => x.key === key);
+        if (m) showToast(`${m.icon} #${m.num} ${m.name}: ${activeTop10[key] ? 'LIGADO!' : 'DESLIGADO'}`);
+        applyTop10SideEffects(key);
+        saveCheckpoint();
+      }
+
+      function renderTop10Lab() {
+        top10Chips.innerHTML = TOP10_MODES.map(m => {
+          const on = activeTop10[m.key];
+          return `<button type="button" data-mode="${m.key}" class="mode-chip ${on ? 'on' : ''}">${m.icon} #${m.num} ${m.name}</button>`;
+        }).join('');
+        top10Chips.querySelectorAll('.mode-chip').forEach(btn => {
+          btn.addEventListener('click', () => {
+            ensureAudio();
+            toggleMode(btn.dataset.mode);
+          });
+        });
+      }
 
       function saveCheckpoint() {
         if (!player || (state !== 'play' && state !== 'levelup' && state !== 'paused')) return;
@@ -784,6 +997,7 @@
           hp: player.hp, maxHp: player.maxHp, projCount: player.projCount,
           orbits: player.orbits, zapLvl: player.zapLvl, dashBoom: player.dashBoom,
           fireRate: player.fireRate, magRadius: player.magRadius, combo,
+          activeTop10: { ...activeTop10 },
           savedAt: new Date().toISOString()
         };
         if (score > store.stats.bestScore) store.stats.bestScore = score;
@@ -793,27 +1007,69 @@
       }
 
       function resetEntities() {
-        bullets = []; enemies = []; gems = []; particles = [];
+        bullets = []; taxBullets = []; enemies = []; gems = []; particles = [];
         floaters = []; ghosts = []; bolts = []; rings = []; splats = [];
+        pinballs = []; echoTrails = []; healPixels = []; spamPopups = [];
+        goldDice = []; jackpotCoins = []; sparks = [];
+        arenaBounds = { left: 0, right: W, top: 0, bottom: H };
+        virusEvent = null; virusCd = 9; bsodTimer = 0; jackpotTimer = 0;
+        slotMachine = { spinning: false, timer: 0, reels: ['7','7','7'], label: '' };
+        slotKills = 0; wallKickCd = 0; pauseBoomCd = 0; pauseSpamTimes = [];
+        runawayBtn = { active: false, x: W / 2, y: H / 2 + 12, vx: 88, vy: 64, timer: 0, pauseWait: 0 };
+        dashPrevActive = false; pinballChain = 0; mimicSpawnTimer = 14; diceSpawnTimer = 8;
+        btnTouchVirus.style.display = 'none';
+        btnTouchVirus.classList.remove('virus-alert');
       }
 
-      function initGame(startImmediately = false) {
+      function spawnPinball(x = player.x + 12, y = player.y - 8, vx = null, vy = null, overcharge = 0) {
+        const cap = isTouchCapable ? 16 : 24;
+        if (pinballs.length >= cap) return false;
+        const ang = Math.random() * Math.PI * 2;
+        const spd = 125;
+        pinballs.push({
+          x, y,
+          vx: vx ?? Math.cos(ang) * spd,
+          vy: vy ?? Math.sin(ang) * spd,
+          r: 4, dmg: 2, bounces: 0, colIdx: Math.floor(Math.random() * 6),
+          overcharge, echoCd: 0.45, trail: []
+        });
+        return true;
+      }
+
+      function spawnGoldDie() {
+        if (goldDice.length >= 2) return;
+        const margin = 22;
+        const x = arenaBounds.left + margin + Math.random() * Math.max(20, (arenaBounds.right - arenaBounds.left) - margin * 2);
+        const y = arenaBounds.top + margin + Math.random() * Math.max(20, (arenaBounds.bottom - arenaBounds.top) - margin * 2);
+        goldDice.push({ x, y, life: 16 });
+      }
+
+      function initGame(startImmediately = false, presetTop10 = null) {
+        if (presetTop10) activeTop10 = { ...defaultActiveTop10(), ...presetTop10 };
+        const is1HP = !!activeTop10.m5;
         player = {
-          x: W / 2, y: H / 2, hp: 5, maxHp: 5, invuln: 0,
-          dashCd: 0, dashTime: 0, dashDx: 1, dashDy: 0, faceX: 1, faceY: 0,
-          lvl: 1, xp: 0, nextXp: 8, fireCd: 0, fireRate: 0.42, projCount: 1,
-          orbits: 0, orbitAngle: 0, zapLvl: 0, zapCd: 1.5, dashBoom: 0, magRadius: 34
+          x: W / 2, y: H / 2, hp: is1HP ? 1 : 5, maxHp: is1HP ? 1 : 5, invuln: 0,
+          dashCd: 0, dashTime: 0, dashDx: 1, dashDy: 0, dashStartX: W / 2, dashStartY: H / 2,
+          faceX: 1, faceY: 0, lvl: 1, xp: 0, nextXp: 8, fireCd: 0, fireRate: 0.42,
+          projCount: 1, orbits: 0, orbitAngle: 0, zapLvl: 0, zapCd: 1.5, dashBoom: 0, magRadius: 34,
+          grazeResetFlag: false
         };
         resetEntities();
         score = 0; wave = 1; combo = 0; comboTimer = 0;
-        spawnTimer = 0.4; bossTimer = 25; shake = 0; hitStop = 0; saveTimer = 0;
-        bannerText = startImmediately ? 'ONDA 1!' : '';
-        bannerTimer = startImmediately ? 1.8 : 0;
+        spawnTimer = 0.35; bossTimer = 25; shake = 0; hitStop = 0; saveTimer = 0;
+        bannerText = startImmediately ? (countActiveTop10() === 10 ? 'CAOS TOTAL 10/10!' : 'ONDA 1!') : '';
+        bannerTimer = startImmediately ? 2.0 : 0;
         state = startImmediately ? 'play' : 'title';
         btnPause.textContent = '⏸';
+        applyTop10SideEffects();
+
         if (startImmediately) {
           store.stats.totalRuns++;
           store.savedRun = null;
+          if (activeTop10.m1) { spawnPinball(W / 2 - 20, H / 2 - 15); spawnPinball(W / 2 + 20, H / 2 + 15); }
+          if (activeTop10.m4) spawnEnemy('mimic');
+          if (activeTop10.m7) virusCd = 4.0;
+          if (activeTop10.m8) spawnGoldDie();
           saveCheckpoint();
         } else {
           for (let i = 0; i < 6; i++) spawnEnemy('slime');
@@ -825,62 +1081,76 @@
       function restoreSavedRun() {
         const r = store.savedRun;
         if (!r) { initGame(true); return; }
+        activeTop10 = { ...defaultActiveTop10(), ...(r.activeTop10 || {}) };
         player = {
           x: W / 2, y: H / 2, hp: Math.max(1, r.hp || 5), maxHp: r.maxHp || 5, invuln: 1.2,
-          dashCd: 0, dashTime: 0, dashDx: 1, dashDy: 0, faceX: 1, faceY: 0,
-          lvl: r.lvl || 1, xp: r.xp || 0, nextXp: r.nextXp || 8,
+          dashCd: 0, dashTime: 0, dashDx: 1, dashDy: 0, dashStartX: W / 2, dashStartY: H / 2,
+          faceX: 1, faceY: 0, lvl: r.lvl || 1, xp: r.xp || 0, nextXp: r.nextXp || 8,
           fireCd: 0, fireRate: r.fireRate || 0.42, projCount: r.projCount || 1,
           orbits: r.orbits || 0, orbitAngle: 0, zapLvl: r.zapLvl || 0, zapCd: 1.0,
-          dashBoom: r.dashBoom || 0, magRadius: r.magRadius || 34
+          dashBoom: r.dashBoom || 0, magRadius: r.magRadius || 34, grazeResetFlag: false
         };
         resetEntities();
-        score = r.score || 0;
-        wave = r.wave || 1;
-        combo = r.combo || 0;
-        comboTimer = combo > 0 ? 2.0 : 0;
+        if (activeTop10.m1) { spawnPinball(); spawnPinball(); }
+        if (activeTop10.m8) spawnGoldDie();
+        score = r.score || 0; wave = r.wave || 1; combo = r.combo || 0; comboTimer = combo > 0 ? 2.0 : 0;
         spawnTimer = 0.5; bossTimer = 25; shake = 0; hitStop = 0; saveTimer = 0;
-        bannerText = `ONDA ${wave} RETOMADA!`;
-        bannerTimer = 2.0;
-        state = 'play';
-        btnPause.textContent = '⏸';
+        bannerText = `ONDA ${wave} RETOMADA!`; bannerTimer = 2.0;
+        state = 'play'; btnPause.textContent = '⏸';
+        applyTop10SideEffects();
         sfx.lvl();
-        rings.push({ x: player.x, y: player.y, r: 3, maxR: 36, col: '#00E436', life: 0.35 });
+        addRing(player.x, player.y, 3, 36, '#00E436', 0.35);
         syncHud();
         render();
       }
 
       function syncHud() {
-        hudHp.textContent = '♥'.repeat(Math.max(0, player.hp)) + '♡'.repeat(Math.max(0, player.maxHp - player.hp));
+        if (!player) return;
+        if (activeTop10.m5) hudHp.textContent = '🥚 1 HP';
+        else hudHp.textContent = '♥'.repeat(Math.max(0, player.hp)) + '♡'.repeat(Math.max(0, player.maxHp - player.hp));
         hudWave.textContent = `W${wave}`;
         hudScore.textContent = `${score}`;
         hudLvl.textContent = `LV ${player.lvl}`;
       }
 
       function burst(x, y, col, count = 6, spd = 55) {
-        const n = Math.min(48, count * cfg.chaos);
+        const mult = particles.length > 100 ? Math.min(1.5, cfg.chaos) : cfg.chaos;
+        const n = Math.min(28, Math.round(count * mult));
         for (let i = 0; i < n; i++) {
+          if (particles.length >= 180) particles.shift();
           const a = Math.random() * Math.PI * 2, v = spd * (0.35 + Math.random() * 0.9);
           particles.push({
             x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
-            life: 0.25 + Math.random() * 0.3, size: Math.random() < 0.3 ? 2 : 1,
+            life: 0.22 + Math.random() * 0.25, size: Math.random() < 0.28 ? 2 : 1,
             col: Math.random() < 0.25 ? '#FFF1E8' : col
           });
         }
       }
 
+      function addRing(x, y, r, maxR, col, life = 0.3) {
+        if (rings.length >= 12) rings.shift();
+        rings.push({ x, y, r, maxR, col, life, maxLife: life });
+      }
+
+      function addBolt(pts) {
+        if (bolts.length >= 14) bolts.shift();
+        bolts.push({ pts, life: 0.16 });
+      }
+
       function addFloater(x, y, txt, col = '#FFF1E8') {
-        if (floaters.length > 26) floaters.shift();
-        floaters.push({ x, y, vy: -22, life: 0.65, txt, col });
+        const cap = isTouchCapable ? 14 : 18;
+        if (floaters.length >= cap) floaters.shift();
+        floaters.push({ x, y, vy: -22, life: 0.62, txt, col });
       }
 
       function spawnEnemy(forceType = null) {
-        if (enemies.length > 65 && forceType !== 'boss') return;
+        if (enemies.length > 62 && forceType !== 'boss' && forceType !== 'mimic') return;
         const side = Math.floor(Math.random() * 4);
         let x, y;
-        if (side === 0) { x = Math.random() * W; y = -10; }
-        else if (side === 1) { x = W + 10; y = Math.random() * H; }
-        else if (side === 2) { x = Math.random() * W; y = H + 10; }
-        else { x = -10; y = Math.random() * H; }
+        if (side === 0) { x = arenaBounds.left + Math.random() * (arenaBounds.right - arenaBounds.left); y = arenaBounds.top - 8; }
+        else if (side === 1) { x = arenaBounds.right + 8; y = arenaBounds.top + Math.random() * (arenaBounds.bottom - arenaBounds.top); }
+        else if (side === 2) { x = arenaBounds.left + Math.random() * (arenaBounds.right - arenaBounds.left); y = arenaBounds.bottom + 8; }
+        else { x = arenaBounds.left - 8; y = arenaBounds.top + Math.random() * (arenaBounds.bottom - arenaBounds.top); }
 
         let type = forceType;
         if (!type) {
@@ -896,39 +1166,68 @@
           bat:   { r: 4, hp: Math.round(1.5 * hpScale), spd: 42 + wave * 1.5, col: '#7E2553', xp: 2, pts: 18 },
           golem: { r: 7, hp: Math.round(6 * hpScale), spd: 15 + wave * 0.6, col: '#AB5236', xp: 4, pts: 35 },
           ghost: { r: 5, hp: Math.round(3 * hpScale), spd: 32 + wave * 1.2, col: '#FF77A8', xp: 3, pts: 25 },
-          boss:  { r: 10, hp: 28 + wave * 14, spd: 19 + wave * 0.8, col: '#FF004D', xp: 14, pts: 250 }
+          boss:  { r: 10, hp: 28 + wave * 14, spd: 19 + wave * 0.8, col: '#FF004D', xp: 14, pts: 250 },
+          mimic: { r: 9, hp: 26 + wave * 10, spd: 26 + wave * 0.8, col: '#FFA300', xp: 12, pts: 300 }
         };
         const d = defs[type];
-        enemies.push({ type, x, y, vx: 0, vy: 0, r: d.r, hp: d.hp, maxHp: d.hp, spd: d.spd, col: d.col, xp: d.xp, pts: d.pts, flash: 0, phase: Math.random() * 6.28 });
+        enemies.push({
+          type, x, y, vx: 0, vy: 0, r: d.r, hp: d.hp, maxHp: d.hp, spd: d.spd, col: d.col, xp: d.xp, pts: d.pts,
+          flash: 0, phase: Math.random() * 6.28,
+          bowlingTime: 0, bowlVx: 0, bowlVy: 0, hitInvuln: 0,
+          taxCd: 2.2, auditCd: 1.5, loot: []
+        });
         if (type === 'boss') {
-          sfx.boss(); shake = 5; bannerText = 'ALERTA: BOSS!'; bannerTimer = 2.0;
-          rings.push({ x, y, r: 2, maxR: 34, col: '#FF004D', life: 0.4 });
+          sfx.boss(); shake = 5; bannerText = 'ALERTA: BOSS COROADO!'; bannerTimer = 2.0;
+          addRing(x, y, 2, 34, '#FF004D', 0.4);
+        } else if (type === 'mimic') {
+          sfx.boss(); shake = 4; bannerText = '🧾 MÍMICO CONTADOR CHEGOU!'; bannerTimer = 2.2;
+          addRing(x, y, 2, 34, '#FFEC27', 0.4);
         }
       }
 
-      function triggerDash() {
-        if (state !== 'play' || player.dashCd > 0) return;
-        const len = Math.hypot(player.faceX, player.faceY) || 1;
-        player.dashDx = player.faceX / len; player.dashDy = player.faceY / len;
-        player.dashTime = 0.14; player.dashCd = 0.95; player.invuln = Math.max(player.invuln, 0.24);
-        sfx.dash(); shake = Math.max(shake, 2);
-        rings.push({ x: player.x, y: player.y, r: 3, maxR: 22 + player.dashBoom * 12, col: '#29ADFF', life: 0.26 });
-        burst(player.x, player.y, '#29ADFF', 8, 70);
-        if (player.dashBoom > 0) {
-          const rad = 32 + player.dashBoom * 10;
-          enemies.forEach(e => {
-            if (Math.hypot(e.x - player.x, e.y - player.y) <= rad) damageEnemy(e, 2 + player.dashBoom * 2, e.x - player.x, e.y - player.y, '#FF77A8');
-          });
+      // --- #08 Slot Machine ---
+      function triggerSlotSpin(guaranteedJackpot = false) {
+        if (slotMachine.spinning) return;
+        slotMachine.spinning = true;
+        slotMachine.timer = 1.05;
+        slotMachine.guaranteed = guaranteedJackpot;
+        slotMachine.label = '🎰 GIRANDO...';
+        sfx.ding(1);
+      }
+
+      function finishSlotSpin() {
+        slotMachine.spinning = false;
+        const win777 = slotMachine.guaranteed || Math.random() < 0.72;
+        if (win777) {
+          slotMachine.reels = ['7', '7', '7'];
+          slotMachine.label = '🎰 JACKPOT 7-7-7!!';
+          jackpotTimer = 8.0;
+          sfx.slot();
+          shake = Math.max(shake, 5);
+          bannerText = '🎰 JACKPOT 777! CHUVA DE MOEDA!';
+          bannerTimer = 2.2;
+        } else {
+          slotMachine.reels = ['★', '★', '★'];
+          slotMachine.label = '★ MINI BÔNUS! ★';
+          sfx.lvl();
+          for (let i = 0; i < 6; i++) {
+            jackpotCoins.push({
+              x: 40 + Math.random() * (W - 80), y: 20,
+              vx: (Math.random() - 0.5) * 140, vy: 80 + Math.random() * 80, life: 4.0, dmg: 2
+            });
+          }
         }
       }
 
-      function damageEnemy(e, dmg, kx, ky, hitCol = '#FFF1E8') {
-        e.hp -= dmg; e.flash = 0.1;
-        const kl = Math.hypot(kx, ky) || 1, push = e.type === 'boss' ? 18 : 52;
+      function damageEnemy(e, dmg, kx, ky, hitCol = '#FFF1E8', dominoChain = 0) {
+        if (!e || e.hp <= 0) return;
+        e.hp -= dmg; e.flash = 0.09;
+        const kl = Math.hypot(kx, ky) || 1, push = (e.type === 'boss' || e.type === 'mimic') ? 16 : 50;
         e.vx += (kx / kl) * push; e.vy += (ky / kl) * push;
         burst(e.x, e.y, e.col, 3, 45);
         addFloater(e.x, e.y - 6, `${dmg}`, hitCol);
         sfx.hit();
+
         if (e.hp <= 0) {
           score += e.pts + combo * 2; combo++; comboTimer = 2.4;
           store.stats.totalKills++;
@@ -937,44 +1236,238 @@
           if (score >= 1000) unlockAchievement('score_1000');
           if (e.type === 'boss') unlockAchievement('boss_slayer');
 
-          shake = Math.max(shake, e.type === 'boss' ? 7 : 2.2);
-          if (e.type === 'boss') hitStop = 0.06;
+          // #04 If Mimic dies, return all confiscated powers!
+          if (e.type === 'mimic' && e.loot && e.loot.length > 0) {
+            restoreMimicLoot(e, true);
+          }
+
+          // #08 Jackpot kill counter
+          if (activeTop10.m8) {
+            slotKills++;
+            if (slotKills >= 14) { slotKills = 0; triggerSlotSpin(false); }
+          }
+
+          // #10 Efeito Dominó de Pólvora (staggered chain sparks)
+          if (activeTop10.m10 && dominoChain < 7 && sparks.length < 20) {
+            let nextTarget = null, bestD = 82;
+            for (const other of enemies) {
+              if (other !== e && other.hp > 0 && Math.hypot(other.x - e.x, other.y - e.y) < bestD) {
+                bestD = Math.hypot(other.x - e.x, other.y - e.y);
+                nextTarget = other;
+              }
+            }
+            if (nextTarget) {
+              sparks.push({ x: e.x, y: e.y, sx: e.x, sy: e.y, target: nextTarget, progress: 0, chain: dominoChain + 1 });
+            }
+          }
+
+          shake = Math.max(shake, (e.type === 'boss' || e.type === 'mimic') ? 6 : 2.0);
+          if (e.type === 'boss' || e.type === 'mimic') hitStop = 0.05;
           sfx.kill();
-          burst(e.x, e.y, e.col, e.type === 'boss' ? 24 : 9, e.type === 'boss' ? 95 : 65);
-          rings.push({ x: e.x, y: e.y, r: 2, maxR: e.type === 'boss' ? 38 : 14, col: e.col, life: 0.25 });
-          if (splats.length > 35) splats.shift();
-          splats.push({ x: e.x, y: e.y, r: e.r, col: e.col, life: 5 });
-          const gemCount = e.type === 'boss' ? 8 : (e.xp >= 3 ? 2 : 1);
+          burst(e.x, e.y, e.col, (e.type === 'boss' || e.type === 'mimic') ? 22 : 8, 70);
+          addRing(e.x, e.y, 2, (e.type === 'boss' || e.type === 'mimic') ? 36 : 13, e.col, 0.25);
+          if (splats.length >= 30) splats.shift();
+          splats.push({ x: e.x, y: e.y, r: e.r, col: e.col, life: 4.5 });
+          const gemCount = (e.type === 'boss' || e.type === 'mimic') ? 8 : (e.xp >= 3 ? 2 : 1);
           for (let i = 0; i < gemCount; i++) {
             gems.push({
               x: e.x + (Math.random() - 0.5) * 8, y: e.y + (Math.random() - 0.5) * 8,
               vx: (Math.random() - 0.5) * 35, vy: (Math.random() - 0.5) * 35,
               val: Math.max(1, Math.ceil(e.xp / gemCount)),
-              col: e.type === 'boss' ? '#FFEC27' : (e.xp >= 3 ? '#29ADFF' : '#00E436')
+              col: (e.type === 'boss' || e.type === 'mimic') ? '#FFEC27' : (e.xp >= 3 ? '#29ADFF' : '#00E436')
             });
           }
           syncHud();
         }
       }
 
+      // #04 Mimic steals and returns upgrades
+      function confiscatePower(mimic) {
+        if (mimic.auditCd > 0) return;
+        mimic.auditCd = 3.0;
+        let stolen = null;
+        if (player.projCount > 1) { player.projCount--; stolen = 'multi'; }
+        else if (player.orbits > 0) { player.orbits--; stolen = 'orbit'; }
+        else if (player.zapLvl > 0) { player.zapLvl--; stolen = 'zap'; }
+        else if (player.dashBoom > 0) { player.dashBoom--; stolen = 'dash'; }
+        if (stolen) {
+          mimic.loot.push(stolen);
+          addFloater(player.x, player.y - 10, '🧾 CONFISCADO!', '#FF004D');
+        } else {
+          score = Math.max(0, score - 25);
+          addFloater(player.x, player.y - 10, '🧾 MULTA -25!', '#FFA300');
+        }
+        sfx.hurt();
+        syncHud();
+      }
+
+      function restoreMimicLoot(mimic, withInterest = true) {
+        let count = mimic.loot.length;
+        while (mimic.loot.length > 0) {
+          const item = mimic.loot.pop();
+          if (item === 'multi') player.projCount++;
+          else if (item === 'orbit') player.orbits++;
+          else if (item === 'zap') player.zapLvl++;
+          else if (item === 'dash') player.dashBoom++;
+        }
+        if (withInterest) {
+          // Interest bonus!
+          const roll = Math.random();
+          if (roll < 0.34) player.projCount++;
+          else if (roll < 0.67) player.orbits++;
+          else player.zapLvl++;
+          score += 120 + count * 60;
+          addFloater(mimic.x, mimic.y - 12, '💸 RESTITUIÇÃO + JUROS!', '#00E436');
+          unlockAchievement('mimic_robbed');
+        }
+        sfx.slot();
+        syncHud();
+      }
+
+      // --- Dash + #01 Raquetada + #01 Eco + #02 Wall Kick + #04 Mimic Slam ---
+      function triggerDash() {
+        if (state !== 'play' || player.dashCd > 0) return;
+        const len = Math.hypot(player.faceX, player.faceY) || 1;
+        player.dashDx = player.faceX / len; player.dashDy = player.faceY / len;
+        player.dashStartX = player.x; player.dashStartY = player.y;
+        player.dashTime = 0.15;
+        player.dashCd = activeTop10.m9 ? 0.48 : 0.92;
+        player.invuln = Math.max(player.invuln, 0.28);
+        player.grazeResetFlag = false;
+        pinballChain = 0;
+
+        sfx.dash(); shake = Math.max(shake, 2.2);
+        addRing(player.x, player.y, 3, 24 + player.dashBoom * 12, activeTop10.m9 ? '#FF77A8' : '#29ADFF', 0.28);
+        burst(player.x, player.y, '#29ADFF', 8, 70);
+
+        if (player.dashBoom > 0) {
+          const rad = 34 + player.dashBoom * 10;
+          enemies.forEach(e => {
+            if (Math.hypot(e.x - player.x, e.y - player.y) <= rad) damageEnemy(e, 2 + player.dashBoom * 2, e.x - player.x, e.y - player.y, '#FF77A8');
+          });
+        }
+
+        // #01 Raquetada on nearby pinballs!
+        if (activeTop10.m1) {
+          let hitBall = false;
+          for (const b of pinballs) {
+            if (Math.hypot(b.x - player.x, b.y - player.y) < 28) {
+              let dirX = player.dashDx, dirY = player.dashDy;
+              let best = null, bestD = 999;
+              for (const e of enemies) {
+                const d = Math.hypot(e.x - b.x, e.y - b.y);
+                if (e.hp > 0 && d < bestD) { bestD = d; best = e; }
+              }
+              if (best) {
+                const bl = Math.hypot(best.x - b.x, best.y - b.y) || 1;
+                dirX = (best.x - b.x) / bl; dirY = (best.y - b.y) / bl;
+              }
+              b.vx = dirX * 320; b.vy = dirY * 320;
+              b.overcharge = Math.min(6, b.overcharge + 2);
+              hitBall = true;
+            }
+          }
+          if (hitBall) {
+            sfx.raquetada();
+            shake = Math.max(shake, 4.5);
+            addFloater(player.x, player.y - 12, '☄️ RAQUETADA!', '#FFEC27');
+          }
+        }
+      }
+
+      // --- #07 Vírus Relâmpago Spawn & Resolve ---
+      function spawnVirusEvent() {
+        const isKeyF = Math.random() < 0.5;
+        const maxT = isTouchCapable ? 4.2 : 3.2;
+        const w = 152, h = 42;
+        const x = Math.round((W - w) / 2), y = 14;
+        virusEvent = {
+          kind: isKeyF ? 'keyF' : 'close',
+          timer: maxT, maxTimer: maxT,
+          x, y, w, h,
+          closeRect: { x: x + w - 22, y: y + 2, w: 20, h: 18 }
+        };
+        btnTouchVirus.style.display = 'inline-block';
+        btnTouchVirus.classList.add('virus-alert');
+        sfx.virus();
+      }
+
+      function resolveVirus(success) {
+        if (!virusEvent) return;
+        virusEvent = null;
+        btnTouchVirus.style.display = 'none';
+        btnTouchVirus.classList.remove('virus-alert');
+        if (success) {
+          bsodTimer = 0.45;
+          sfx.slot();
+          shake = Math.max(shake, 6);
+          bannerText = '💙 TELA AZUL DA VITÓRIA!';
+          bannerTimer = 1.6;
+          unlockAchievement('virus_slayer');
+          // Wipe half of normal enemies + damage bosses
+          let killToggle = false;
+          for (const e of enemies) {
+            if (e.hp <= 0) continue;
+            if (e.type === 'boss' || e.type === 'mimic') {
+              damageEnemy(e, 8, e.x - player.x, e.y - player.y, '#29ADFF');
+            } else {
+              killToggle = !killToggle;
+              if (killToggle) damageEnemy(e, e.hp + 5, e.x - player.x, e.y - player.y, '#29ADFF');
+            }
+          }
+        } else {
+          sfx.hurt();
+          addFloater(W / 2, 36, '🦠 SPAM INSTALADO!', '#FF004D');
+          for (let i = 0; i < 2; i++) {
+            if (spamPopups.length >= 4) break;
+            const sw = 54, sh = 26;
+            spamPopups.push({
+              x: arenaBounds.left + 20 + Math.random() * Math.max(20, (arenaBounds.right - arenaBounds.left) - sw - 40),
+              y: arenaBounds.top + 24 + Math.random() * Math.max(20, (arenaBounds.bottom - arenaBounds.top) - sh - 48),
+              w: sw, h: sh, hp: 2,
+              label: Math.random() < 0.5 ? '💎 CLIQUE AKI' : '⚠ CPU 999%'
+            });
+          }
+        }
+      }
+
       function openLevelUp() {
         state = 'levelup'; sfx.lvl();
         saveCheckpoint();
-        levelChoices = [...UPGRADES].sort(() => Math.random() - 0.5).slice(0, 3);
+        const unownedTop10 = TOP10_MODES.filter(m => !activeTop10[m.key]);
+        const pool = [...UPGRADES];
+        // Mix Top 10 powers into Level Up choices so players unlock craziness naturally!
+        if (unownedTop10.length > 0) {
+          const pickedMode = unownedTop10[Math.floor(Math.random() * unownedTop10.length)];
+          pool.push({
+            id: `top10_${pickedMode.key}`,
+            name: `#${pickedMode.num} ${pickedMode.icon} ${pickedMode.name.slice(0, 12)}`,
+            desc: 'Desbloqueia Poder Top 10!',
+            col: pickedMode.col,
+            modeKey: pickedMode.key
+          });
+        }
+        levelChoices = pool.sort(() => Math.random() - 0.5).slice(0, 3);
       }
 
       function applyUpgrade(idx) {
         const up = levelChoices[idx];
         if (!up) return;
-        if (up.id === 'multi') player.projCount++;
+        if (up.modeKey) {
+          activeTop10[up.modeKey] = true;
+          applyTop10SideEffects(up.modeKey);
+        } else if (up.id === 'multi') player.projCount++;
         else if (up.id === 'orbit') player.orbits++;
         else if (up.id === 'zap') player.zapLvl++;
         else if (up.id === 'dash') player.dashBoom++;
-        else if (up.id === 'rate') player.fireRate *= 0.78;
-        else if (up.id === 'mag') { player.magRadius += 24; player.hp = Math.min(player.maxHp, player.hp + 1); }
+        else if (up.id === 'rate') player.fireRate = Math.max(0.08, player.fireRate * 0.78);
+        else if (up.id === 'mag') {
+          player.magRadius += 24;
+          if (!activeTop10.m5) player.hp = Math.min(player.maxHp, player.hp + 1);
+        }
         state = 'play';
         btnPause.textContent = '⏸';
-        rings.push({ x: player.x, y: player.y, r: 4, maxR: 42, col: up.col, life: 0.35 });
+        addRing(player.x, player.y, 4, 42, up.col, 0.35);
         burst(player.x, player.y, up.col, 12, 80);
         saveCheckpoint();
         syncHud();
@@ -982,19 +1475,37 @@
       }
 
       function fireAutoWeapons(dt) {
+        // #09 Pacifist disables normal guns (unless #08 Jackpot rainbow frenzy!)
+        const gunsDisabled = activeTop10.m9 && jackpotTimer <= 0;
         player.fireCd -= dt;
-        if (player.fireCd <= 0 && enemies.length > 0) {
+        if (!gunsDisabled && player.fireCd <= 0 && (enemies.length > 0 || spamPopups.length > 0)) {
           let nearest = null, bestD = 9999;
           for (const e of enemies) {
             const d = Math.hypot(e.x - player.x, e.y - player.y);
             if (d < bestD) { bestD = d; nearest = e; }
           }
+          if (!nearest && spamPopups.length > 0) {
+            const sp = spamPopups[0];
+            nearest = { x: sp.x + sp.w / 2, y: sp.y + sp.h / 2 };
+          }
           if (nearest) {
-            player.fireCd = player.fireRate;
+            // #05 +400% fire rate, #08 Jackpot 2x fire rate
+            let rate = player.fireRate;
+            if (activeTop10.m5) rate *= 0.25;
+            if (jackpotTimer > 0) rate *= 0.65;
+            player.fireCd = Math.max(0.055, rate);
+
             const baseAng = Math.atan2(nearest.y - player.y, nearest.x - player.x);
+            const bigScale = activeTop10.m5 ? 2.6 : 1;
+            const dmg = (activeTop10.m5 ? 2 : 1) * (jackpotTimer > 0 ? 2 : 1);
             for (let i = 0; i < player.projCount; i++) {
               const a = baseAng + (i - (player.projCount - 1) / 2) * 0.2;
-              bullets.push({ x: player.x, y: player.y, vx: Math.cos(a) * 165, vy: Math.sin(a) * 165, life: 1.4, dmg: 1 });
+              if (bullets.length > 140) bullets.shift();
+              bullets.push({
+                x: player.x, y: player.y,
+                vx: Math.cos(a) * 175, vy: Math.sin(a) * 175,
+                life: 1.4, dmg, r: 2 * bigScale, rainbow: jackpotTimer > 0 || activeTop10.m5
+              });
             }
             sfx.shoot();
           }
@@ -1028,31 +1539,91 @@
               damageEnemy(best, 1 + Math.floor(player.zapLvl / 2), best.x - cx, best.y - cy, '#00E436');
               cx = best.x; cy = best.y;
             }
-            if (pts.length > 1) { bolts.push({ pts, life: 0.16 }); sfx.zap(); }
+            if (pts.length > 1) { addBolt(pts); sfx.zap(); }
           }
         }
       }
 
+      // Segment-circle distance helper for #01 Echo Trail
+      function distToSeg(px, py, x1, y1, x2, y2) {
+        const dx = x2 - x1, dy = y2 - y1;
+        const lenSq = dx * dx + dy * dy;
+        if (lenSq === 0) return Math.hypot(px - x1, py - y1);
+        const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lenSq));
+        return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+      }
+
+      function hurtPlayer() {
+        if (player.invuln > 0) return;
+        player.hp--; player.invuln = 1.05; shake = 6; hitStop = 0.05; sfx.hurt();
+        burst(player.x, player.y, '#FF004D', 12, 85);
+        addRing(player.x, player.y, 3, 28, '#FF004D', 0.3);
+        syncHud();
+        if (player.hp <= 0) {
+          state = 'gameover';
+          if (score > store.stats.bestScore) store.stats.bestScore = score;
+          if (wave > store.stats.bestWave) store.stats.bestWave = wave;
+          if (player.lvl > store.stats.bestLevel) store.stats.bestLevel = player.lvl;
+          store.savedRun = null;
+          persistStore(true);
+        }
+      }
+
       function update(rawDt) {
-        const dt = Math.min(0.05, rawDt) * cfg.speedMult;
-        time += dt;
-        for (const s of stars) { s.y += s.spd * dt * 0.5; if (s.y > H) { s.y = 0; s.x = Math.random() * W; } }
+        const dtBase = Math.min(0.05, rawDt) * cfg.speedMult;
+        time += dtBase;
+        for (const s of stars) { s.y += s.spd * dtBase * 0.5; if (s.y > H) { s.y = 0; s.x = Math.random() * W; } }
+
+        // #03 Runaway Pause Button animation while paused!
+        if (state === 'paused' && runawayBtn.active) {
+          runawayBtn.timer -= rawDt;
+          if (runawayBtn.timer <= 0) {
+            runawayBtn.active = false;
+          } else {
+            if (runawayBtn.pauseWait > 0) {
+              runawayBtn.pauseWait -= rawDt;
+            } else {
+              runawayBtn.x += runawayBtn.vx * rawDt;
+              runawayBtn.y += runawayBtn.vy * rawDt;
+              if (runawayBtn.x < 45 || runawayBtn.x > W - 45) { runawayBtn.vx *= -1; runawayBtn.x = Math.max(45, Math.min(W - 45, runawayBtn.x)); runawayBtn.pauseWait = 0.25; }
+              if (runawayBtn.y < 30 || runawayBtn.y > H - 25) { runawayBtn.vy *= -1; runawayBtn.y = Math.max(30, Math.min(H - 25, runawayBtn.y)); runawayBtn.pauseWait = 0.25; }
+            }
+          }
+          return;
+        }
+
         if (state === 'title') {
-          for (const e of enemies) { e.phase += dt * 4; e.x += Math.cos(e.phase * 0.4) * 14 * dt; e.y += Math.sin(e.phase * 0.3) * 14 * dt; }
+          for (const e of enemies) { e.phase += dtBase * 4; e.x += Math.cos(e.phase * 0.4) * 14 * dtBase; e.y += Math.sin(e.phase * 0.3) * 14 * dtBase; }
           return;
         }
         if (state !== 'play') return;
         if (hitStop > 0) { hitStop -= rawDt; return; }
-        if (shake > 0) shake = Math.max(0, shake - dt * 22);
-        if (bannerTimer > 0) bannerTimer -= dt;
-        if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) combo = 0; }
+
+        // #07 slow-mo horde while Virus popup active
+        const dt = virusEvent ? dtBase * 0.65 : dtBase;
+
+        if (shake > 0) shake = Math.max(0, shake - dtBase * 22);
+        if (bannerTimer > 0) bannerTimer -= dtBase;
+        if (bsodTimer > 0) bsodTimer -= rawDt;
+        if (pauseBoomCd > 0) pauseBoomCd = Math.max(0, pauseBoomCd - dtBase);
+        if (wallKickCd > 0) wallKickCd = Math.max(0, wallKickCd - dtBase);
+        if (comboTimer > 0) { comboTimer -= dtBase; if (comboTimer <= 0) combo = 0; }
+        if (jackpotTimer > 0) {
+          jackpotTimer -= dtBase;
+          if (Math.random() < dtBase * 9 && jackpotCoins.length < 18) {
+            jackpotCoins.push({
+              x: arenaBounds.left + 12 + Math.random() * Math.max(10, arenaBounds.right - arenaBounds.left - 24),
+              y: arenaBounds.top + 8,
+              vx: (Math.random() - 0.5) * 120, vy: 85 + Math.random() * 80, life: 3.5, dmg: 2
+            });
+          }
+        }
+        for (const ic of osIcons) if (ic.cd > 0) ic.cd -= dtBase;
 
         saveTimer += rawDt;
-        if (saveTimer >= 2.0) {
-          saveTimer = 0;
-          saveCheckpoint();
-        }
+        if (saveTimer >= 2.0) { saveTimer = 0; saveCheckpoint(); }
 
+        // Movement
         let mx = 0, my = 0;
         if (keys['KeyW'] || keys['ArrowUp']) my -= 1;
         if (keys['KeyS'] || keys['ArrowDown']) my += 1;
@@ -1064,85 +1635,409 @@
           if (dist > 4) { mx = dx / dist; my = dy / dist; player.faceX = mx; player.faceY = my; }
         }
 
-        if (player.dashCd > 0) player.dashCd -= dt;
-        if (player.invuln > 0) player.invuln -= dt;
-        if (player.dashTime > 0) {
-          player.dashTime -= dt;
-          player.x += player.dashDx * 215 * dt; player.y += player.dashDy * 215 * dt;
-          if (Math.random() < 0.75) ghosts.push({ x: player.x, y: player.y, life: 0.18, col: cfg.heroColor });
-        } else {
-          player.x += mx * 74 * dt; player.y += my * 74 * dt;
-        }
-        player.x = Math.max(8, Math.min(W - 8, player.x));
-        player.y = Math.max(8, Math.min(H - 8, player.y));
+        if (player.dashCd > 0) player.dashCd -= dtBase;
+        if (player.invuln > 0) player.invuln -= dtBase;
 
-        spawnTimer -= dt;
-        if (spawnTimer <= 0) {
-          const newWave = 1 + Math.floor(score / 320);
-          if (newWave > wave) {
-            wave = newWave;
-            bannerText = `ONDA ${wave}!`;
-            bannerTimer = 1.6;
-            if (wave >= 3) unlockAchievement('wave_3');
-            if (wave >= 5) unlockAchievement('wave_5');
-            saveCheckpoint();
-            syncHud();
+        const isDashing = player.dashTime > 0;
+        if (isDashing) {
+          player.dashTime -= dtBase;
+          player.x += player.dashDx * 225 * dtBase;
+          player.y += player.dashDy * 225 * dtBase;
+          if (Math.random() < 0.75) ghosts.push({ x: player.x, y: player.y, life: 0.18, col: activeTop10.m9 ? '#FF77A8' : cfg.heroColor });
+
+          // #01 Record echo segment once as dash runs/completes
+          if (activeTop10.m1 && player.dashTime <= 0 && echoTrails.length < 6) {
+            echoTrails.push({ x1: player.dashStartX, y1: player.dashStartY, x2: player.x, y2: player.y, life: 3.6, maxLife: 3.6 });
           }
-          spawnEnemy(); spawnTimer = Math.max(0.22, 1.05 - wave * 0.08);
-        }
-        bossTimer -= dt;
-        if (bossTimer <= 0) { bossTimer = 32; spawnEnemy('boss'); }
 
-        fireAutoWeapons(dt);
+          // #05 Fina / Graze 80% Dash Reset
+          if (activeTop10.m5 && !player.grazeResetFlag) {
+            for (const e of enemies) {
+              if (e.hp > 0 && Math.hypot(e.x - player.x, e.y - player.y) < 24) {
+                player.grazeResetFlag = true;
+                player.dashCd *= 0.2;
+                sfx.ding(6);
+                addFloater(player.x, player.y - 10, '⚡ FINA 80%!', '#FFEC27');
+                break;
+              }
+            }
+          }
 
-        for (let i = bullets.length - 1; i >= 0; i--) {
-          const b = bullets[i]; b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
-          let hit = false;
+          // #06 Dash Pinball Bumper + #04 Mimic Slam + #07 Spam smash
+          for (let i = spamPopups.length - 1; i >= 0; i--) {
+            const sp = spamPopups[i];
+            if (player.x > sp.x - 6 && player.x < sp.x + sp.w + 6 && player.y > sp.y - 6 && player.y < sp.y + sp.h + 6) {
+              sp.hp -= 2;
+              if (sp.hp <= 0) { burst(sp.x + sp.w / 2, sp.y + sp.h / 2, '#FFEC27', 10, 75); spamPopups.splice(i, 1); sfx.kill(); }
+            }
+          }
+
           for (const e of enemies) {
-            if (e.hp > 0 && Math.hypot(e.x - b.x, e.y - b.y) < e.r + 3) { damageEnemy(e, b.dmg, b.vx, b.vy); hit = true; break; }
+            if (e.hp <= 0) continue;
+            const dist = Math.hypot(e.x - player.x, e.y - player.y);
+            // #04 Mimic dash restitution!
+            if (e.type === 'mimic' && dist < e.r + 12 && e.hitInvuln <= 0) {
+              e.hitInvuln = 0.45;
+              damageEnemy(e, 6, e.x - player.x, e.y - player.y, '#FFEC27');
+              restoreMimicLoot(e, true);
+              shake = Math.max(shake, 5);
+            }
+            // #06 Pinball Dash bumper
+            if (activeTop10.m6 && dist < e.r + 10 && e.hitInvuln <= 0) {
+              e.hitInvuln = 0.35;
+              pinballChain++;
+              sfx.ding(pinballChain);
+              shake = Math.max(shake, 3);
+              const l = dist || 1;
+              e.bowlingTime = 0.75;
+              e.bowlVx = ((e.x - player.x) / l) * 215;
+              e.bowlVy = ((e.y - player.y) / l) * 215;
+              damageEnemy(e, 3, e.bowlVx, e.bowlVy, '#00E436');
+              if (pinballChain >= 2) addFloater(e.x, e.y - 12, `🎱 x${pinballChain}!`, '#FFEC27');
+            }
           }
-          if (hit || b.life <= 0 || b.x < -10 || b.x > W + 10 || b.y < -10 || b.y > H + 10) bullets.splice(i, 1);
-        }
 
-        for (let i = enemies.length - 1; i >= 0; i--) {
-          const e = enemies[i];
-          if (e.hp <= 0) { enemies.splice(i, 1); continue; }
-          if (e.flash > 0) e.flash -= dt;
-          e.phase += dt * 7;
-          const dx = player.x - e.x, dy = player.y - e.y, dist = Math.hypot(dx, dy) || 1;
-          let spd = e.spd;
-          if (e.type === 'ghost' && Math.sin(e.phase * 0.5) > 0.65) spd *= 1.9;
-          const wobble = e.type === 'bat' ? Math.sin(e.phase * 1.4) * 28 : 0;
-          e.vx *= Math.pow(0.05, dt); e.vy *= Math.pow(0.05, dt);
-          e.x += ((dx / dist) * spd + (-dy / dist) * wobble + e.vx) * dt;
-          e.y += ((dy / dist) * spd + (dx / dist) * wobble + e.vy) * dt;
-          if (dist < e.r + 5 && player.invuln <= 0) {
-            player.hp--; player.invuln = 1.0; shake = 6; hitStop = 0.05; sfx.hurt();
-            burst(player.x, player.y, '#FF004D', 12, 85);
-            rings.push({ x: player.x, y: player.y, r: 3, maxR: 28, col: '#FF004D', life: 0.3 });
-            syncHud();
-            if (player.hp <= 0) {
-              state = 'gameover';
-              if (score > store.stats.bestScore) store.stats.bestScore = score;
-              if (wave > store.stats.bestWave) store.stats.bestWave = wave;
-              if (player.lvl > store.stats.bestLevel) store.stats.bestLevel = player.lvl;
-              store.savedRun = null;
-              persistStore(true);
-              return;
+          // #09 Pacifist Black Hole Pull
+          if (activeTop10.m9) {
+            for (const e of enemies) {
+              if (e.hp <= 0) continue;
+              const dx = player.x - e.x, dy = player.y - e.y, d = Math.hypot(dx, dy) || 1;
+              if (d < 92 && d > 12) {
+                e.x += (dx / d) * 145 * dtBase;
+                e.y += (dy / d) * 145 * dtBase;
+              }
+            }
+          }
+        } else {
+          player.x += mx * 76 * dtBase;
+          player.y += my * 76 * dtBase;
+          // #09 End of dash Supernova!
+          if (dashPrevActive && activeTop10.m9) {
+            player.invuln = Math.max(player.invuln, 0.25);
+            const rad = 64 + player.lvl * 4;
+            const novaDmg = 4 + Math.floor(player.lvl / 2) + player.dashBoom * 2;
+            addRing(player.x, player.y, 6, rad, '#FF77A8', 0.35);
+            burst(player.x, player.y, '#29ADFF', 16, 110);
+            sfx.boom();
+            shake = Math.max(shake, 5.5);
+            addFloater(player.x, player.y - 12, '☢️ SUPERNOVA!', '#FF77A8');
+            const boltPts = [{ x: player.x, y: player.y }];
+            for (const e of enemies) {
+              if (e.hp > 0 && Math.hypot(e.x - player.x, e.y - player.y) <= rad) {
+                damageEnemy(e, novaDmg, e.x - player.x, e.y - player.y, '#FF77A8');
+                if (boltPts.length < 6) boltPts.push({ x: e.x, y: e.y });
+              }
+            }
+            if (boltPts.length > 1) addBolt(boltPts);
+          }
+        }
+        dashPrevActive = isDashing;
+
+        // #02 Arena-Janela Viva shrinking + wall kick
+        if (activeTop10.m2) {
+          const maxLeft = 82, maxTop = 42;
+          arenaBounds.left = Math.min(maxLeft, arenaBounds.left + 3.2 * dt);
+          arenaBounds.right = Math.max(W - maxLeft, arenaBounds.right - 3.2 * dt);
+          arenaBounds.top = Math.min(maxTop, arenaBounds.top + 2.0 * dt);
+          arenaBounds.bottom = Math.max(H - maxTop, arenaBounds.bottom - 2.0 * dt);
+
+          // Kick wall outward during Dash!
+          if (isDashing && wallKickCd <= 0) {
+            let kickedSide = null;
+            if (player.x <= arenaBounds.left + 18 && arenaBounds.left > 2) { kickedSide = 'left'; arenaBounds.left = Math.max(0, arenaBounds.left - 34); }
+            else if (player.x >= arenaBounds.right - 18 && arenaBounds.right < W - 2) { kickedSide = 'right'; arenaBounds.right = Math.min(W, arenaBounds.right + 34); }
+            else if (player.y <= arenaBounds.top + 18 && arenaBounds.top > 6) { kickedSide = 'top'; arenaBounds.top = Math.max(0, arenaBounds.top - 24); }
+            else if (player.y >= arenaBounds.bottom - 18 && arenaBounds.bottom < H - 2) { kickedSide = 'bottom'; arenaBounds.bottom = Math.min(H, arenaBounds.bottom + 24); }
+
+            if (kickedSide) {
+              wallKickCd = 0.25;
+              sfx.boom(); shake = Math.max(shake, 4.5);
+              addFloater(player.x, player.y - 10, '🪟 PRENSA!', '#FFA300');
+              for (const e of enemies) {
+                if (e.hp <= 0) continue;
+                const near = (kickedSide === 'left' && e.x < arenaBounds.left + 44)
+                  || (kickedSide === 'right' && e.x > arenaBounds.right - 44)
+                  || (kickedSide === 'top' && e.y < arenaBounds.top + 36)
+                  || (kickedSide === 'bottom' && e.y > arenaBounds.bottom - 36);
+                if (near) damageEnemy(e, 6, e.x - player.x, e.y - player.y, '#FFA300');
+              }
+              // Hit nearby desktop icons to drop cure pixel!
+              for (const ic of osIcons) {
+                if (ic.cd <= 0) {
+                  ic.cd = 4.0;
+                  healPixels.push({ x: Math.max(arenaBounds.left + 12, Math.min(arenaBounds.right - 12, ic.x)), y: Math.max(arenaBounds.top + 12, Math.min(arenaBounds.bottom - 12, ic.y)), life: 12 });
+                  break;
+                }
+              }
             }
           }
         }
 
+        player.x = Math.max(arenaBounds.left + 8, Math.min(arenaBounds.right - 8, player.x));
+        player.y = Math.max(arenaBounds.top + 10, Math.min(arenaBounds.bottom - 8, player.y));
+
+        // Update #01 Echo Trails & Pinballs
+        for (let i = echoTrails.length - 1; i >= 0; i--) { echoTrails[i].life -= dtBase; if (echoTrails[i].life <= 0) echoTrails.splice(i, 1); }
+        if (activeTop10.m1 && pinballs.length === 0) spawnPinball();
+        const ballCap = isTouchCapable ? 16 : 24;
+        for (let i = pinballs.length - 1; i >= 0; i--) {
+          const b = pinballs[i];
+          if (b.echoCd > 0) b.echoCd -= dtBase;
+          b.x += b.vx * dtBase; b.y += b.vy * dtBase;
+          let bounced = false;
+          if (b.x - b.r < arenaBounds.left) { b.x = arenaBounds.left + b.r; b.vx = Math.abs(b.vx); bounced = true; }
+          if (b.x + b.r > arenaBounds.right) { b.x = arenaBounds.right - b.r; b.vx = -Math.abs(b.vx); bounced = true; }
+          if (b.y - b.r < arenaBounds.top) { b.y = arenaBounds.top + b.r; b.vy = Math.abs(b.vy); bounced = true; }
+          if (b.y + b.r > arenaBounds.bottom) { b.y = arenaBounds.bottom - b.r; b.vy = -Math.abs(b.vy); bounced = true; }
+          if (bounced) {
+            const spd = Math.hypot(b.vx, b.vy);
+            if (spd < 340) { b.vx *= 1.04; b.vy *= 1.04; }
+            b.colIdx = (b.colIdx + 1) % 6;
+            b.bounces++;
+          }
+          // Check Echo Trail duplication or Overcharge!
+          if (b.echoCd <= 0) {
+            for (const tr of echoTrails) {
+              if (distToSeg(b.x, b.y, tr.x1, tr.y1, tr.x2, tr.y2) < 9) {
+                b.echoCd = 0.55;
+                const ang = Math.atan2(b.vy, b.vx), spd = Math.hypot(b.vx, b.vy);
+                if (pinballs.length < ballCap) {
+                  spawnPinball(b.x, b.y, Math.cos(ang + 0.35) * spd, Math.sin(ang + 0.35) * spd, b.overcharge);
+                  addFloater(b.x, b.y - 8, '🌀 x2!', '#29ADFF');
+                } else {
+                  for (const ob of pinballs) ob.overcharge = Math.min(6, ob.overcharge + 1);
+                  addFloater(b.x, b.y - 8, '⚡ OVERCHARGE!', '#FFEC27');
+                }
+                sfx.ding(3);
+                break;
+              }
+            }
+          }
+          // Pinball enemy hit
+          for (const e of enemies) {
+            if (e.hp > 0 && e.hitInvuln <= 0 && Math.hypot(e.x - b.x, e.y - b.y) < e.r + b.r + 1) {
+              e.hitInvuln = 0.14;
+              damageEnemy(e, b.dmg + b.overcharge, b.vx, b.vy, RAINBOW[b.colIdx]);
+              // Bounce slightly off heavy enemies
+              const spd = Math.hypot(b.vx, b.vy);
+              if (spd < 320) { b.vx *= 1.03; b.vy *= 1.03; }
+              break;
+            }
+          }
+        }
+
+        // Update #10 Domino Sparks
+        for (let i = sparks.length - 1; i >= 0; i--) {
+          const sp = sparks[i];
+          sp.progress += dtBase * 18; // ~55ms travel stagger!
+          if (!sp.target || sp.target.hp <= 0) { sparks.splice(i, 1); continue; }
+          sp.x = sp.sx + (sp.target.x - sp.sx) * Math.min(1, sp.progress);
+          sp.y = sp.sy + (sp.target.y - sp.sy) * Math.min(1, sp.progress);
+          if (sp.progress >= 1) {
+            const tx = sp.target.x, ty = sp.target.y, ch = sp.chain;
+            sparks.splice(i, 1);
+            addRing(tx, ty, 3, 22, '#FFA300', 0.2);
+            burst(tx, ty, '#FFEC27', 7, 70);
+            sfx.ding(ch);
+            for (const e of enemies) {
+              if (e.hp > 0 && Math.hypot(e.x - tx, e.y - ty) <= 24) {
+                damageEnemy(e, 3 + Math.min(4, ch), e.x - tx, e.y - ty, '#FFA300', ch);
+              }
+            }
+          }
+        }
+
+        // Spawning enemies + #04 Mimic + #07 Virus + #08 Dice
+        spawnTimer -= dt;
+        if (spawnTimer <= 0) {
+          const newWave = 1 + Math.floor(score / 320);
+          if (newWave > wave) {
+            wave = newWave; bannerText = `ONDA ${wave}!`; bannerTimer = 1.6;
+            if (wave >= 3) unlockAchievement('wave_3');
+            if (wave >= 5) unlockAchievement('wave_5');
+            saveCheckpoint(); syncHud();
+          }
+          spawnEnemy(); spawnTimer = Math.max(0.22, 1.05 - wave * 0.08);
+        }
+        bossTimer -= dt;
+        if (bossTimer <= 0) { bossTimer = 30; spawnEnemy('boss'); }
+
+        if (activeTop10.m4) {
+          mimicSpawnTimer -= dt;
+          if (mimicSpawnTimer <= 0 && !enemies.some(e => e.type === 'mimic')) {
+            mimicSpawnTimer = 24;
+            spawnEnemy('mimic');
+          }
+        }
+
+        if (activeTop10.m7) {
+          if (virusEvent) {
+            virusEvent.timer -= rawDt;
+            if (virusEvent.timer <= 0) resolveVirus(false);
+          } else {
+            virusCd -= dtBase;
+            if (virusCd <= 0) { virusCd = 15; spawnVirusEvent(); }
+          }
+        }
+
+        if (activeTop10.m8) {
+          if (slotMachine.spinning) {
+            slotMachine.timer -= dtBase;
+            if (slotMachine.timer <= 0) finishSlotSpin();
+          }
+          diceSpawnTimer -= dtBase;
+          if (diceSpawnTimer <= 0) { diceSpawnTimer = 11; spawnGoldDie(); }
+          for (let i = goldDice.length - 1; i >= 0; i--) {
+            const gd = goldDice[i]; gd.life -= dtBase;
+            if (Math.hypot(player.x - gd.x, player.y - gd.y) < 12) {
+              goldDice.splice(i, 1);
+              triggerSlotSpin(true);
+            } else if (gd.life <= 0) goldDice.splice(i, 1);
+          }
+          for (let i = jackpotCoins.length - 1; i >= 0; i--) {
+            const c = jackpotCoins[i];
+            c.vy += 180 * dtBase;
+            c.x += c.vx * dtBase; c.y += c.vy * dtBase; c.life -= dtBase;
+            if (c.x < arenaBounds.left + 3 || c.x > arenaBounds.right - 3) c.vx *= -1;
+            if (c.y > arenaBounds.bottom - 4) { c.y = arenaBounds.bottom - 4; c.vy = -Math.abs(c.vy) * 0.78; }
+            for (const e of enemies) {
+              if (e.hp > 0 && e.hitInvuln <= 0 && Math.hypot(e.x - c.x, e.y - c.y) < e.r + 4) {
+                e.hitInvuln = 0.2;
+                damageEnemy(e, c.dmg, c.vx, c.vy, '#FFEC27');
+                break;
+              }
+            }
+            if (c.life <= 0) jackpotCoins.splice(i, 1);
+          }
+        }
+
+        // Heal Pixels from #02
+        for (let i = healPixels.length - 1; i >= 0; i--) {
+          const hpPx = healPixels[i]; hpPx.life -= dtBase;
+          if (Math.hypot(player.x - hpPx.x, player.y - hpPx.y) < 12) {
+            healPixels.splice(i, 1);
+            if (!activeTop10.m5 && player.hp < player.maxHp) { player.hp++; addFloater(player.x, player.y - 10, '+1 ♥', '#00E436'); }
+            else { score += 50; addFloater(player.x, player.y - 10, '+50 PTS', '#FFEC27'); }
+            sfx.gem(5); syncHud();
+          } else if (hpPx.life <= 0) healPixels.splice(i, 1);
+        }
+
+        fireAutoWeapons(dtBase);
+
+        // Bullets
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          const b = bullets[i]; b.x += b.vx * dtBase; b.y += b.vy * dtBase; b.life -= dtBase;
+          let hit = false;
+          for (let j = spamPopups.length - 1; j >= 0; j--) {
+            const sp = spamPopups[j];
+            if (b.x >= sp.x && b.x <= sp.x + sp.w && b.y >= sp.y && b.y <= sp.y + sp.h) {
+              sp.hp--; hit = true;
+              if (sp.hp <= 0) { burst(sp.x + sp.w / 2, sp.y + sp.h / 2, '#FFEC27', 8, 60); spamPopups.splice(j, 1); sfx.kill(); }
+              break;
+            }
+          }
+          if (!hit) {
+            for (const e of enemies) {
+              if (e.hp > 0 && Math.hypot(e.x - b.x, e.y - b.y) < e.r + (b.r || 2) + 1) {
+                damageEnemy(e, b.dmg, b.vx, b.vy, b.rainbow ? RAINBOW[Math.floor(time * 20) % 6] : '#FFF1E8');
+                hit = true; break;
+              }
+            }
+          }
+          if (hit || b.life <= 0 || b.x < -12 || b.x > W + 12 || b.y < -12 || b.y > H + 12) bullets.splice(i, 1);
+        }
+
+        // #04 Mimic Tax Bullets
+        for (let i = taxBullets.length - 1; i >= 0; i--) {
+          const tb = taxBullets[i]; tb.x += tb.vx * dt; tb.y += tb.vy * dt; tb.life -= dt;
+          if (Math.hypot(player.x - tb.x, player.y - tb.y) < 7 && player.invuln <= 0) {
+            if (tb.owner && tb.owner.hp > 0) confiscatePower(tb.owner);
+            else hurtPlayer();
+            taxBullets.splice(i, 1); continue;
+          }
+          if (tb.life <= 0 || tb.x < -10 || tb.x > W + 10 || tb.y < -10 || tb.y > H + 10) taxBullets.splice(i, 1);
+        }
+
+        // Enemies update + #06 Bowling chain collisions
+        for (let i = enemies.length - 1; i >= 0; i--) {
+          const e = enemies[i];
+          if (e.hp <= 0) { enemies.splice(i, 1); continue; }
+          if (e.flash > 0) e.flash -= dtBase;
+          if (e.hitInvuln > 0) e.hitInvuln -= dtBase;
+          if (e.auditCd > 0) e.auditCd -= dtBase;
+          e.phase += dt * 7;
+
+          if (e.bowlingTime > 0) {
+            e.bowlingTime -= dtBase;
+            e.x += e.bowlVx * dtBase;
+            e.y += e.bowlVy * dtBase;
+            if (e.x < arenaBounds.left + e.r || e.x > arenaBounds.right - e.r) e.bowlVx *= -0.85;
+            if (e.y < arenaBounds.top + e.r || e.y > arenaBounds.bottom - e.r) e.bowlVy *= -0.85;
+            e.x = Math.max(arenaBounds.left + e.r, Math.min(arenaBounds.right - e.r, e.x));
+            e.y = Math.max(arenaBounds.top + e.r, Math.min(arenaBounds.bottom - e.r, e.y));
+            // Slam into other monsters!
+            for (const other of enemies) {
+              if (other !== e && other.hp > 0 && other.hitInvuln <= 0 && Math.hypot(other.x - e.x, other.y - e.y) < other.r + e.r + 2) {
+                other.hitInvuln = 0.25;
+                other.bowlingTime = 0.45;
+                other.bowlVx = e.bowlVx * 0.85; other.bowlVy = e.bowlVy * 0.85;
+                sfx.ding(3);
+                damageEnemy(other, 3, e.bowlVx, e.bowlVy, '#FFEC27');
+                addFloater(other.x, other.y - 10, '🎱 STRIKE!', '#00E436');
+              }
+            }
+          } else {
+            const dx = player.x - e.x, dy = player.y - e.y, dist = Math.hypot(dx, dy) || 1;
+            let spd = e.spd;
+            if (e.type === 'ghost' && Math.sin(e.phase * 0.5) > 0.65) spd *= 1.9;
+            const wobble = e.type === 'bat' ? Math.sin(e.phase * 1.4) * 28 : 0;
+            e.vx *= Math.pow(0.05, dt); e.vy *= Math.pow(0.05, dt);
+            e.x += ((dx / dist) * spd + (-dy / dist) * wobble + e.vx) * dt;
+            e.y += ((dy / dist) * spd + (dx / dist) * wobble + e.vy) * dt;
+
+            // #04 Mimic tax bullet firing
+            if (e.type === 'mimic') {
+              e.taxCd -= dt;
+              if (e.taxCd <= 0) {
+                e.taxCd = 2.4;
+                const ang = Math.atan2(dy, dx);
+                const fan = Math.min(3, 1 + e.loot.length);
+                for (let k = 0; k < fan; k++) {
+                  const a = ang + (k - (fan - 1) / 2) * 0.26;
+                  taxBullets.push({ x: e.x, y: e.y, vx: Math.cos(a) * 90, vy: Math.sin(a) * 90, life: 3.0, owner: e });
+                }
+              }
+            }
+
+            if (activeTop10.m2) {
+              e.x = Math.max(arenaBounds.left + e.r, Math.min(arenaBounds.right - e.r, e.x));
+              e.y = Math.max(arenaBounds.top + e.r, Math.min(arenaBounds.bottom - e.r, e.y));
+            }
+          }
+
+          if (Math.hypot(player.x - e.x, player.y - e.y) < e.r + 5 && player.invuln <= 0) {
+            if (e.type === 'mimic' && e.auditCd <= 0) {
+              confiscatePower(e);
+              player.invuln = 0.85;
+            } else {
+              hurtPlayer();
+              if (state === 'gameover') return;
+            }
+          }
+        }
+
+        // Gems
         for (let i = gems.length - 1; i >= 0; i--) {
           const g = gems[i];
-          g.vx *= Math.pow(0.08, dt); g.vy *= Math.pow(0.08, dt);
+          g.vx *= Math.pow(0.08, dtBase); g.vy *= Math.pow(0.08, dtBase);
           const dx = player.x - g.x, dy = player.y - g.y, d = Math.hypot(dx, dy) || 1;
           if (d < player.magRadius) {
-            const pull = 175 * (1 - d / (player.magRadius + 15)) + 75;
-            g.vx += (dx / d) * pull * dt * 8; g.vy += (dy / d) * pull * dt * 8;
+            const pull = 180 * (1 - d / (player.magRadius + 15)) + 75;
+            g.vx += (dx / d) * pull * dtBase * 8; g.vy += (dy / d) * pull * dtBase * 8;
           }
-          g.x += g.vx * dt; g.y += g.vy * dt;
-          if (d < 7) {
+          g.x = Math.max(arenaBounds.left + 4, Math.min(arenaBounds.right - 4, g.x + g.vx * dtBase));
+          g.y = Math.max(arenaBounds.top + 6, Math.min(arenaBounds.bottom - 4, g.y + g.vy * dtBase));
+          if (d < 8) {
             player.xp += g.val; score += 5; sfx.gem(combo); gems.splice(i, 1);
             if (player.xp >= player.nextXp) {
               player.xp -= player.nextXp; player.lvl++; player.nextXp = Math.round(player.nextXp * 1.45 + 3);
@@ -1153,27 +2048,49 @@
         }
 
         for (let i = particles.length - 1; i >= 0; i--) {
-          const p = particles[i]; p.x += p.vx * dt; p.y += p.vy * dt;
-          p.vx *= Math.pow(0.25, dt); p.vy *= Math.pow(0.25, dt); p.life -= dt;
+          const p = particles[i]; p.x += p.vx * dtBase; p.y += p.vy * dtBase;
+          p.vx *= Math.pow(0.25, dtBase); p.vy *= Math.pow(0.25, dtBase); p.life -= dtBase;
           if (p.life <= 0) particles.splice(i, 1);
         }
-        for (let i = floaters.length - 1; i >= 0; i--) { floaters[i].y += floaters[i].vy * dt; floaters[i].life -= dt; if (floaters[i].life <= 0) floaters.splice(i, 1); }
-        for (let i = ghosts.length - 1; i >= 0; i--) { ghosts[i].life -= dt; if (ghosts[i].life <= 0) ghosts.splice(i, 1); }
-        for (let i = bolts.length - 1; i >= 0; i--) { bolts[i].life -= dt; if (bolts[i].life <= 0) bolts.splice(i, 1); }
-        for (let i = rings.length - 1; i >= 0; i--) { rings[i].life -= dt; if (rings[i].life <= 0) rings.splice(i, 1); }
-        for (let i = splats.length - 1; i >= 0; i--) { splats[i].life -= dt; if (splats[i].life <= 0) splats.splice(i, 1); }
+        for (let i = floaters.length - 1; i >= 0; i--) { floaters[i].y += floaters[i].vy * dtBase; floaters[i].life -= dtBase; if (floaters[i].life <= 0) floaters.splice(i, 1); }
+        for (let i = ghosts.length - 1; i >= 0; i--) { ghosts[i].life -= dtBase; if (ghosts[i].life <= 0) ghosts.splice(i, 1); }
+        for (let i = bolts.length - 1; i >= 0; i--) { bolts[i].life -= dtBase; if (bolts[i].life <= 0) bolts.splice(i, 1); }
+        for (let i = rings.length - 1; i >= 0; i--) { rings[i].life -= dtBase; if (rings[i].life <= 0) rings.splice(i, 1); }
+        for (let i = splats.length - 1; i >= 0; i--) { splats[i].life -= dtBase; if (splats[i].life <= 0) splats.splice(i, 1); }
       }
 
+      // --- Rendering ---
       function rect(x, y, w, h, col) {
         ctx.fillStyle = col;
         ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
       }
 
-      function drawSquashSprite(x, y, r, col, phase, faceX, faceY, skin = 'slime', isBoss = false) {
+      function drawSquashSprite(x, y, r, col, phase, faceX, faceY, skin = 'slime', type = 'slime') {
         const sq = Math.sin(phase) * 0.16;
         const w = Math.max(4, Math.round(r * 2 * (1 + sq)));
         const h = Math.max(4, Math.round(r * 2 * (1 - sq)));
         const dx = Math.round(x - w / 2), dy = Math.round(y - h / 2);
+
+        if (type === 'mimic') {
+          // 6 spider legs
+          ctx.strokeStyle = '#000000'; ctx.lineWidth = 1.5;
+          for (let leg = -1; leg <= 1; leg++) {
+            const lift = Math.sin(phase + leg * 2) * 2;
+            ctx.beginPath(); ctx.moveTo(dx, y + leg * 2); ctx.lineTo(dx - 5, y + leg * 3 + lift); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(dx + w, y + leg * 2); ctx.lineTo(dx + w + 5, y + leg * 3 - lift); ctx.stroke();
+          }
+          rect(dx - 1, dy, w + 2, h, '#000000'); rect(dx, dy - 1, w, h + 2, '#000000');
+          rect(dx, dy, w, Math.round(h * 0.45), '#FFEC27');
+          rect(dx, dy + Math.round(h * 0.45), w, Math.round(h * 0.55), col);
+          rect(dx + 1, dy + Math.round(h * 0.45) - 1, w - 2, 2, '#000000');
+          // Glasses & tiny tax clipboard!
+          rect(x - 4, dy + 2, 3, 3, '#FFF1E8'); rect(x + 1, dy + 2, 3, 3, '#FFF1E8');
+          rect(x - 3, dy + 3, 1, 1, '#000000'); rect(x + 2, dy + 3, 1, 1, '#000000');
+          rect(x - 1, dy + 3, 2, 1, '#000000');
+          rect(dx + w + 1, y - 3, 4, 6, '#FFF1E8');
+          return;
+        }
+
         rect(x - w * 0.45, y + h * 0.4, w * 0.9, 2, '#000000');
         rect(dx - 1, dy, w + 2, h, '#000000'); rect(dx, dy - 1, w, h + 2, '#000000'); rect(dx, dy, w, h, col);
         if (skin === 'robo') {
@@ -1187,7 +2104,7 @@
           rect(dx - 1, dy - 1, w + 2, 2, '#7E2553'); rect(x - 2, dy - 4, 4, 3, '#7E2553');
           rect(x + faceX * 4, y - 1, 2, 5, '#AB5236'); rect(x + faceX * 4, y - 2, 2, 2, '#FFEC27');
         }
-        if (isBoss) {
+        if (type === 'boss') {
           rect(x - 4, dy - 4, 8, 3, '#FFEC27');
           rect(x - 4, dy - 6, 2, 2, '#FFEC27'); rect(x - 1, dy - 6, 2, 2, '#FFEC27'); rect(x + 2, dy - 6, 2, 2, '#FFEC27');
         }
@@ -1198,7 +2115,7 @@
 
       function drawRainbowText(text, cx, cy, size = 12, waveAmp = 2.5) {
         ctx.font = `bold ${size}px ui-monospace, Consolas, monospace`; ctx.textAlign = 'center';
-        const spacing = size * 0.65, startX = cx - ((text.length - 1) * spacing) / 2;
+        const spacing = size * 0.64, startX = cx - ((text.length - 1) * spacing) / 2;
         for (let i = 0; i < text.length; i++) {
           const lx = Math.round(startX + i * spacing), ly = Math.round(cy + Math.sin(time * 9 + i * 0.6) * waveAmp);
           ctx.fillStyle = '#000000'; ctx.fillText(text[i], lx + 1, ly + 1);
@@ -1210,38 +2127,135 @@
         ctx.save();
         ctx.scale(SCALE, SCALE);
         if (shake > 0.2) ctx.translate(Math.round((Math.random() - 0.5) * shake * 2), Math.round((Math.random() - 0.5) * shake * 2));
-        rect(0, 0, W, H, '#0f1733');
-        for (const s of stars) rect(s.x, s.y, s.s, s.s, s.col);
-        for (const sp of splats) { ctx.globalAlpha = Math.min(0.28, sp.life * 0.08); rect(sp.x - sp.r / 2, sp.y - sp.r / 2, sp.r, sp.r, sp.col); }
+
+        // Background + #02 PICO-OS Outer Desktop when shrunk
+        rect(0, 0, W, H, activeTop10.m2 ? '#1D2B53' : '#0f1733');
+        if (activeTop10.m2) {
+          for (const ic of osIcons) {
+            rect(ic.x - 5, ic.y - 5, 10, 10, ic.cd > 0 ? '#5F574F' : ic.col);
+            rect(ic.x - 5, ic.y - 5, 10, 2, '#FFF1E8');
+            ctx.font = 'bold 5px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#FFF1E8';
+            ctx.fillText(ic.label, ic.x, ic.y + 11);
+          }
+          rect(arenaBounds.left, arenaBounds.top, arenaBounds.right - arenaBounds.left, arenaBounds.bottom - arenaBounds.top, '#0f1733');
+        }
+
+        for (const s of stars) {
+          if (s.x >= arenaBounds.left && s.x <= arenaBounds.right && s.y >= arenaBounds.top && s.y <= arenaBounds.bottom) {
+            rect(s.x, s.y, s.s, s.s, s.col);
+          }
+        }
+        ctx.globalAlpha = 0.24;
+        for (const sp of splats) rect(sp.x - sp.r / 2, sp.y - sp.r / 2, sp.r, sp.r, sp.col);
         ctx.globalAlpha = 1;
 
+        // #01 Echo Trails
+        for (const tr of echoTrails) {
+          ctx.strokeStyle = Math.floor(time * 16) % 2 === 0 ? '#29ADFF' : '#FF77A8';
+          ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.moveTo(tr.x1, tr.y1); ctx.lineTo(tr.x2, tr.y2); ctx.stroke();
+        }
+
+        // #07 Spam Popups
+        for (const sp of spamPopups) {
+          rect(sp.x, sp.y, sp.w, sp.h, '#C2C3C7');
+          rect(sp.x, sp.y, sp.w, 8, '#FF004D');
+          ctx.strokeStyle = '#000000'; ctx.lineWidth = 1; ctx.strokeRect(sp.x, sp.y, sp.w, sp.h);
+          ctx.font = 'bold 6px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#000000';
+          ctx.fillText(sp.label, sp.x + sp.w / 2, sp.y + 18);
+        }
+
         for (const r of rings) {
-          const rad = Math.max(2, r.r + (r.maxR - r.r) * (1 - r.life / 0.35));
+          const rad = Math.max(2, r.r + (r.maxR - r.r) * (1 - r.life / (r.maxLife || 0.35)));
           ctx.strokeStyle = r.col; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(Math.round(r.x), Math.round(r.y), Math.round(rad), 0, Math.PI * 2); ctx.stroke();
         }
+
         for (const g of gems) {
           const bob = Math.sin(time * 8 + g.x) * 1.2;
           rect(g.x - 2, g.y - 2 + bob, 4, 4, '#000000'); rect(g.x - 1, g.y - 1 + bob, 2, 2, g.col); rect(g.x - 1, g.y - 1 + bob, 1, 1, '#FFF1E8');
         }
+        // #02 Heal pixels
+        for (const hpPx of healPixels) {
+          const bob = Math.sin(time * 10) * 1.5;
+          rect(hpPx.x - 3, hpPx.y - 3 + bob, 6, 6, '#000000'); rect(hpPx.x - 2, hpPx.y - 2 + bob, 4, 4, '#FF004D');
+          rect(hpPx.x - 1, hpPx.y - 1 + bob, 2, 2, '#FFF1E8');
+        }
+        // #08 Gold Dice
+        for (const gd of goldDice) {
+          const bob = Math.sin(time * 10 + gd.x) * 2;
+          rect(gd.x - 4, gd.y - 4 + bob, 8, 8, '#000000');
+          rect(gd.x - 3, gd.y - 3 + bob, 6, 6, '#FFEC27');
+          rect(gd.x - 2, gd.y - 2 + bob, 1, 1, '#000000');
+          rect(gd.x + 1, gd.y + 1 + bob, 1, 1, '#000000');
+        }
+        // #08 Jackpot bouncing coins
+        for (const c of jackpotCoins) {
+          rect(c.x - 2, c.y - 3, 4, 6, '#000000'); rect(c.x - 1, c.y - 2, 2, 4, '#FFEC27');
+        }
+
+        // #01 Pinballs
+        for (const b of pinballs) {
+          const col = b.overcharge > 0 ? RAINBOW[Math.floor(time * 18) % 6] : RAINBOW[b.colIdx];
+          rect(b.x - 4, b.y - 4, 8, 8, '#000000');
+          rect(b.x - 3, b.y - 3, 6, 6, col);
+          rect(b.x - 1, b.y - 1, 2, 2, '#FFF1E8');
+        }
+
         for (const gh of ghosts) { ctx.globalAlpha = gh.life * 3; rect(gh.x - 4, gh.y - 4, 8, 8, gh.col); }
         ctx.globalAlpha = 1;
 
+        // Enemies (always crisp!)
         for (const e of enemies) {
-          const col = e.flash > 0 ? '#FFF1E8' : e.col, dx = player.x - e.x, dy = player.y - e.y, l = Math.hypot(dx, dy) || 1;
-          drawSquashSprite(e.x, e.y, e.r, col, e.phase, dx / l, dy / l, 'slime', e.type === 'boss');
-          if (e.type === 'boss') { rect(e.x - 12, e.y - 17, 24, 3, '#000000'); rect(e.x - 11, e.y - 16, Math.round(22 * (e.hp / e.maxHp)), 1, '#FF004D'); }
-        }
-        if (state !== 'title') {
-          if (!(player.invuln > 0 && Math.floor(time * 24) % 2 === 0)) {
-            drawSquashSprite(player.x, player.y, 5, cfg.heroColor, time * 10, player.faceX, player.faceY, cfg.skin, false);
+          const col = e.flash > 0 ? '#FFF1E8' : (e.bowlingTime > 0 ? '#FFEC27' : e.col);
+          const dx = player.x - e.x, dy = player.y - e.y, l = Math.hypot(dx, dy) || 1;
+          drawSquashSprite(e.x, e.y, e.r, col, e.phase, dx / l, dy / l, 'slime', e.type);
+          if (e.type === 'boss' || e.type === 'mimic') {
+            rect(e.x - 12, e.y - 17, 24, 3, '#000000');
+            rect(e.x - 11, e.y - 16, Math.max(0, Math.round(22 * (e.hp / e.maxHp))), 1, e.type === 'mimic' ? '#FFEC27' : '#FF004D');
           }
-          if (player.dashCd > 0) { rect(player.x - 5, player.y + 8, 10, 2, '#000000'); rect(player.x - 5, player.y + 8, Math.round(10 * (1 - player.dashCd / 0.95)), 1, '#29ADFF'); }
+          // #03 ZA WARUDO targeting reticle when paused under pauseBox!
+          if (state === 'paused' && activeTop10.m3 && e.x >= pauseBox.x && e.x <= pauseBox.x + pauseBox.w && e.y >= pauseBox.y && e.y <= pauseBox.y + pauseBox.h) {
+            ctx.strokeStyle = '#FF004D'; ctx.lineWidth = 1; ctx.strokeRect(e.x - e.r - 2, e.y - e.r - 2, e.r * 2 + 4, e.r * 2 + 4);
+          }
+        }
+
+        // Player Hero
+        if (state !== 'title') {
+          if (activeTop10.m5) {
+            ctx.strokeStyle = '#FFEC27'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(Math.round(player.x), Math.round(player.y), 8, 0, Math.PI * 2); ctx.stroke();
+          }
+          if (player.dashTime > 0 && activeTop10.m6) {
+            // Pinball bumper aura!
+            ctx.strokeStyle = '#FFF1E8'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(Math.round(player.x), Math.round(player.y), 9, 0, Math.PI * 2); ctx.stroke();
+          }
+          if (!(player.invuln > 0 && Math.floor(time * 24) % 2 === 0)) {
+            drawSquashSprite(player.x, player.y, 5, player.dashTime > 0 && activeTop10.m6 ? '#FFF1E8' : cfg.heroColor, time * 10, player.faceX, player.faceY, cfg.skin, 'player');
+          }
+          if (player.dashCd > 0) {
+            const maxCd = activeTop10.m9 ? 0.48 : 0.92;
+            rect(player.x - 5, player.y + 8, 10, 2, '#000000');
+            rect(player.x - 5, player.y + 8, Math.max(0, Math.round(10 * (1 - player.dashCd / maxCd))), 1, '#29ADFF');
+          }
           for (let i = 0; i < player.orbits; i++) {
             const a = player.orbitAngle + (i * Math.PI * 2) / player.orbits, ox = player.x + Math.cos(a) * 20, oy = player.y + Math.sin(a) * 20;
             rect(ox - 3, oy - 3, 6, 6, '#000000'); rect(ox - 2, oy - 2, 4, 4, '#FFEC27'); rect(ox - 1, oy - 1, 2, 2, '#FFF1E8');
           }
         }
-        for (const b of bullets) { rect(b.x - 2, b.y - 2, 4, 4, '#FFF1E8'); rect(b.x - 1, b.y - 1, 2, 2, '#FFEC27'); }
+
+        // Bullets & Tax bullets
+        for (const b of bullets) {
+          const s = Math.round(b.r || 2);
+          const col = b.rainbow ? RAINBOW[Math.floor(time * 24 + b.x) % 6] : '#FFEC27';
+          rect(b.x - s, b.y - s, s * 2, s * 2, '#FFF1E8');
+          rect(b.x - s + 1, b.y - s + 1, Math.max(1, s * 2 - 2), Math.max(1, s * 2 - 2), col);
+        }
+        for (const tb of taxBullets) {
+          rect(tb.x - 3, tb.y - 3, 6, 6, '#000000'); rect(tb.x - 2, tb.y - 2, 4, 4, '#FF004D');
+        }
+
+        // Bolts & Domino Sparks
         for (const bo of bolts) {
           ctx.strokeStyle = bo.life > 0.08 ? '#FFF1E8' : '#00E436'; ctx.lineWidth = 1.5; ctx.beginPath();
           bo.pts.forEach((p, idx) => {
@@ -1250,16 +2264,35 @@
           });
           ctx.stroke();
         }
+        for (const sp of sparks) {
+          rect(sp.x - 2, sp.y - 2, 5, 5, '#FFEC27');
+          rect(sp.x - 1, sp.y - 1, 3, 3, '#FF004D');
+        }
         for (const p of particles) rect(p.x, p.y, p.size, p.size, p.col);
+
+        // #02 Shrinking Window Frame Border
+        if (activeTop10.m2 && (arenaBounds.left > 0 || arenaBounds.top > 0 || arenaBounds.right < W || arenaBounds.bottom < H)) {
+          const fw = arenaBounds.right - arenaBounds.left, fh = arenaBounds.bottom - arenaBounds.top;
+          rect(arenaBounds.left, arenaBounds.top - 9, fw, 9, '#C2C3C7');
+          ctx.strokeStyle = '#000000'; ctx.lineWidth = 2; ctx.strokeRect(arenaBounds.left, arenaBounds.top - 9, fw, fh + 9);
+          ctx.font = 'bold 6px ui-monospace, monospace'; ctx.textAlign = 'left'; ctx.fillStyle = '#000000';
+          ctx.fillText('🪟 PICO-WINDOW (DASH NA BORDA!)', arenaBounds.left + 4, arenaBounds.top - 2);
+        }
+
+        // Floaters
         ctx.font = 'bold 8px ui-monospace, Consolas, monospace'; ctx.textAlign = 'center';
         for (const f of floaters) {
           ctx.fillStyle = '#000000'; ctx.fillText(f.txt, Math.round(f.x) + 1, Math.round(f.y) + 1);
           ctx.fillStyle = f.col; ctx.fillText(f.txt, Math.round(f.x), Math.round(f.y));
         }
-        if (state === 'play' && pointer.inside) {
+
+        // Crosshair on desktop
+        if (state === 'play' && pointer.inside && pointer.type !== 'touch') {
           rect(pointer.x - 3, pointer.y, 2, 1, '#FFF1E8'); rect(pointer.x + 2, pointer.y, 2, 1, '#FFF1E8');
           rect(pointer.x, pointer.y - 3, 1, 2, '#FFF1E8'); rect(pointer.x, pointer.y + 2, 1, 2, '#FFF1E8');
         }
+
+        // Top HUD XP bar & #08 Slot Marquee
         if (state !== 'title') {
           rect(0, 0, W, 3, '#000000'); rect(0, 0, Math.round(W * (player.xp / player.nextXp)), 2, '#00E436');
           if (combo >= 3) {
@@ -1267,46 +2300,82 @@
             ctx.fillStyle = '#000000'; ctx.fillText(`COMBO x${combo}`, 6, 14);
             ctx.fillStyle = '#FFEC27'; ctx.fillText(`COMBO x${combo}`, 5, 13);
           }
+          if (activeTop10.m8 && (slotMachine.spinning || jackpotTimer > 0)) {
+            const sym = slotMachine.spinning
+              ? [RAINBOW[Math.floor(time * 22) % 6] === '#FF004D' ? '7' : '★', Math.floor(time * 30) % 9, '🍒']
+              : slotMachine.reels;
+            rect(W - 86, 5, 82, 14, '#000000');
+            ctx.strokeStyle = jackpotTimer > 0 ? RAINBOW[Math.floor(time * 18) % 6] : '#FFEC27';
+            ctx.lineWidth = 1; ctx.strokeRect(W - 85.5, 5.5, 81, 13);
+            ctx.font = 'bold 8px ui-monospace, monospace'; ctx.textAlign = 'center';
+            ctx.fillStyle = jackpotTimer > 0 ? '#00E436' : '#FFEC27';
+            ctx.fillText(`🎰 [${sym[0]}|${sym[1]}|${sym[2]}]`, W - 45, 14.5);
+          }
         }
+
+        // #07 BSOD Flash Victory + Virus Popup
+        if (bsodTimer > 0) {
+          ctx.globalAlpha = 0.65;
+          rect(0, 0, W, H, '#0055FF');
+          ctx.globalAlpha = 1;
+          drawRainbowText('TELA AZUL DA VITORIA!', W / 2, H / 2, 13, 2);
+        }
+        if (virusEvent && state === 'play') {
+          const v = virusEvent;
+          rect(v.x, v.y, v.w, v.h, '#C2C3C7');
+          rect(v.x, v.y, v.w, 12, '#FF004D');
+          ctx.strokeStyle = '#000000'; ctx.lineWidth = 2; ctx.strokeRect(v.x, v.y, v.w, v.h);
+          rect(v.closeRect.x, v.closeRect.y, v.closeRect.w, v.closeRect.h, '#FFEC27');
+          ctx.font = 'bold 8px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#000000';
+          ctx.fillText('X', v.closeRect.x + v.closeRect.w / 2, v.closeRect.y + 12);
+          ctx.fillStyle = '#FFF1E8'; ctx.textAlign = 'left';
+          ctx.fillText(`🦠 VÍRUS (${v.timer.toFixed(1)}s)`, v.x + 4, v.y + 9);
+          ctx.fillStyle = '#000000'; ctx.textAlign = 'center';
+          ctx.fillText(v.kind === 'keyF' ? 'APERTE [F] OU CLIQUE AKI!' : 'CLIQUE NO [X] OU [F]!', v.x + v.w / 2, v.y + 28);
+          rect(v.x + 4, v.y + v.h - 5, Math.round((v.w - 8) * (v.timer / v.maxTimer)), 3, '#008751');
+        }
+
         if (bannerTimer > 0 && state === 'play') drawRainbowText(bannerText, W / 2, 26, 11, 2);
 
         if (state === 'title') {
-          rect(20, 26, W - 40, 124, 'rgba(0,0,0,0.85)');
-          ctx.strokeStyle = '#FFF1E8'; ctx.lineWidth = 1; ctx.strokeRect(20.5, 26.5, W - 41, 123);
-          drawRainbowText('PICO-SURVIVOR', W / 2, 54, 15, 2.5);
-          ctx.font = 'bold 8.5px ui-monospace, Consolas, monospace'; ctx.textAlign = 'center';
-          ctx.fillStyle = '#000000';
-          ctx.fillText(`RECORDE: ${store.stats.bestScore} PTS  |  ONDA MÁX: ${store.stats.bestWave}`, W / 2 + 0.7, 73.7);
+          rect(16, 20, W - 32, 136, 'rgba(0,0,0,0.88)');
+          ctx.strokeStyle = '#FFF1E8'; ctx.lineWidth = 1; ctx.strokeRect(16.5, 20.5, W - 33, 135);
+          drawRainbowText('PICO-SURVIVOR TOP 10', W / 2, 46, 13, 2.2);
+          ctx.font = 'bold 8px ui-monospace, Consolas, monospace'; ctx.textAlign = 'center';
           ctx.fillStyle = '#FFF1E8';
-          ctx.fillText(`RECORDE: ${store.stats.bestScore} PTS  |  ONDA MÁX: ${store.stats.bestWave}`, W / 2, 73);
+          ctx.fillText(`RECORDE: ${store.stats.bestScore} PTS  |  ONDA MÁX: ${store.stats.bestWave}`, W / 2, 62);
 
           if (store.savedRun) {
             const sr = store.savedRun;
-            rect(40, 86, W - 80, 22, '#00E436');
-            rect(40, 86, W - 80, 1, '#FFF1E8');
-            ctx.fillStyle = '#000000'; ctx.font = 'bold 8.5px ui-monospace, Consolas, monospace';
-            ctx.fillText(`▶ CONTINUAR (W${sr.wave} · LV${sr.lvl} · ${sr.score} PTS)`, W / 2, 100);
-            rect(82, 116, W - 164, 19, '#C2C3C7');
-            rect(82, 116, W - 164, 1, '#FFF1E8');
+            rect(34, 72, W - 68, 20, '#00E436');
             ctx.fillStyle = '#000000';
-            ctx.fillText('↺ NOVA PARTIDA (N)', W / 2, 128.5);
+            ctx.fillText(`▶ CONTINUAR (W${sr.wave} · LV${sr.lvl} · ${sr.score} PTS)`, W / 2, 85);
+            rect(34, 96, W - 68, 20, '#FF004D');
+            ctx.fillStyle = '#FFF1E8';
+            ctx.fillText('🔥 CAOS TOTAL (TODOS OS 10 MODOS!)', W / 2, 109);
+            rect(68, 121, W - 136, 18, '#C2C3C7');
+            ctx.fillStyle = '#000000';
+            ctx.fillText('↺ NOVA PARTIDA CLÁSSICA', W / 2, 133);
           } else {
-            rect(60, 96, W - 120, 24, '#00E436');
-            rect(60, 96, W - 120, 1, '#FFF1E8');
-            ctx.fillStyle = '#000000'; ctx.font = 'bold 9.5px ui-monospace, Consolas, monospace';
-            ctx.fillText('▶ JOGAR AGORA', W / 2, 111.5);
+            rect(34, 76, W - 68, 24, '#FF004D');
+            ctx.fillStyle = '#FFF1E8'; ctx.font = 'bold 9px ui-monospace, Consolas, monospace';
+            ctx.fillText('🔥 JOGAR CAOS TOTAL (#01 AO #10!)', W / 2, 91);
+            rect(56, 108, W - 112, 22, '#00E436');
+            ctx.fillStyle = '#000000';
+            ctx.fillText('▶ JOGAR MODO CLÁSSICO', W / 2, 122);
           }
         }
+
         if (state === 'levelup') {
           rect(0, 0, W, H, 'rgba(0,0,0,0.78)');
           drawRainbowText('LEVEL UP!', W / 2, 28, 13, 2);
-          ctx.font = 'bold 8.5px ui-monospace, Consolas, monospace'; ctx.textAlign = 'center';
+          ctx.font = 'bold 8px ui-monospace, Consolas, monospace'; ctx.textAlign = 'center';
           ctx.fillStyle = '#FFF1E8';
-          ctx.fillText('ESCOLHA UM PODER (CLIQUE OU TECLA 1-3)', W / 2, 42);
+          ctx.fillText('TOQUE NO PODER OU TECLA 1-3', W / 2, 42);
           levelChoices.forEach((up, idx) => {
-            const cw = 90, ch = 84, cx = 16 + idx * 99, cy = 54;
+            const cw = 90, ch = 88, cx = 16 + idx * 99, cy = 52;
             rect(cx, cy, cw, ch, '#1D2B53');
-            ctx.strokeStyle = up.col; ctx.lineWidth = 1; ctx.strokeRect(cx + 0.5, cy + 0.5, cw - 1, ch - 1);
+            ctx.strokeStyle = up.col; ctx.lineWidth = 1.5; ctx.strokeRect(cx + 0.5, cy + 0.5, cw - 1, ch - 1);
             rect(cx + 2, cy + 2, cw - 4, 14, up.col);
             ctx.fillStyle = '#000000'; ctx.font = 'bold 8.5px ui-monospace, Consolas, monospace'; ctx.fillText(`[${idx + 1}]`, cx + cw / 2, cy + 12);
             ctx.fillStyle = '#FFF1E8'; ctx.fillText(up.name, cx + cw / 2, cy + 36);
@@ -1316,71 +2385,155 @@
             ctx.fillText(words.slice(mid).join(' '), cx + cw / 2, cy + 67);
           });
         }
+
         if (state === 'paused') {
-          rect(0, 0, W, H, 'rgba(0,0,0,0.72)');
-          rect(24, 24, W - 48, 126, '#1D2B53');
-          ctx.strokeStyle = '#FFF1E8'; ctx.lineWidth = 1; ctx.strokeRect(24.5, 24.5, W - 49, 125);
-          drawRainbowText('JOGO PAUSADO', W / 2, 50, 14, 2);
-          ctx.font = 'bold 8.5px ui-monospace, Consolas, monospace'; ctx.textAlign = 'center';
+          // #03 ZA WARUDO high contrast dim + draggable pauseBox!
+          ctx.fillStyle = activeTop10.m3 ? 'rgba(20,20,24,0.55)' : 'rgba(0,0,0,0.72)';
+          ctx.fillRect(0, 0, W, H);
+          const pb = pauseBox;
+          rect(pb.x, pb.y, pb.w, pb.h, '#1D2B53');
+          ctx.strokeStyle = activeTop10.m3 && pauseBoomCd <= 0 ? '#FFEC27' : '#FFF1E8';
+          ctx.lineWidth = 2; ctx.strokeRect(pb.x, pb.y, pb.w, pb.h);
+          rect(pb.x + 1, pb.y + 1, pb.w - 2, 14, activeTop10.m3 ? '#FFEC27' : '#C2C3C7');
+          ctx.font = 'bold 7.5px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#000000';
+          ctx.fillText(activeTop10.m3 ? '⏸ ARRASTE PRA MIRAR A BOMBA!' : 'JOGO PAUSADO', pb.x + pb.w / 2, pb.y + 10.5);
+
           ctx.fillStyle = '#FFF1E8';
-          ctx.fillText(`ONDA ${wave}  |  LV ${player.lvl}  |  PONTOS: ${score}`, W / 2, 68);
-          ctx.fillStyle = '#00E436';
-          ctx.fillText('💾 PARTIDA SALVA NO CACHE LOCAL', W / 2, 81);
-          rect(50, 92, W - 100, 22, '#00E436');
-          rect(50, 92, W - 100, 1, '#FFF1E8');
-          ctx.fillStyle = '#000000'; ctx.font = 'bold 8.5px ui-monospace, Consolas, monospace';
-          ctx.fillText('▶ CONTINUAR (P / ESC / CLIQUE)', W / 2, 106);
-          rect(76, 120, W - 152, 18, '#C2C3C7');
-          rect(76, 120, W - 152, 1, '#FFF1E8');
-          ctx.fillStyle = '#000000';
-          ctx.fillText('↺ REINICIAR PARTIDA (R)', W / 2, 132);
+          ctx.fillText(`W${wave} · LV${player.lvl} · ${score} PTS`, pb.x + pb.w / 2, pb.y + 28);
+          ctx.fillStyle = activeTop10.m3 && pauseBoomCd <= 0 ? '#FF77A8' : '#00E436';
+          ctx.fillText(activeTop10.m3 && pauseBoomCd <= 0 ? '💥 BOMBA ARMADA AO DESPAUSAR!' : '💾 SALVO NO CACHE LOCAL', pb.x + pb.w / 2, pb.y + 40);
+
+          if (runawayBtn.active) {
+            // Runaway Continue button with pixel legs!
+            const rx = runawayBtn.x - 42, ry = runawayBtn.y - 10;
+            const step = Math.floor(time * 20) % 2;
+            rect(rx + 14, ry + 18, 3, 5 + step * 2, '#FFF1E8');
+            rect(rx + 66, ry + 18, 3, 5 + (1 - step) * 2, '#FFF1E8');
+            rect(rx, ry, 84, 18, '#FF004D');
+            ctx.fillStyle = '#FFF1E8';
+            ctx.fillText('🏃 PEGA EU!', runawayBtn.x, runawayBtn.y + 2);
+          } else {
+            rect(pb.x + 14, pb.y + 48, pb.w - 28, 20, '#00E436');
+            ctx.fillStyle = '#000000';
+            ctx.fillText('▶ CONTINUAR', pb.x + pb.w / 2, pb.y + 61);
+            rect(pb.x + 28, pb.y + 72, pb.w - 56, 17, '#C2C3C7');
+            ctx.fillText('↺ REINICIAR (R)', pb.x + pb.w / 2, pb.y + 83);
+          }
         }
+
         if (state === 'gameover') {
-          rect(0, 0, W, H, 'rgba(0,0,0,0.82)');
-          drawRainbowText('GAME OVER', W / 2, 60, 15, 2);
+          rect(0, 0, W, H, 'rgba(0,0,0,0.84)');
+          drawRainbowText('GAME OVER', W / 2, 58, 15, 2);
           ctx.font = 'bold 9px ui-monospace, Consolas, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#FFF1E8';
-          ctx.fillText(`PONTOS: ${score}  |  ONDA: ${wave}  |  RECORDE: ${store.stats.bestScore}`, W / 2, 88);
+          ctx.fillText(`PONTOS: ${score}  |  ONDA: ${wave}  |  RECORDE: ${store.stats.bestScore}`, W / 2, 86);
           ctx.fillStyle = Math.floor(time * 3) % 2 === 0 ? '#FFEC27' : '#FFF1E8';
-          ctx.fillText('[ CLIQUE OU APERTE R PARA JOGAR DE NOVO ]', W / 2, 118);
+          ctx.fillText('[ TOQUE OU APERTE R / ESPAÇO PRA JOGAR DE NOVO ]', W / 2, 118);
         }
+
         ctx.restore();
       }
 
-      // --- Input Events ---
+      // --- Input Events (Mobile Touch + Desktop Mouse/Keyboard Separated Cleanly!) ---
       function canvasPos(cx, cy) {
         const r = canvas.getBoundingClientRect();
         return { x: ((cx - r.left) / r.width) * W, y: ((cy - r.top) / r.height) * H };
       }
-      canvas.addEventListener('pointermove', (e) => { const p = canvasPos(e.clientX, e.clientY); pointer.x = p.x; pointer.y = p.y; pointer.inside = true; });
-      canvas.addEventListener('pointerleave', () => { pointer.inside = false; });
+
       canvas.addEventListener('pointerdown', (e) => {
         ensureAudio();
-        const p = canvasPos(e.clientX, e.clientY); pointer.x = p.x; pointer.y = p.y; pointer.inside = true;
+        const p = canvasPos(e.clientX, e.clientY);
+        pointer.x = p.x; pointer.y = p.y; pointer.inside = true;
+        pointer.type = e.pointerType || 'mouse';
+        pointer.downTime = performance.now();
+        pointer.startX = p.x; pointer.startY = p.y; pointer.moved = false;
+
         if (state === 'title') {
           if (store.savedRun) {
-            if (p.y >= 114 && p.y <= 136 && p.x >= 80 && p.x <= W - 80) initGame(true);
+            if (p.y >= 95 && p.y <= 117) initGame(true, allTop10On());
+            else if (p.y >= 119 && p.y <= 142) initGame(true, defaultActiveTop10());
             else restoreSavedRun();
           } else {
-            initGame(true);
+            if (p.y >= 72 && p.y <= 102) initGame(true, allTop10On());
+            else initGame(true, defaultActiveTop10());
             sfx.lvl();
           }
           return;
         }
+
         if (state === 'paused') {
-          if (p.y >= 118 && p.y <= 140 && p.x >= 76 && p.x <= W - 76) initGame(true);
-          else togglePause();
+          if (runawayBtn.active) {
+            // Generous hitbox for runaway button!
+            if (Math.abs(p.x - runawayBtn.x) <= 52 && Math.abs(p.y - runawayBtn.y) <= 18) {
+              runawayBtn.active = false;
+              togglePause();
+            }
+            return;
+          }
+          const pb = pauseBox;
+          const onContinue = p.x >= pb.x + 14 && p.x <= pb.x + pb.w - 14 && p.y >= pb.y + 46 && p.y <= pb.y + 70;
+          const onRestart = p.x >= pb.x + 28 && p.x <= pb.x + pb.w - 28 && p.y >= pb.y + 71 && p.y <= pb.y + 92;
+          if (onContinue) { togglePause(); return; }
+          if (onRestart) { initGame(true); return; }
+          // Drag pause box!
+          if (activeTop10.m3 && p.x >= pb.x && p.x <= pb.x + pb.w && p.y >= pb.y && p.y <= pb.y + pb.h) {
+            pb.dragging = true;
+            pb.offX = p.x - pb.x;
+            pb.offY = p.y - pb.y + (pointer.type === 'touch' ? 14 : 0);
+            return;
+          }
+          if (pointer.type !== 'touch') togglePause();
           return;
         }
+
         if (state === 'gameover') { initGame(true); sfx.lvl(); return; }
         if (state === 'levelup') {
           for (let idx = 0; idx < 3; idx++) {
-            const cx = 16 + idx * 99, cy = 54;
-            if (p.x >= cx && p.x <= cx + 90 && p.y >= cy && p.y <= cy + 84) { applyUpgrade(idx); break; }
+            const cx = 16 + idx * 99, cy = 52;
+            if (p.x >= cx && p.x <= cx + 90 && p.y >= cy && p.y <= cy + 88) { applyUpgrade(idx); break; }
           }
           return;
         }
-        if (state === 'play') triggerDash();
+
+        if (state === 'play') {
+          // Priority 1: #07 Virus popup click/tap!
+          if (virusEvent && p.x >= virusEvent.x && p.x <= virusEvent.x + virusEvent.w && p.y >= virusEvent.y && p.y <= virusEvent.y + virusEvent.h) {
+            resolveVirus(true);
+            return;
+          }
+          // Priority 2: #07 Spam popup tap smash!
+          for (let j = spamPopups.length - 1; j >= 0; j--) {
+            const sp = spamPopups[j];
+            if (p.x >= sp.x - 4 && p.x <= sp.x + sp.w + 4 && p.y >= sp.y - 4 && p.y <= sp.y + sp.h + 4) {
+              sp.hp -= 2;
+              burst(sp.x + sp.w / 2, sp.y + sp.h / 2, '#FFEC27', 8, 60);
+              if (sp.hp <= 0) { spamPopups.splice(j, 1); sfx.kill(); }
+              return;
+            }
+          }
+          // Desktop mouse click dashes immediately; touch drags smoothly (tap <170ms or dedicated button dashes!)
+          if (pointer.type !== 'touch') triggerDash();
+        }
       });
+
+      canvas.addEventListener('pointermove', (e) => {
+        const p = canvasPos(e.clientX, e.clientY);
+        pointer.x = p.x; pointer.y = p.y; pointer.inside = true;
+        pointer.type = e.pointerType || pointer.type;
+        if (Math.hypot(p.x - pointer.startX, p.y - pointer.startY) > 6) pointer.moved = true;
+        if (state === 'paused' && pauseBox.dragging) {
+          pauseBox.x = Math.max(4, Math.min(W - pauseBox.w - 4, p.x - pauseBox.offX));
+          pauseBox.y = Math.max(4, Math.min(H - pauseBox.h - 4, p.y - pauseBox.offY));
+          render();
+        }
+      });
+
+      canvas.addEventListener('pointerup', () => {
+        if (pauseBox.dragging) { pauseBox.dragging = false; }
+        else if (state === 'play' && pointer.type === 'touch' && !pointer.moved && (performance.now() - pointer.downTime) < 180) {
+          triggerDash();
+        }
+      });
+      canvas.addEventListener('pointerleave', () => { pointer.inside = false; pauseBox.dragging = false; });
 
       window.addEventListener('keydown', (e) => {
         if (currentView !== 'view-game') return;
@@ -1389,15 +2542,16 @@
         if (e.code === 'Space') {
           ensureAudio();
           if (state === 'title') { if (store.savedRun) restoreSavedRun(); else initGame(true); }
-          else if (state === 'paused') togglePause();
+          else if (state === 'paused' && !runawayBtn.active) togglePause();
           else if (state === 'gameover') initGame(true);
           else if (state === 'play') triggerDash();
         }
         if (e.code === 'KeyP' || e.code === 'Escape') {
-          if (state === 'play' || state === 'paused') { e.preventDefault(); togglePause(); }
+          if (isFullscreen && e.code === 'Escape') { setFullscreen(false); return; }
+          if ((state === 'play' || state === 'paused') && !runawayBtn.active) { e.preventDefault(); togglePause(); }
         }
-        if (e.code === 'KeyN' && state === 'title') { ensureAudio(); initGame(true); }
-        if (e.code === 'KeyR') initGame(true);
+        if (e.code === 'KeyF' && state === 'play' && virusEvent) { e.preventDefault(); resolveVirus(true); }
+        if (e.code === 'KeyR' && !runawayBtn.active) initGame(true);
         if (e.code === 'KeyM') toggleSound();
         if (state === 'levelup') {
           if (e.code === 'Digit1') applyUpgrade(0);
@@ -1410,66 +2564,114 @@
       function togglePause() {
         ensureAudio();
         if (state === 'play') {
+          const now = performance.now();
+          if (activeTop10.m3) {
+            pauseSpamTimes = pauseSpamTimes.filter(t => now - t < 8000);
+            pauseSpamTimes.push(now);
+            if (pauseSpamTimes.length >= 3) {
+              pauseSpamTimes = [];
+              runawayBtn = { active: true, x: W / 2, y: H / 2 + 16, vx: 88, vy: 64, timer: 4.0, pauseWait: 0 };
+              sfx.virus();
+            }
+          }
+          pauseBox.x = Math.max(8, Math.min(W - pauseBox.w - 8, player.x - pauseBox.w / 2));
+          pauseBox.y = Math.max(8, Math.min(H - pauseBox.h - 8, player.y - pauseBox.h / 2));
           state = 'paused';
           saveCheckpoint();
           btnPause.textContent = '▶';
+          btnTouchPause.textContent = '▶ VOLTAR';
           tone(330, 0.06, 'square', 0.04, 220);
           render();
         } else if (state === 'paused') {
+          runawayBtn.active = false;
           state = 'play';
           btnPause.textContent = '⏸';
+          btnTouchPause.textContent = '⏸ PAUSE';
           lastTs = 0;
-          tone(440, 0.06, 'square', 0.04, 660);
+
+          // #03 Pause Bomb Explosion!
+          if (activeTop10.m3 && pauseBoomCd <= 0) {
+            pauseBoomCd = 4.0;
+            const cx = pauseBox.x + pauseBox.w / 2, cy = pauseBox.y + pauseBox.h / 2;
+            addRing(cx, cy, 8, pauseBox.w * 0.65, '#FFEC27', 0.4);
+            burst(cx, cy, '#FF004D', 18, 120);
+            sfx.boom(); shake = Math.max(shake, 7);
+            addFloater(cx, cy - 10, '⏸️ ZA WARUDO BOOM!', '#FFEC27');
+            for (const e of enemies) {
+              if (e.hp > 0 && e.x >= pauseBox.x - 10 && e.x <= pauseBox.x + pauseBox.w + 10 && e.y >= pauseBox.y - 10 && e.y <= pauseBox.y + pauseBox.h + 10) {
+                damageEnemy(e, 9, e.x - cx, e.y - cy, '#FFEC27');
+              }
+            }
+          } else {
+            tone(440, 0.06, 'square', 0.04, 660);
+          }
           render();
         }
       }
+
       function toggleSound() {
-        soundOn = !soundOn;
-        store.prefs.soundOn = soundOn;
+        soundOn = !soundOn; store.prefs.soundOn = soundOn;
         btnSound.textContent = soundOn ? '🔊' : '🔇';
         if (soundOn) ensureAudio();
         persistStore(true);
       }
+
       btnPause.addEventListener('click', togglePause);
+      btnTouchPause.addEventListener('click', togglePause);
+      btnTouchDash.addEventListener('pointerdown', (e) => { e.preventDefault(); ensureAudio(); triggerDash(); });
+      btnTouchVirus.addEventListener('click', () => { ensureAudio(); resolveVirus(true); });
+      btnTouchTop10.addEventListener('click', () => top10Panel.classList.toggle('hidden'));
       btnSound.addEventListener('click', toggleSound);
       btnReset.addEventListener('click', () => { ensureAudio(); initGame(true); });
+      btnToggleTop10.addEventListener('click', () => top10Panel.classList.toggle('hidden'));
+      btnAllTop10.addEventListener('click', () => {
+        ensureAudio();
+        activeTop10 = allTop10On();
+        applyTop10SideEffects();
+        if (state === 'play') {
+          if (pinballs.length < 2) { spawnPinball(); spawnPinball(); }
+          if (!enemies.some(e => e.type === 'mimic')) spawnEnemy('mimic');
+          if (goldDice.length === 0) spawnGoldDie();
+          virusCd = Math.min(virusCd, 3.0);
+        }
+        showToast('🔥 TODOS OS 10 MODOS LIGADOS!');
+      });
+      btnClearTop10.addEventListener('click', () => {
+        activeTop10 = defaultActiveTop10();
+        applyTop10SideEffects();
+        showToast('↺ Voltando ao Modo Clássico');
+      });
       btnHood.addEventListener('click', () => {
         hoodPanel.classList.toggle('hidden');
-        btnHood.textContent = hoodPanel.classList.contains('hidden') ? '⚡ Abrir Capô' : '⚡ Fechar Capô';
+        btnHood.textContent = hoodPanel.classList.contains('hidden') ? '⚡ Capô' : '⚡ Fechar Capô';
       });
+      btnDeckToggle.addEventListener('click', () => mobileDeck.classList.toggle('visible'));
+
       document.querySelectorAll('.skin-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          cfg.skin = btn.dataset.skin;
-          store.prefs.skin = cfg.skin;
-          applyPrefsUI();
-          unlockAchievement('tinkerer');
-          persistStore(true);
+          cfg.skin = btn.dataset.skin; store.prefs.skin = cfg.skin;
+          applyPrefsUI(); unlockAchievement('tinkerer'); persistStore(true);
           if (player) burst(player.x, player.y, cfg.heroColor, 8, 50);
           sfx.gem(4);
         });
       });
       document.querySelectorAll('.col-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          cfg.heroColor = btn.dataset.color;
-          store.prefs.heroColor = cfg.heroColor;
-          unlockAchievement('tinkerer');
-          persistStore(true);
+          cfg.heroColor = btn.dataset.color; store.prefs.heroColor = cfg.heroColor;
+          unlockAchievement('tinkerer'); persistStore(true);
           if (player) burst(player.x, player.y, cfg.heroColor, 8, 50);
           sfx.gem(6);
         });
       });
       btnChaos.addEventListener('click', () => {
-        cfg.chaos = cfg.chaos === 1 ? 3 : 1;
-        store.prefs.chaos = cfg.chaos;
-        applyPrefsUI();
-        persistStore(true);
+        cfg.chaos = cfg.chaos === 1 ? 3 : 1; store.prefs.chaos = cfg.chaos;
+        applyPrefsUI(); persistStore(true);
       });
       btnSpeed.addEventListener('click', () => {
         const speeds = [0.7, 1.0, 1.5];
         cfg.speedMult = speeds[(speeds.indexOf(cfg.speedMult) + 1) % speeds.length];
         store.prefs.speedMult = cfg.speedMult;
-        applyPrefsUI();
-        persistStore(true);
+        applyPrefsUI(); persistStore(true);
       });
       btnBoss.addEventListener('click', () => {
         ensureAudio();
@@ -1477,16 +2679,114 @@
         spawnEnemy('boss');
       });
 
+      // --- Render Estante (#01 ao #10) & Cache View ---
+      function renderHubAndData() {
+        hubSummary.textContent = `RECORDE: ${store.stats.bestScore} · ONDA MÁX: ${store.stats.bestWave}`;
+        const r = store.savedRun;
+
+        shelfHero.innerHTML = `
+          <article class="cart-card featured">
+            <div class="cart-body" style="flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+              <div style="flex:1;min-width:230px;">
+                <div class="flex-row" style="margin-bottom:4px;">
+                  <span class="pill" style="background:#FF004D;color:#FFF1E8;">CARTUCHO MESTRE</span>
+                  <span class="plat-badge plat-both">📱+💻 Tela Cheia & Botões Touch</span>
+                </div>
+                <strong style="font-size:17px;color:#FFEC27;">🔥 PICO-SURVIVOR: CAOS TOTAL (TOP 10 COMPLETO)</strong>
+                <p style="margin:4px 0 0;font-size:11px;color:#FFF1E8;line-height:1.4;">
+                  Todos os 10 modos (#01 ao #10) ligados juntos — ou escolha qualquer cartucho numerado abaixo para testar do #01 ao #10 na ordem!
+                </p>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                ${r ? `<button id="hub-resume-btn" type="button" class="pico-btn primary">▶ CONTINUAR (W${r.wave} · ${r.score} PTS)</button>` : ''}
+                <button id="hub-chaos-btn" type="button" class="pico-btn danger">🔥 JOGAR TODOS OS 10</button>
+                <button id="hub-full-btn" type="button" class="pico-btn accent">📱 Tela Cheia</button>
+              </div>
+            </div>
+          </article>
+        `;
+
+        shelfGrid.innerHTML = TOP10_MODES.map(m => `
+          <article class="cart-card">
+            <div class="cart-art" style="border-bottom-color:${m.col};">
+              <span class="pill" style="position:absolute;top:6px;left:6px;color:#FFEC27;">TOP #${m.num}</span>
+              <span class="plat-badge ${m.platform === 'both' ? 'plat-both' : 'plat-pc'}" style="position:absolute;top:6px;right:6px;">${m.platLabel}</span>
+              <div style="font-size:24px;margin-top:14px;">${m.icon}</div>
+              <div style="font-size:14px;font-weight:700;color:${m.col};margin-top:2px;">${m.name}</div>
+            </div>
+            <div class="cart-body">
+              <p style="margin:0;font-size:11px;color:#C2C3C7;line-height:1.45;">${m.desc}</p>
+              <button data-launch-mode="${m.key}" type="button" class="launch-mode-btn pico-btn primary" style="width:100%;">
+                ▶ Jogar #${m.num} ${m.name}
+              </button>
+            </div>
+          </article>
+        `).join('');
+
+        document.getElementById('hub-resume-btn')?.addEventListener('click', () => {
+          ensureAudio(); restoreSavedRun(); switchToView('view-game');
+        });
+        document.getElementById('hub-chaos-btn')?.addEventListener('click', () => {
+          ensureAudio(); initGame(true, allTop10On()); switchToView('view-game');
+        });
+        document.getElementById('hub-full-btn')?.addEventListener('click', () => {
+          ensureAudio(); initGame(true, allTop10On()); switchToView('view-game'); setFullscreen(true);
+        });
+        shelfGrid.querySelectorAll('.launch-mode-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            ensureAudio();
+            const preset = defaultActiveTop10();
+            preset[btn.dataset.launchMode] = true;
+            initGame(true, preset);
+            switchToView('view-game');
+            if (isTouchCapable) setFullscreen(true);
+          });
+        });
+
+        achListEl.innerHTML = ACHIEVEMENTS.map(a => {
+          const ok = store.stats.achievements.includes(a.id);
+          return `
+            <div class="ach-item ${ok ? 'unlocked' : 'locked'}">
+              <div>
+                <div style="font-weight:700;color:${ok ? '#00E436' : '#C2C3C7'};">${ok ? '✓' : '🔒'} ${a.title}</div>
+                <div style="font-size:11px;color:#C2C3C7;">${a.desc}</div>
+              </div>
+              <span class="pill" style="color:${ok ? '#FFEC27' : '#5F574F'};">${ok ? 'LIBERADA' : 'BLOQ'}</span>
+            </div>
+          `;
+        }).join('');
+
+        statsBoxEl.innerHTML = `
+          <div class="pill" style="padding:6px;color:#00E436;">Recorde: ${store.stats.bestScore}</div>
+          <div class="pill" style="padding:6px;color:#FFEC27;">Onda Máx: ${store.stats.bestWave}</div>
+          <div class="pill" style="padding:6px;color:#29ADFF;">Nível Máx: ${store.stats.bestLevel}</div>
+          <div class="pill" style="padding:6px;color:#FF77A8;">Abates: ${store.stats.totalKills}</div>
+          <div class="pill" style="padding:6px;color:#FFF1E8;grid-column:span 2;">Partidas iniciadas: ${store.stats.totalRuns}</div>
+        `;
+
+        if (r) {
+          checkpointBoxEl.innerHTML = `
+            <div style="color:#00E436;font-weight:700;margin-bottom:4px;">💾 Partida salva!</div>
+            <div style="color:#FFF1E8;">Onda ${r.wave} · Nível ${r.lvl} · ${r.score} pts</div>
+            <button id="data-resume-btn" type="button" class="pico-btn primary" style="margin-top:6px;">▶ Retomar Agora</button>
+          `;
+          document.getElementById('data-resume-btn').addEventListener('click', () => {
+            ensureAudio(); restoreSavedRun(); switchToView('view-game');
+          });
+        } else {
+          checkpointBoxEl.innerHTML = `<div style="color:#C2C3C7;">Nenhuma partida pausada. O avanço é salvo a cada 2s!</div>`;
+        }
+        updateCacheIndicators();
+      }
+
       // --- Export / Import / Wipe Cache ---
       btnExport.addEventListener('click', () => {
         saveCheckpoint();
         const blob = new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
+        const a = document.createElement('a'); a.href = url;
         a.download = `pico-os-save-${new Date().toISOString().slice(0, 10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+        a.click(); URL.revokeObjectURL(url);
         showToast('💾 Save exportado!');
       });
 
@@ -1503,12 +2803,9 @@
             store = loadStore();
             cfg.skin = store.prefs.skin; cfg.heroColor = store.prefs.heroColor;
             cfg.chaos = store.prefs.chaos; cfg.speedMult = store.prefs.speedMult;
-            applyPrefsUI();
-            renderHubAndData();
+            applyPrefsUI(); renderHubAndData();
             showToast('⬆ Save importado com sucesso!');
-          } catch {
-            showToast('⚠ Arquivo de save inválido');
-          }
+          } catch { showToast('⚠ Arquivo inválido'); }
           fileImport.value = '';
         };
         reader.readAsText(f);
@@ -1517,23 +2814,15 @@
       let wipeArmed = false, wipeTimer = null;
       btnWipe.addEventListener('click', () => {
         if (!wipeArmed) {
-          wipeArmed = true;
-          btnWipe.textContent = '⚠ Clique novamente para confirmar!';
-          wipeTimer = setTimeout(() => {
-            wipeArmed = false;
-            btnWipe.textContent = '🗑️ Limpar Cache Local';
-          }, 3000);
+          wipeArmed = true; btnWipe.textContent = '⚠ Clique novamente p/ confirmar!';
+          wipeTimer = setTimeout(() => { wipeArmed = false; btnWipe.textContent = '🗑️ Limpar Cache Local'; }, 3000);
           return;
         }
-        clearTimeout(wipeTimer);
-        wipeArmed = false;
-        btnWipe.textContent = '🗑️ Limpar Cache Local';
+        clearTimeout(wipeTimer); wipeArmed = false; btnWipe.textContent = '🗑️ Limpar Cache Local';
         localStorage.removeItem(STORAGE_KEY);
         store = defaultStore();
         cfg.skin = 'slime'; cfg.heroColor = '#29ADFF'; cfg.chaos = 1; cfg.speedMult = 1;
-        applyPrefsUI();
-        initGame(false);
-        renderHubAndData();
+        applyPrefsUI(); initGame(false); renderHubAndData();
         showToast('🗑️ Cache local limpo!');
       });
 
@@ -1557,8 +2846,7 @@
       }
 
       shell.addEventListener('contentvisibilityautostatechange', (event) => {
-        if (event.skipped) { saveCheckpoint(); stopLoop(); }
-        else startLoop();
+        if (event.skipped) { saveCheckpoint(); stopLoop(); } else startLoop();
       });
       if (!('contentVisibility' in document.documentElement.style)) {
         new IntersectionObserver((entries) => {
@@ -1566,8 +2854,7 @@
         }, { rootMargin: '150px' }).observe(shell);
       }
       document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { saveCheckpoint(); stopLoop(); }
-        else startLoop();
+        if (document.hidden) { saveCheckpoint(); stopLoop(); } else startLoop();
       });
       window.addEventListener('pagehide', saveCheckpoint);
 
