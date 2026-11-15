@@ -310,6 +310,7 @@
               <span id="hud-hp" class="pill" style="color:#FF004D;">♥♥♥♥♥</span>
               <span id="hud-wave" class="pill" style="color:#FFEC27;">W1</span>
               <span id="hud-score" class="pill" style="color:#00E436;">0</span>
+              <button id="btn-pause" type="button" title="Pausar (P / Esc)" class="pico-btn" style="background:#FFF1E8;padding:3px 7px;">⏸</button>
               <button id="btn-sound" type="button" title="Som (M)" class="pico-btn" style="background:#FFF1E8;padding:3px 7px;">🔊</button>
               <button id="btn-reset" type="button" title="Nova Partida (R)" class="pico-btn" style="background:#FFF1E8;padding:3px 7px;">↻</button>
             </div>
@@ -322,7 +323,7 @@
           <div class="statusbar">
             <div class="flex-row">
               <span id="hud-lvl" style="color:#FFEC27;font-weight:700;">LV 1</span>
-              <span style="color:#FFF1E8;">Mouse/WASD: mover · Clique/Espaço: Dash · Save automático</span>
+              <span style="color:#FFF1E8;">Mouse/WASD: mover · Clique/Espaço: Dash · P/Esc: Pausar</span>
             </div>
             <button id="btn-hood" type="button" class="pico-btn" style="background:#FFEC27;">⚡ Abrir Capô</button>
           </div>
@@ -500,6 +501,7 @@
       const hudScore = document.getElementById('hud-score');
       const hudLvl = document.getElementById('hud-lvl');
       const cartSizeEl = document.getElementById('cart-size');
+      const btnPause = document.getElementById('btn-pause');
       const btnSound = document.getElementById('btn-sound');
       const btnReset = document.getElementById('btn-reset');
       const btnBackHub = document.getElementById('btn-back-hub');
@@ -776,7 +778,7 @@
       }));
 
       function saveCheckpoint() {
-        if (!player || (state !== 'play' && state !== 'levelup')) return;
+        if (!player || (state !== 'play' && state !== 'levelup' && state !== 'paused')) return;
         store.savedRun = {
           score, wave, lvl: player.lvl, xp: player.xp, nextXp: player.nextXp,
           hp: player.hp, maxHp: player.maxHp, projCount: player.projCount,
@@ -808,6 +810,7 @@
         bannerText = startImmediately ? 'ONDA 1!' : '';
         bannerTimer = startImmediately ? 1.8 : 0;
         state = startImmediately ? 'play' : 'title';
+        btnPause.textContent = '⏸';
         if (startImmediately) {
           store.stats.totalRuns++;
           store.savedRun = null;
@@ -839,6 +842,7 @@
         bannerText = `ONDA ${wave} RETOMADA!`;
         bannerTimer = 2.0;
         state = 'play';
+        btnPause.textContent = '⏸';
         sfx.lvl();
         rings.push({ x: player.x, y: player.y, r: 3, maxR: 36, col: '#00E436', life: 0.35 });
         syncHud();
@@ -969,6 +973,7 @@
         else if (up.id === 'rate') player.fireRate *= 0.78;
         else if (up.id === 'mag') { player.magRadius += 24; player.hp = Math.min(player.maxHp, player.hp + 1); }
         state = 'play';
+        btnPause.textContent = '⏸';
         rings.push({ x: player.x, y: player.y, r: 4, maxR: 42, col: up.col, life: 0.35 });
         burst(player.x, player.y, up.col, 12, 80);
         saveCheckpoint();
@@ -1311,6 +1316,25 @@
             ctx.fillText(words.slice(mid).join(' '), cx + cw / 2, cy + 67);
           });
         }
+        if (state === 'paused') {
+          rect(0, 0, W, H, 'rgba(0,0,0,0.72)');
+          rect(24, 24, W - 48, 126, '#1D2B53');
+          ctx.strokeStyle = '#FFF1E8'; ctx.lineWidth = 1; ctx.strokeRect(24.5, 24.5, W - 49, 125);
+          drawRainbowText('JOGO PAUSADO', W / 2, 50, 14, 2);
+          ctx.font = 'bold 8.5px ui-monospace, Consolas, monospace'; ctx.textAlign = 'center';
+          ctx.fillStyle = '#FFF1E8';
+          ctx.fillText(`ONDA ${wave}  |  LV ${player.lvl}  |  PONTOS: ${score}`, W / 2, 68);
+          ctx.fillStyle = '#00E436';
+          ctx.fillText('💾 PARTIDA SALVA NO CACHE LOCAL', W / 2, 81);
+          rect(50, 92, W - 100, 22, '#00E436');
+          rect(50, 92, W - 100, 1, '#FFF1E8');
+          ctx.fillStyle = '#000000'; ctx.font = 'bold 8.5px ui-monospace, Consolas, monospace';
+          ctx.fillText('▶ CONTINUAR (P / ESC / CLIQUE)', W / 2, 106);
+          rect(76, 120, W - 152, 18, '#C2C3C7');
+          rect(76, 120, W - 152, 1, '#FFF1E8');
+          ctx.fillStyle = '#000000';
+          ctx.fillText('↺ REINICIAR PARTIDA (R)', W / 2, 132);
+        }
         if (state === 'gameover') {
           rect(0, 0, W, H, 'rgba(0,0,0,0.82)');
           drawRainbowText('GAME OVER', W / 2, 60, 15, 2);
@@ -1342,6 +1366,11 @@
           }
           return;
         }
+        if (state === 'paused') {
+          if (p.y >= 118 && p.y <= 140 && p.x >= 76 && p.x <= W - 76) initGame(true);
+          else togglePause();
+          return;
+        }
         if (state === 'gameover') { initGame(true); sfx.lvl(); return; }
         if (state === 'levelup') {
           for (let idx = 0; idx < 3; idx++) {
@@ -1360,8 +1389,12 @@
         if (e.code === 'Space') {
           ensureAudio();
           if (state === 'title') { if (store.savedRun) restoreSavedRun(); else initGame(true); }
+          else if (state === 'paused') togglePause();
           else if (state === 'gameover') initGame(true);
           else if (state === 'play') triggerDash();
+        }
+        if (e.code === 'KeyP' || e.code === 'Escape') {
+          if (state === 'play' || state === 'paused') { e.preventDefault(); togglePause(); }
         }
         if (e.code === 'KeyN' && state === 'title') { ensureAudio(); initGame(true); }
         if (e.code === 'KeyR') initGame(true);
@@ -1374,6 +1407,22 @@
       });
       window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
+      function togglePause() {
+        ensureAudio();
+        if (state === 'play') {
+          state = 'paused';
+          saveCheckpoint();
+          btnPause.textContent = '▶';
+          tone(330, 0.06, 'square', 0.04, 220);
+          render();
+        } else if (state === 'paused') {
+          state = 'play';
+          btnPause.textContent = '⏸';
+          lastTs = 0;
+          tone(440, 0.06, 'square', 0.04, 660);
+          render();
+        }
+      }
       function toggleSound() {
         soundOn = !soundOn;
         store.prefs.soundOn = soundOn;
@@ -1381,6 +1430,7 @@
         if (soundOn) ensureAudio();
         persistStore(true);
       }
+      btnPause.addEventListener('click', togglePause);
       btnSound.addEventListener('click', toggleSound);
       btnReset.addEventListener('click', () => { ensureAudio(); initGame(true); });
       btnHood.addEventListener('click', () => {
