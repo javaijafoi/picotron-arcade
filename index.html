@@ -425,18 +425,27 @@
       touch-action: none;
       user-select: none;
     }
+    .data-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+      align-items: start;
+    }
+    .ach-item .pill {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
     .score-mini-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
       gap: 6px;
     }
     .score-mini-item {
       border: 2px solid #000000;
       background: #12182b;
-      padding: 6px 8px;
+      padding: 5px 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 6px;
       font-size: 11px;
     }
   </style>
@@ -585,15 +594,13 @@
               <div style="font-weight:700;color:#FFEC27;">🏆 CONQUISTAS DO WORKSTATION</div>
               <div id="ach-list" style="display:flex;flex-direction:column;gap:6px;"></div>
             </div>
-            <div class="panel-box" style="grid-column:1 / -1;">
-              <div style="font-size:13px;font-weight:700;color:#29ADFF;">🏆 RECORDES DOS 10 CARTUCHOS (.P64)</div>
-              <div id="scores-by-game" class="score-mini-grid"></div>
-            </div>
 
             <div class="panel-box">
               <div style="font-weight:700;color:#29ADFF;">📊 ESTATÍSTICAS & SAVE LOCAL</div>
               <div id="stats-box" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;"></div>
               <div id="checkpoint-box" style="border:2px solid #000000;background:#1D2B53;padding:8px;font-size:12px;"></div>
+              <div style="font-weight:700;color:#FFEC27;margin-top:4px;">🎮 RECORDES DOS 10 CARTUCHOS (.P64)</div>
+              <div id="scores-by-game" class="score-mini-grid"></div>
               <div style="font-weight:700;color:#00E436;margin-top:4px;">💾 BACKUP PORTÁTIL (.JSON)</div>
               <p style="margin:0;font-size:11px;color:#C2C3C7;">
                 Tudo fica salvo no cache deste navegador. Leve seu progresso entre PC e celular exportando o .json abaixo.
@@ -5324,8 +5331,11 @@ window.BUILD_GAMES_06_10 = function(api) {
           const ok = store.stats.achievements.includes(a.id);
           return `
             <div class="ach-item ${ok ? 'unlocked' : 'locked'}">
-              <div><strong>${ok ? '🏆' : '🔒'} ${a.title}</strong><div style="font-size:11px;color:#C2C3C7;">${a.desc}</div></div>
-              <span class="pill" style="color:${ok ? '#00E436' : '#C2C3C7'};">${ok ? 'FEITO' : '---'}</span>
+              <div>
+                <div style="font-weight:700;color:${ok ? '#00E436' : '#C2C3C7'};">${ok ? '✓' : '🔒'} ${a.title}</div>
+                <div style="font-size:11px;color:#C2C3C7;">${a.desc}</div>
+              </div>
+              <span class="pill" style="color:${ok ? '#FFEC27' : '#5F574F'};white-space:nowrap;flex-shrink:0;">${ok ? 'LIBERADA' : 'BLOQ'}</span>
             </div>`;
         }).join('');
 
@@ -5335,19 +5345,19 @@ window.BUILD_GAMES_06_10 = function(api) {
             const played = (store.stats.playedGames || []).includes(g.id) || (g.id === 'pico_survivor' && store.stats.totalRuns > 0);
             return `
               <div class="score-mini-item">
-                <span style="color:#FFF1E8;">${g.num} ${g.title.split(':')[0]}</span>
-                <strong style="color:${played ? '#FFEC27' : '#5F574F'};">${best.toLocaleString('pt-BR')}</strong>
+                <span style="color:#FFF1E8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${g.num} ${g.title.split(':')[0]}</span>
+                <strong style="color:${played ? '#FFEC27' : '#5F574F'};white-space:nowrap;">${best.toLocaleString('pt-BR')}</strong>
               </div>`;
           }).join('');
         }
 
-        const bytes = new Blob([localStorage.getItem(STORAGE_KEY) || '']).size;
-        storageBytesEl.textContent = `${(bytes / 1024).toFixed(1)} KB local`;
         statsBoxEl.innerHTML = `
-          <div>🏆 Melhor Pontuação Survivor: <strong style="color:#FFEC27;">${store.stats.bestScore} pts</strong></div>
-          <div>🕹️ Cartuchos Experimentados: <strong style="color:#00E436;">${(store.stats.playedGames || []).length} / 10</strong></div>
-          <div>🌊 Maior Onda / Nível Survivor: <strong>W${store.stats.bestWave} · LV ${store.stats.bestLevel}</strong></div>
-          <div>👾 Abates / Partidas Survivor: <strong>${store.stats.totalKills} abates · ${store.stats.totalRuns} runs</strong></div>
+          <div class="pill" style="padding:6px;color:#00E436;">Recorde Survivor: ${store.stats.bestScore}</div>
+          <div class="pill" style="padding:6px;color:#29ADFF;">Cartuchos Jogados: ${(store.stats.playedGames || []).length} / 10</div>
+          <div class="pill" style="padding:6px;color:#FFEC27;">Onda Máx: W${store.stats.bestWave}</div>
+          <div class="pill" style="padding:6px;color:#FF77A8;">Nível Máx: LV ${store.stats.bestLevel}</div>
+          <div class="pill" style="padding:6px;color:#FFF1E8;">Abates: ${store.stats.totalKills}</div>
+          <div class="pill" style="padding:6px;color:#C2C3C7;">Runs Survivor: ${store.stats.totalRuns}</div>
         `;
         if (store.savedRun) {
           const r = store.savedRun;
