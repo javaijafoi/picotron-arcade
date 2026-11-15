@@ -115,7 +115,11 @@
     .spa-view.inactive {
       content-visibility: hidden;
       position: absolute;
-      inset: 0;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      z-index: -1;
+      opacity: 0;
       pointer-events: none;
     }
     @supports not (content-visibility: hidden) {
@@ -125,7 +129,7 @@
     }
     .picotron-game-shell {
       content-visibility: auto;
-      contain-intrinsic-size: auto none auto 520px;
+      contain-intrinsic-size: auto 320px auto 520px;
     }
     .shelf-grid {
       display: grid;
@@ -279,17 +283,19 @@
     <!-- Multi-View SPA Stage -->
     <main class="views-stage">
       <!-- VIEW 1: CARTRIDGE SHELF (HUB) -->
-      <section id="view-hub" class="spa-view pico-win" tabindex="-1" aria-hidden="false">
-        <div class="pico-titlebar">
-          <span>ESTANTE DE CARTUCHOS (.P64) — PROGRESSO SALVO NO NAVEGADOR</span>
-          <span id="hub-summary" class="pill" style="color:#FFEC27;">RECORDE: 0</span>
-        </div>
+      <section id="view-hub" class="spa-view" tabindex="-1" aria-hidden="false">
+        <div class="pico-win">
+          <div class="pico-titlebar">
+            <span>ESTANTE DE CARTUCHOS (.P64) — PROGRESSO SALVO NO NAVEGADOR</span>
+            <span id="hub-summary" class="pill" style="color:#FFEC27;">RECORDE: 0</span>
+          </div>
 
-        <div id="shelf-grid" class="shelf-grid"></div>
+          <div id="shelf-grid" class="shelf-grid"></div>
 
-        <div class="statusbar">
-          <span style="color:#FFF1E8;">⚡ Zero cadastro, zero servidor: seu progresso fica salvo automaticamente neste navegador.</span>
-          <span id="last-saved-label" style="color:#FFEC27;font-weight:700;">Último save: --</span>
+          <div class="statusbar">
+            <span style="color:#FFF1E8;">⚡ Zero cadastro, zero servidor: seu progresso fica salvo automaticamente neste navegador.</span>
+            <span id="last-saved-label" style="color:#FFEC27;font-weight:700;">Último save: --</span>
+          </div>
         </div>
       </section>
 
@@ -348,35 +354,37 @@
       </section>
 
       <!-- VIEW 3: ACHIEVEMENTS & LOCAL CACHE MANAGER -->
-      <section id="view-data" class="spa-view inactive pico-win" tabindex="-1" aria-hidden="true" inert="inert">
-        <div class="pico-titlebar">
-          <span>CONQUISTAS & GERENCIADOR DE CACHE LOCAL (LOCALSTORAGE)</span>
-          <span id="storage-bytes" class="pill" style="color:#29ADFF;">0 B</span>
-        </div>
-
-        <div class="data-grid">
-          <div class="panel-box">
-            <div style="font-weight:700;color:#FFEC27;">🏆 CONQUISTAS DO WORKSTATION</div>
-            <div id="ach-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      <section id="view-data" class="spa-view inactive" tabindex="-1" aria-hidden="true" inert="inert">
+        <div class="pico-win">
+          <div class="pico-titlebar">
+            <span>CONQUISTAS & GERENCIADOR DE CACHE LOCAL (LOCALSTORAGE)</span>
+            <span id="storage-bytes" class="pill" style="color:#29ADFF;">0 B</span>
           </div>
 
-          <div class="panel-box">
-            <div style="font-weight:700;color:#29ADFF;">📊 ESTATÍSTICAS & SAVE LOCAL</div>
-            <div id="stats-box" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;"></div>
-
-            <div id="checkpoint-box" style="border:2px solid #000000;background:#1D2B53;padding:8px;font-size:12px;"></div>
-
-            <div style="font-weight:700;color:#00E436;margin-top:4px;">💾 BACKUP PORTÁTIL (SEM SUPABASE)</div>
-            <p style="margin:0;font-size:11px;color:#C2C3C7;">
-              Tudo fica salvo no cache local deste navegador. Quer levar seu save para outro PC ou celular? Exporte o arquivo .json abaixo.
-            </p>
-            <div class="flex-row">
-              <button id="btn-export" type="button" class="pico-btn accent">⬇ Exportar Save (.json)</button>
-              <button id="btn-import" type="button" class="pico-btn">⬆ Importar Save</button>
-              <input id="file-import" type="file" accept=".json,application/json" style="display:none;" />
+          <div class="data-grid">
+            <div class="panel-box">
+              <div style="font-weight:700;color:#FFEC27;">🏆 CONQUISTAS DO WORKSTATION</div>
+              <div id="ach-list" style="display:flex;flex-direction:column;gap:6px;"></div>
             </div>
-            <div class="flex-row" style="margin-top:4px;">
-              <button id="btn-wipe" type="button" class="pico-btn danger">🗑️ Limpar Cache Local</button>
+
+            <div class="panel-box">
+              <div style="font-weight:700;color:#29ADFF;">📊 ESTATÍSTICAS & SAVE LOCAL</div>
+              <div id="stats-box" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;"></div>
+
+              <div id="checkpoint-box" style="border:2px solid #000000;background:#1D2B53;padding:8px;font-size:12px;"></div>
+
+              <div style="font-weight:700;color:#00E436;margin-top:4px;">💾 BACKUP PORTÁTIL (SEM SUPABASE)</div>
+              <p style="margin:0;font-size:11px;color:#C2C3C7;">
+                Tudo fica salvo no cache local deste navegador. Quer levar seu save para outro PC ou celular? Exporte o arquivo .json abaixo.
+              </p>
+              <div class="flex-row">
+                <button id="btn-export" type="button" class="pico-btn accent">⬇ Exportar Save (.json)</button>
+                <button id="btn-import" type="button" class="pico-btn">⬆ Importar Save</button>
+                <input id="file-import" type="file" accept=".json,application/json" style="display:none;" />
+              </div>
+              <div class="flex-row" style="margin-top:4px;">
+                <button id="btn-wipe" type="button" class="pico-btn danger">🗑️ Limpar Cache Local</button>
+              </div>
             </div>
           </div>
         </div>
@@ -561,6 +569,7 @@
         currentView = viewId;
 
         if (viewId === 'view-game') {
+          render();
           startLoop();
         } else {
           renderHubAndData();
@@ -809,6 +818,7 @@
           for (let i = 0; i < 6; i++) spawnEnemy('slime');
         }
         syncHud();
+        render();
       }
 
       function restoreSavedRun() {
@@ -834,6 +844,7 @@
         sfx.lvl();
         rings.push({ x: player.x, y: player.y, r: 3, maxR: 36, col: '#00E436', life: 0.35 });
         syncHud();
+        render();
       }
 
       function syncHud() {
@@ -964,6 +975,7 @@
         burst(player.x, player.y, up.col, 12, 80);
         saveCheckpoint();
         syncHud();
+        render();
       }
 
       function fireAutoWeapons(dt) {
