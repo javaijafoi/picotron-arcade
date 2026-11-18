@@ -1,0 +1,15 @@
+# PICO-OS Arcade (Picotron Arena)
+
+> Estação de trabalho arcade retrô com 10 jogos de ação, do Liquidificador Cósmico ao Dominó de Pólvora, num único arquivo HTML. Funciona no PC e no celular.
+
+O PICO-OS Arcade é uma estação de trabalho arcade retrô inspirada no Picotron, num único arquivo HTML. São 10 cartuchos de jogo (Survivor, Truco, Pinball, Enduro, Obra, Lander, Sinuca, Detona, Labirinto e Travessia), modo Kids, tela cheia, controles de toque, recordes e conquistas salvos no navegador.
+
+Feito por Peter (@javaijafoi), desenvolvedor brasileiro. Site em português do Brasil.
+
+## Links
+
+- [Abrir PICO-OS Arcade (Picotron Arena)](https://picotron-arena.vercel.app/)
+- [Portfólio do Peter](https://javaijafoi.vercel.app): Todos os projetos do Peter (jogos, histórias interativas e experimentos com IA).
+- [Código deste projeto](https://github.com/javaijafoi/picotron-arcade): Repositório público no GitHub.
+- [GitHub do Peter](https://github.com/javaijafoi): Perfil do autor.
+- [llms.txt do portfólio](https://javaijafoi.vercel.app/llms.txt): Guia de todos os projetos para IAs.
