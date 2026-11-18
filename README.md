@@ -1,4 +1,32 @@
-# PICO-OS v3.0 // 10 Jogos Clássicos (.p64)
+<div align="center">
+
+# 🕹️ PICO-OS Arcade
+
+**Estação de trabalho arcade retrô com 10 jogos, num único arquivo HTML.**
+Dez cartuchos de ação, do Liquidificador Cósmico ao Dominó de Pólvora, para o PC e para o celular.
+
+[![Jogar agora](https://img.shields.io/badge/%E2%96%B6%20jogar%20agora-picotron--arena.vercel.app-00e436?style=for-the-badge&labelColor=111)](https://picotron-arena.vercel.app)
+
+![HTML único](https://img.shields.io/badge/HTML-arquivo%20%C3%BAnico-e34f26?style=flat-square&logo=html5&logoColor=white)
+![Canvas](https://img.shields.io/badge/Canvas-2D-29adff?style=flat-square)
+![Sem dependências](https://img.shields.io/badge/depend%C3%AAncias-zero-00e436?style=flat-square)
+![Salvamento local](https://img.shields.io/badge/save-localStorage-ffa300?style=flat-square)
+![Mobile](https://img.shields.io/badge/PC%20%2B%20celular-tela%20cheia-ff77a8?style=flat-square)
+
+<img src="docs/img/hub.jpg" alt="Estante de cartuchos do PICO-OS" width="820">
+
+</div>
+
+## ▶️ Como jogar
+
+Abra o [link no ar](https://picotron-arena.vercel.app) ou baixe o `index.html` e abra no navegador. Não precisa instalar nada, não tem build e não depende de internet depois de carregar. No celular, use tela cheia e os botões de toque de cada jogo.
+
+<div align="center">
+<img src="docs/img/cartuchos.jpg" alt="Cartuchos de Pinball, Enduro, Obra, Lander, Sinuca, Pilhas, Labirinto e Travessia" width="820">
+</div>
+
+---
+
 
 Estação de trabalho arcade retrô inspirada no **Picotron** (`320x176` escalado `3x` para `960x528`), 100% single-file (`index.html`), estática e leve, sem IA pesada e com salvamento automático local em `localStorage` (`pico_os_hub_v1`).
 
