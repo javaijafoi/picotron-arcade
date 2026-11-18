@@ -51,3 +51,26 @@ Estação de trabalho arcade retrô inspirada no **Picotron** (`320x176` escalad
 - **Gaveta Dobrável no #01 (`🧪 Ver 10 Modos Malucos`)**: começa recolhida para manter a estante limpa; ao expandir, permite jogar qualquer um dos 10 mutadores clássicos do Pico-Survivor (ou ligar os 10 ao mesmo tempo).
 - **Tela Cheia & Controles Adaptados por Cartucho**: cada jogo configura seu painel de botões touch/mouse dedicado (flippers no Pinball, Truco/Coberta/Sinal no Truco, acelerador/freio/turbo no Enduro, giz/spin na Sinuca, etc.) e pausa universal (`P`, `Esc` ou botão `⏸`).
 - **Conquistas, Recordes por Cartucho & Cache Local**: aba `🏆 Conquistas & Save` exibe recorde individual dos 10 jogos, conquistas desbloqueadas e exportação/importação `.json`.
+
+---
+
+## 🌴 Mais do Peter
+
+Este projeto faz parte do [**portfólio do Peter**](https://javaijafoi.vercel.app), uma vitrine de jogos, histórias interativas e experimentos com IA, todos no ar. Perfil no GitHub: [@javaijafoi](https://github.com/javaijafoi).
+
+| Projeto | No ar | Código |
+| --- | --- | --- |
+| **Antigravitus**: Diário de aventuras num RPG de texto, jogado por agentes de IA | [abrir](https://antigravitus.vercel.app) | [repo](https://github.com/javaijafoi/antigravitus) |
+| **Jogo do Davi**: Jogo para crianças aprenderem a ler e a contar | [abrir](https://jogo-davi.vercel.app) | [repo](https://github.com/javaijafoi/Jogo-davi) |
+| **Matusalém**: História interativa de mistério no Bixiga | [abrir](https://matusalem-six.vercel.app) | — |
+| **Era Vargas: O Equilibrista**: Jogo 3D de decisões sobre o Brasil de 1930 a 1945 | [abrir](https://era-vargas-seliga.vercel.app) | [repo](https://github.com/javaijafoi/era-vargas-seliga) |
+| **Pinta-Kara**: Desenhe no ar com as mãos, só com a webcam | [abrir](https://pinta-kara.vercel.app) | [repo](https://github.com/javaijafoi/pinta-kara) |
+| **Rolador**: Dados para qualquer RPG de mesa, com cara de PICO-8 | [abrir](https://rolador-javaijafoi.vercel.app) | [repo](https://github.com/javaijafoi/rolador) |
+| **iFone**: Celular de mentira para mesas de #iHunt | [abrir](https://ifone-javaijafoi.vercel.app) | [repo](https://github.com/javaijafoi/ifone) |
+| **Pico Poetry**: Poemas em pixel para sortear e compartilhar como imagem | [abrir](https://pico-poetry.vercel.app) | — |
+| **#iHunt Chronicle**: Mesa virtual para o RPG #iHunt (em pausa) | [abrir](https://ihunt-chronicle.vercel.app) | — |
+| **iHunt App**: Fork do Fari App (Fate) para mesas de #iHunt | — | [repo](https://github.com/javaijafoi/iHunt-app) |
+
+---
+
+Feito por [@javaijafoi](https://github.com/javaijafoi) · parte do [portfólio](https://javaijafoi.vercel.app).
