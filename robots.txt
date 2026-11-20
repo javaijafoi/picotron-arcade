@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://picotron-arena.vercel.app/sitemap.xml
+Sitemap: https://picotron.javaijafoi.dev/sitemap.xml
