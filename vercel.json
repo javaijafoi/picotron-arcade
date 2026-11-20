@@ -18,14 +18,14 @@
   ],
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "has": [
         {
           "type": "host",
           "value": "picotron-arena.vercel.app"
         }
       ],
-      "destination": "https://picotron.javaijafoi.dev/:path*",
+      "destination": "https://picotron.javaijafoi.dev/$1",
       "statusCode": 301
     }
   ]
