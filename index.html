@@ -6365,7 +6365,7 @@ window.BUILD_GAMES_06_10 = function(api) {
           const r = store.savedRun;
           checkpointBoxEl.innerHTML = `
             <div style="color:#00E436;font-weight:700;margin-bottom:4px;">💾 Partida salva!</div>
-            <div style="color:#FFF1E8;">Onda ${r.wave} · Nível ${r.lvl} · ${r.score} pts</div>
+            <div style="color:#FFF1E8;">Onda ${Number(r.wave) || 1} · Nível ${Number(r.lvl) || 1} · ${Number(r.score) || 0} pts</div>
             <button id="data-resume-btn" type="button" class="pico-btn primary" style="margin-top:6px;">▶ Retomar Agora</button>
           `;
           document.getElementById('data-resume-btn')?.addEventListener('click', () => {
